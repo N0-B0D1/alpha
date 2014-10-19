@@ -1,8 +1,15 @@
 
-#include "AlphaEngine\Include\AppLayer\AppLayer.h"
+#include <iostream>
+#include <string>
+
+#include "AlphaEngine\Include\AlphaController.h"
 
 int main(int /*argc*/, char /**argv[]*/)
 {
-	AppLayer app;
+    alpha::InitiateAlpha();
+
+    std::string stuff;
+    std::cin >> stuff;
+
     return 0;
 }
