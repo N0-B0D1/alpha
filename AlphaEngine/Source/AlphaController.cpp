@@ -14,13 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <iostream>
-
 #include "AlphaController.h"
+
+#include "Logic/LogicSystem.h"
+#include "Graphics/GraphicsSystem.h"
 
 namespace alpha
 {
-    AlphaController::AlphaController() { }
+    AlphaController::AlphaController()
+        : m_graphics(0)
+        , m_logic(0)
+    { }
     AlphaController::~AlphaController() { }
 
     void AlphaController::Execute()
@@ -35,23 +39,30 @@ namespace alpha
                 }
             }
         }
-        //else
+
+        this->Shutdown();
+        //if (!this->Shutdown())
         //{
         //    // log error message
+        //    return;
         //}
-
-        if (!this->Shutdown())
-        {
-            // log error message
-            return;
-        }
     }
 
     bool AlphaController::Initialize()
     {
         // create graphcs
+        m_graphics = new GraphicsSystem();
+        if (!m_graphics->VInitialize())
+        {
+            return false;
+        }
         // create input device manager
         // create game logic
+        m_logic = new LogicSystem();
+        if (!m_logic->VInitialize())
+        {
+            return false;
+        }
 
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();
@@ -61,9 +72,9 @@ namespace alpha
 
     bool AlphaController::Update()
     {
-        static int loops = 1000;
-        static const double sk_maxUpdateTime = 1.0f / 60.0f;
-        static double s_accumulator = 0.0f;
+        bool success = true;
+        //static int loops = 1000;
+        //static const double sk_maxUpdateTime = 1.0f / 60.0f;
 
         // update event manager
         // process any events for me
@@ -73,25 +84,21 @@ namespace alpha
         std::chrono::duration<double> elapsed = now - m_start;
         double currentTime = (double)(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 100000.0f);
         double elapsedTime = currentTime - m_timeLastFrame;
-        /*if (elapsedTime > 0.25) {
-            elapsedTime = 0.25;
-        }*/
-        m_timeLastFrame = currentTime;
-        s_accumulator += elapsedTime;
-        std::cout << "time: " << currentTime << " [" << elapsedTime << "]" << std::endl;
 
-        // update systems
-        double delta = 0.0f;
-        while (s_accumulator >= sk_maxUpdateTime)
+        m_timeAccumulator += elapsedTime;
+
+        // update systems in discrete chunks of time
+        while (m_timeAccumulator >= sk_maxUpdateTime)
         {
-            m_logic.Update(currentTime, sk_maxUpdateTime);
-            m_graphics.Update(currentTime, sk_maxUpdateTime);
+            m_logic->Update(currentTime, sk_maxUpdateTime);
+            success = m_graphics->Update(currentTime, sk_maxUpdateTime);
+            if (!success)
+            {
+                return false;
+            }
 
-            delta += sk_maxUpdateTime;
-            s_accumulator -= sk_maxUpdateTime;
+            m_timeAccumulator -= sk_maxUpdateTime;
         }
-
-
 
         // update the time last frame to now
         // We want to essentially ignore the time taken to update
@@ -101,10 +108,11 @@ namespace alpha
         m_timeLastFrame = (double)(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 100000.0f);
 
         // render after updates complete
-        m_graphics.Render();
+        m_graphics->Render();
 
-        loops -= 1;
-        return loops > 0;
+        //loops -= 1;
+        //return loops > 0;
+        return success;
     }
 
     bool AlphaController::Shutdown()
@@ -112,13 +120,23 @@ namespace alpha
         // destroy systems in reverse order
         // shutdown needs to be smart about deleting things that might not exist
         // in case something failed during initialization, and we are only half built
+        if (m_logic)
+        {
+            m_logic->VShutdown();
+            delete m_logic;
+        }
+        if (m_graphics) {
+            m_graphics->VShutdown();
+            delete m_graphics;
+        }
 
         return true;
     }
 
-    void InitiateAlpha()
+    int InitiateAlpha()
     {
         AlphaController controller;
         controller.Execute();
+        return 0;
     }
 }

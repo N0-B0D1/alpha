@@ -14,35 +14,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <iostream>
-
 #include "Graphics/GraphicsSystem.h"
+
+#include "Graphics/GraphicsRenderer.h"
 
 namespace alpha
 {
-    GraphicsSystem::GraphicsSystem() : AlphaSystem(30) { }
+    GraphicsSystem::GraphicsSystem()
+        : AlphaSystem(30)
+        , m_pRenderer(0)
+    { }
     GraphicsSystem::~GraphicsSystem() { }
 
     bool GraphicsSystem::VInitialize()
     {
+        m_pRenderer = new GraphicsRenderer();
+        if (!m_pRenderer->Initialize())
+        {
+            return false;
+        }
         return true;
     }
 
     bool GraphicsSystem::VShutdown()
     {
+        if (m_pRenderer)
+        {
+            m_pRenderer->Shutdown();
+            delete m_pRenderer;
+        }
         return true;
     }
 
     bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)
-        //bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        std::cout << "    Graphics " << currentTime << " [" << elapsedTime << "]" << std::endl;
-        return true;
+        return m_pRenderer->Update(currentTime, elapsedTime);
     }
 
     void GraphicsSystem::Render()
     {
-        // do something cool
-        std::cout << "    Graphics rendering" << std::endl;
+        m_pRenderer->Render();
     }
 }

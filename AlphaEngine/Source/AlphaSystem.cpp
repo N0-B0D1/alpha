@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <iostream>
-
 #include "AlphaSystem.h"
 
 namespace alpha
@@ -33,13 +31,14 @@ namespace alpha
 
     bool AlphaSystem::Update(double currentTime, double elapsedTime)
     {
+        bool success = true;
         m_elapsedTime += elapsedTime;
         if (m_elapsedTime > m_updateFrequency)
         {
-            this->VUpdate(currentTime, m_updateFrequency);
+            success = this->VUpdate(currentTime, m_updateFrequency);
             m_elapsedTime = m_elapsedTime - m_updateFrequency;
         }
-        return true;
+        return success;
     }
 
     bool AlphaSystem::VShutdown()

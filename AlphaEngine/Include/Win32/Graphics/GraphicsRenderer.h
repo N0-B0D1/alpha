@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_SYSTEM_H
-#define GRAPHICS_SYSTEM_H
+#ifndef RENDERER_H
+#define RENDERER_H
 
 /**
 Copyright 2014 Jason R. Wendlandt
@@ -17,28 +17,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <Windows.h>
+#include <d3d11_1.h>
+
 #include "AlphaSystem.h"
 
 namespace alpha
 {
-    class GraphicsRenderer;
 
-    class GraphicsSystem : public AlphaSystem
+    class GraphicsRenderer
     {
     public:
-        GraphicsSystem();
-        virtual ~GraphicsSystem();
+        GraphicsRenderer();
+        virtual ~GraphicsRenderer();
 
-        virtual bool VInitialize();
-        virtual bool VShutdown();
+        bool Initialize();
+        bool Update(double currentTime, double elapsedTime);
+        bool Shutdown();
 
         void Render();
 
     private:
-        virtual bool VUpdate(double currentTime, double elapsedTime);
+        //virtual bool VUpdate(double currentTime, double elapsedTime);
 
-        GraphicsRenderer *m_pRenderer;
+        // DirectX methods
+        static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+        HRESULT InitializeWindow();
+        HRESULT InitializeDevice();
+        void CleanupDevice();
     };
 }
 
-#endif // GRAPHICS_SYSTEM_H
+#endif // RENDERER_H

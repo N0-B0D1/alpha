@@ -11,8 +11,18 @@ file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 
 # make basic demo project
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
-add_executable(DemoBasic ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(DemoBasic WIN32 ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(DemoBasic ${ALPHA_LIBRARIES})
+if (WIN32)
+    target_link_libraries(DemoBasic d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib)
+    #SET_TARGET_PROPERTIES(DemoBasic PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:windows")
+    #SET_TARGET_PROPERTIES(DemoBasic PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
+    #SET_TARGET_PROPERTIES(DemoBasic PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
+    #SET_TARGET_PROPERTIES(DemoBasic PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:windows")
+endif (WIN32)
+if (MSVC)
+    set(CMAKE_CREATE_WIN32_EXE "/SUBSYSTEM:WINDOWS /ENTRY:\"mainCRTStartup\"")
+endif (MSVC)
 
 # install demo to sdk folder
 install(TARGETS DemoBasic DESTINATION bin)

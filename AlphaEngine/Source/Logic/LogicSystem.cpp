@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <iostream>
-
 #include "Logic/LogicSystem.h"
 
 namespace alpha
@@ -33,10 +31,8 @@ namespace alpha
         return true;
     }
 
-    bool LogicSystem::VUpdate(double currentTime, double elapsedTime)
-    //bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
+    bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        std::cout << "    logic " << currentTime << " [" << elapsedTime << "]" << std::endl;
         return true;
     }
 }

@@ -19,11 +19,11 @@ limitations under the License.
 
 #include <chrono>
 
-#include "Logic/LogicSystem.h"
-#include "Graphics/GraphicsSystem.h"
-
 namespace alpha
 {
+    class LogicSystem;
+    class GraphicsSystem;
+
     /**
      * The AlphaController is the main engine controller which handles the lifecycle of the engine.
      */
@@ -48,15 +48,17 @@ namespace alpha
         //AlphaClock m_clock;
         std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
         double m_timeLastFrame = 0.0f;
+        double m_timeAccumulator = 0.0f;
+        double sk_maxUpdateTime = 1.0f / 60.0f;
 
         /** game logic system */
-        LogicSystem m_logic;
+        LogicSystem *m_logic;
 
         /** Graphics render system */
-        GraphicsSystem m_graphics;
+        GraphicsSystem *m_graphics;
 	};
 
-    extern void InitiateAlpha();
+    extern int InitiateAlpha();
 }
 
 #endif // ALPHA_CONTROLLER_H

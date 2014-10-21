@@ -1,15 +1,23 @@
 
-#include <iostream>
+//#include <iostream>
 #include <string>
 
 #include "AlphaEngine\Include\AlphaController.h"
 
-int main(int /*argc*/, char /**argv[]*/)
-{
-    alpha::InitiateAlpha();
+#if WIN32
+    #include <Windows.h>
 
-    std::string stuff;
-    std::cin >> stuff;
+    //INT WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE, LPSTR /*strCmdLine*/, INT)
+    int WINAPI wWinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPWSTR /*lpCmdLine*/, _In_ int /*nCmdShow*/)
+#else
+    int main(int /*argc*/, char /**argv[]*/)
+#endif
+    {
+        //UNREFERENCED_PARAMETER(nCmdShow);
+        int error = alpha::InitiateAlpha();
 
-    return 0;
-}
+        //std::string stuff;
+        //std::cin >> stuff;
+
+        return error;
+    }
