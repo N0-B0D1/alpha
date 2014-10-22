@@ -18,12 +18,14 @@ limitations under the License.
 
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
+#include "Assets/AssetSystem.h"
 
 namespace alpha
 {
     AlphaController::AlphaController()
-        : m_graphics(0)
-        , m_logic(0)
+        : m_pGraphics(0)
+        , m_pLogic(0)
+        , m_pAssets(0)
     { }
     AlphaController::~AlphaController() { }
 
@@ -41,25 +43,27 @@ namespace alpha
         }
 
         this->Shutdown();
-        //if (!this->Shutdown())
-        //{
-        //    // log error message
-        //    return;
-        //}
     }
 
     bool AlphaController::Initialize()
     {
+        // Initialize asset repository
+        m_pAssets = new AssetSystem();
+        if (!m_pAssets->VInitialize())
+        {
+            return false;
+        }
+
         // create graphcs
-        m_graphics = new GraphicsSystem();
-        if (!m_graphics->VInitialize())
+        m_pGraphics = new GraphicsSystem();
+        if (!m_pGraphics->VInitialize())
         {
             return false;
         }
         // create input device manager
         // create game logic
-        m_logic = new LogicSystem();
-        if (!m_logic->VInitialize())
+        m_pLogic = new LogicSystem();
+        if (!m_pLogic->VInitialize())
         {
             return false;
         }
@@ -90,8 +94,9 @@ namespace alpha
         // update systems in discrete chunks of time
         while (m_timeAccumulator >= sk_maxUpdateTime)
         {
-            m_logic->Update(currentTime, sk_maxUpdateTime);
-            success = m_graphics->Update(currentTime, sk_maxUpdateTime);
+            m_pAssets->Update(currentTime, sk_maxUpdateTime);
+            m_pLogic->Update(currentTime, sk_maxUpdateTime);
+            success = m_pGraphics->Update(currentTime, sk_maxUpdateTime);
             if (!success)
             {
                 return false;
@@ -108,7 +113,7 @@ namespace alpha
         m_timeLastFrame = (double)(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 100000.0f);
 
         // render after updates complete
-        m_graphics->Render();
+        m_pGraphics->Render();
 
         //loops -= 1;
         //return loops > 0;
@@ -120,14 +125,20 @@ namespace alpha
         // destroy systems in reverse order
         // shutdown needs to be smart about deleting things that might not exist
         // in case something failed during initialization, and we are only half built
-        if (m_logic)
+        if (m_pLogic)
         {
-            m_logic->VShutdown();
-            delete m_logic;
+            m_pLogic->VShutdown();
+            delete m_pLogic;
         }
-        if (m_graphics) {
-            m_graphics->VShutdown();
-            delete m_graphics;
+        if (m_pGraphics)
+        {
+            m_pGraphics->VShutdown();
+            delete m_pGraphics;
+        }
+        if (m_pAssets)
+        {
+            m_pAssets->VShutdown();
+            delete m_pAssets;
         }
 
         return true;

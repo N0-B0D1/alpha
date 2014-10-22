@@ -23,6 +23,7 @@ namespace alpha
 {
     class LogicSystem;
     class GraphicsSystem;
+    class AssetSystem;
 
     /**
      * The AlphaController is the main engine controller which handles the lifecycle of the engine.
@@ -52,10 +53,13 @@ namespace alpha
         double sk_maxUpdateTime = 1.0f / 60.0f;
 
         /** game logic system */
-        LogicSystem *m_logic;
+        LogicSystem *m_pLogic;
 
         /** Graphics render system */
-        GraphicsSystem *m_graphics;
+        GraphicsSystem *m_pGraphics;
+
+        /** Asset Management System */
+        AssetSystem * m_pAssets;
 	};
 
     extern int InitiateAlpha();
