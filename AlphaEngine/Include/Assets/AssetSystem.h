@@ -17,7 +17,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <map>
+#include <string>
+#include <memory>
+
 #include "AlphaSystem.h"
+
+#include "Asset.h"
 
 namespace alpha
 {
@@ -30,8 +36,21 @@ namespace alpha
         virtual bool VInitialize();
         virtual bool VShutdown();
 
+        /**
+         * XXX
+         * Temporary way to get/load and asset while we are still single threaded.
+         * Eventually this should be replaced with an event/response cycle
+         * for background loading an asset
+         */
+        std::shared_ptr<Asset> GetAsset(std::string name);
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
+
+        std::shared_ptr <Asset> LoadAsset(std::string name);
+
+        typedef std::map<std::string, std::shared_ptr<Asset>> AssetMap;
+        AssetMap m_assets;
     };
 }
 

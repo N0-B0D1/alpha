@@ -23,9 +23,9 @@ limitations under the License.
 namespace alpha
 {
     AlphaController::AlphaController()
-        : m_pGraphics(0)
-        , m_pLogic(0)
-        , m_pAssets(0)
+        : m_pGraphics(nullptr)
+        , m_pLogic(nullptr)
+        , m_pAssets(nullptr)
     { }
     AlphaController::~AlphaController() { }
 
