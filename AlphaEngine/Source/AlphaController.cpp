@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "AlphaController.h"
 
+#include "Events/EventSystem.h"
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
 #include "Assets/AssetSystem.h"
@@ -23,7 +24,8 @@ limitations under the License.
 namespace alpha
 {
     AlphaController::AlphaController()
-        : m_pGraphics(nullptr)
+        : m_pEvents(nullptr)
+        , m_pGraphics(nullptr)
         , m_pLogic(nullptr)
         , m_pAssets(nullptr)
     { }
@@ -47,6 +49,13 @@ namespace alpha
 
     bool AlphaController::Initialize()
     {
+        // Event management system is allways first
+        m_pEvents = new EventSystem;
+        if (!m_pEvents->VInitialize())
+        {
+            return false;
+        }
+
         // Initialize asset repository
         m_pAssets = new AssetSystem();
         if (!m_pAssets->VInitialize())
@@ -94,6 +103,9 @@ namespace alpha
         // update systems in discrete chunks of time
         while (m_timeAccumulator >= sk_maxUpdateTime)
         {
+            // pass around events first
+            m_pEvents->Update(currentTime, sk_maxUpdateTime);
+
             m_pAssets->Update(currentTime, sk_maxUpdateTime);
             m_pLogic->Update(currentTime, sk_maxUpdateTime);
             success = m_pGraphics->Update(currentTime, sk_maxUpdateTime);
@@ -139,6 +151,11 @@ namespace alpha
         {
             m_pAssets->VShutdown();
             delete m_pAssets;
+        }
+        if (m_pEvents)
+        {
+            m_pEvents->VShutdown();
+            delete m_pEvents;
         }
 
         return true;

@@ -21,6 +21,7 @@ limitations under the License.
 
 namespace alpha
 {
+    class EventSystem;
     class LogicSystem;
     class GraphicsSystem;
     class AssetSystem;
@@ -51,6 +52,9 @@ namespace alpha
         double m_timeLastFrame = 0.0f;
         double m_timeAccumulator = 0.0f;
         double sk_maxUpdateTime = 1.0f / 60.0f;
+
+        /** Event management system */
+        EventSystem *m_pEvents;
 
         /** game logic system */
         LogicSystem *m_pLogic;

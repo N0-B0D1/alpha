@@ -17,6 +17,8 @@ endif (WIN32)
 source_group(Header\\Graphics FILES ${GRAPHICS_HEADER_FILES})
 file(GLOB ASSETS_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Assets/*.h")
 source_group(Header\\Assets FILES ${ASSETS_HEADER_FILES})
+file(GLOB EVENTS_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Events/*.h")
+source_group(Header\\Events FILES ${EVENTS_HEADER_FILES})
 
 
 # define source files for the library
@@ -34,6 +36,8 @@ endif (WIN32)
 source_group(Source\\Graphics FILES ${GRAPHICS_SOURCE_FILES})
 file(GLOB ASSETS_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Assets/*.cpp")
 source_group(Source\\Assets FILES ${ASSETS_SOURCE_FILES})
+file(GLOB EVENTS_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Events/*.cpp")
+source_group(Source\\Events FILES ${EVENTS_SOURCE_FILES})
 
 
 # make engine project
@@ -48,11 +52,13 @@ add_library(
         ${TOOLBOX_HEADER_FILES}
         ${GRAPHICS_HEADER_FILES}
         ${ASSETS_HEADER_FILES}
+        ${EVENTS_HEADER_FILES}
         ${SOURCE_FILES}
         ${LOGIC_SOURCE_FILES}
         ${TOOLBOX_SOURCE_FILES}
         ${GRAPHICS_SOURCE_FILES}
         ${ASSETS_SOURCE_FILES}
+        ${EVENTS_SOURCE_FILES}
     )
     
 
@@ -62,4 +68,5 @@ install(FILES ${LOGIC_HEADER_FILES} DESTINATION include/AlphaEngine/Logic)
 install(FILES ${TOOLBOX_HEADER_FILES} DESTINATION include/AlphaEngine/Toolbox)
 install(FILES ${GRAPHICS_HEADER_FILES} DESTINATION include/AlphaEngine/Graphics)
 install(FILES ${ASSETS_HEADER_FILES} DESTINATION include/AlphaEngine/Assets)
+install(FILES ${EVENTS_HEADER_FILES} DESTINATION include/AlphaEngine/Events)
 install(TARGETS AlphaEngine DESTINATION lib)
