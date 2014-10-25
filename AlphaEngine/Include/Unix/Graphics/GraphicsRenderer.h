@@ -1,5 +1,5 @@
-#ifndef ASSET_H
-#define ASSET_H
+#ifndef RENDERER_H
+#define RENDERER_H
 
 /**
 Copyright 2014 Jason R. Wendlandt
@@ -17,22 +17,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <sys/stat.h>
-#include <string>
-
 namespace alpha
 {
-    class Asset
+    class GraphicsRenderer
     {
     public:
-        Asset(std::string name, struct stat fileStats);
-        virtual ~Asset();
+        GraphicsRenderer();
+        virtual ~GraphicsRenderer();
 
-    private:
-        std::string m_name;
-        struct stat m_fileStats;
-        char *m_pBuffer;
+        bool Initialize();
+        bool Update(double currentTime, double elapsedTime);
+        bool Shutdown();
+
+        void Render();
     };
 }
 
-#endif // ASSET_H
+#endif // RENDERER_H

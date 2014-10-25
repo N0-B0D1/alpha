@@ -25,8 +25,8 @@ namespace alpha
 {
     AlphaController::AlphaController()
         : m_pEvents(nullptr)
-        , m_pGraphics(nullptr)
         , m_pLogic(nullptr)
+        , m_pGraphics(nullptr)
         , m_pAssets(nullptr)
     { }
     AlphaController::~AlphaController() { }

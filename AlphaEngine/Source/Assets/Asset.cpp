@@ -19,9 +19,9 @@ limitations under the License.
 namespace alpha
 {
     Asset::Asset(std::string name, struct stat fileStats)
-        : m_pBuffer(nullptr)
-        , m_name(name)
+        : m_name(name)
         , m_fileStats(fileStats)
+        , m_pBuffer(nullptr)
     { }
     Asset::~Asset() { }
 }
