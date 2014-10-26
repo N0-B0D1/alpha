@@ -17,8 +17,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include<stdio.h>
+#include<stdlib.h>
+#include<X11/X.h>
+#include<X11/Xlib.h>
+#include<GL/gl.h>
+#include<GL/glx.h>
+#include<GL/glu.h>
+
 namespace alpha
 {
+
     class GraphicsRenderer
     {
     public:
@@ -30,6 +39,21 @@ namespace alpha
         bool Shutdown();
 
         void Render();
+
+    private:
+        /** XXX Temporary function to draw something, so we have a little more than a black window */
+        void DrawAQuad();
+
+        Display *m_pDisplay;
+        Window m_root;
+        GLint m_att[5] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+        XVisualInfo *m_pVisualInfo;
+        Colormap m_colorMap;
+        XSetWindowAttributes m_setWindowAttrs;
+        Window m_window;
+        GLXContext m_glContext;
+        XWindowAttributes m_xWindowAttrs;
+        XEvent m_xEvent;
     };
 }
 

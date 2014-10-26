@@ -13,6 +13,8 @@ file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 add_executable(DemoBasic WIN32 ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(DemoBasic ${ALPHA_LIBRARIES})
+
+# Windows link and project settings for Visual Studio
 if (WIN32)
     target_link_libraries(DemoBasic d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib)
 endif (WIN32)

@@ -15,7 +15,7 @@ project(ALPHA)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
     "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(warnings "-Wall -Wextra -Werror")
-    set(ALPHA_CXX_FLAGS "-std=c++0x")
+    set(ALPHA_CXX_FLAGS "-std=c++0x -lX11 -lGL -lGLU")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(warnings "/W4 /WX /EHsc")
     set(ALPHA_CXX_FLAGS "")
