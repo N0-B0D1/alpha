@@ -14,25 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Events/EventSystem.h"
+#include "Events/EventReceiver.h"
 
 namespace alpha
 {
-    EventSystem::EventSystem() : AlphaSystem(60) { }
-    EventSystem::~EventSystem() { }
+	unsigned long int g_nextReceiverId = 0;
 
-    bool EventSystem::VInitialize()
-    {
-        return true;
-    }
+	EventReceiverBase::EventReceiverBase()
+	{ 
+		m_id = ++g_nextReceiverId;
+	}
+	EventReceiverBase::EventReceiverBase(EventReceiverBase const & rhs)
+		: m_id(rhs.m_id) 
+	{ }
+	EventReceiverBase& EventReceiverBase::operator = (EventReceiverBase const & rhs)
+	{
+		m_id = rhs.m_id;
+		return *this;
+	}
 
-    bool EventSystem::VShutdown()
-    {
-        return true;
-    }
-
-    bool EventSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
-    {
-        return true;
-    }
+	bool EventReceiverBase::operator == (EventReceiverBase const & rhs) const
+	{
+		return m_id == rhs.m_id;
+	}
 }

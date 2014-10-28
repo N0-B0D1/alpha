@@ -1,6 +1,3 @@
-#ifndef EVENT_SYSTEM_H
-#define EVENT_SYSTEM_H
-
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -17,22 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
+#include "Events/AlphaEvent.h"
 
 namespace alpha
 {
-    class EventSystem : public AlphaSystem
-    {
-    public:
-        EventSystem();
-        virtual ~EventSystem();
+	AlphaEvent::AlphaEvent(const float fTimeStamp /*= 0.0f*/)
+		: m_fTimeStamp(fTimeStamp) 
+	{ }
+	AlphaEvent::~AlphaEvent() { }
 
-        virtual bool VInitialize();
-        virtual bool VShutdown();
-
-    private:
-        virtual bool VUpdate(double currentTime, double elapsedTime);
-    };
+	float AlphaEvent::VGetTimeStamp() const
+	{ 
+		return m_fTimeStamp; 
+	}
 }
-
-#endif // EVENT_SYSTEM_H
