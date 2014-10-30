@@ -59,7 +59,7 @@ namespace alpha
 
 		std::shared_ptr<EvDataType *> GetNextEvent()
 		{
-			std::shared_ptr<EventDataBase *> pEvData = nullptr;
+			std::shared_ptr<AlphaEvent *> pEvData = nullptr;
 			if (m_qEventData.TryPop(pEvData))
 			{
 				return std::dynamic_pointer_cast<EvDataType *>(pEvData);
@@ -73,7 +73,8 @@ namespace alpha
 		{
 			if (pEvent)
 			{
-				m_qEventData.Push(pEvent->VCopy());
+				//m_qEventData.Push(pEvent->VCopy());
+				m_qEventData.Push(pEvent);
 			}
 		}
 
