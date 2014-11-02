@@ -8,7 +8,7 @@
 
 namespace alpha
 {
-//#ifdef DEBUG
+#ifdef ALPHA_DEBUG
 
     enum Severity
     {
@@ -80,15 +80,15 @@ namespace alpha
     #define LOG_ERR s_logger.print<Severity::ERROR>
     #define LOG_WARN s_logger.print<Severity::WARNING>
 
-/*
+
 #else
 
-    #define LOG (...)
-    #define LOG_ERR (...)
-    #define LOG_WARN (...)
+    #define LOG(...)
+    #define LOG_ERR(...)
+    #define LOG_WARN(...)
 
 #endif
-*/
+
 }
 
 #endif // LOGGER_H

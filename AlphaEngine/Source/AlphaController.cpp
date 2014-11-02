@@ -46,6 +46,10 @@ namespace alpha
                 }
             }
         }
+        else
+        {
+            LOG_ERR("Alpha Controller initialization failed");
+        }
 
         this->Shutdown();
 
@@ -58,6 +62,7 @@ namespace alpha
         m_pEvents = new EventManager;
         if (!m_pEvents->Initialize())
         {
+            LOG_ERR("Event Manager initialization failed");
             return false;
         }
 
@@ -65,6 +70,7 @@ namespace alpha
         m_pAssets = new AssetSystem();
         if (!m_pAssets->VInitialize())
         {
+            LOG_ERR("Asset System initialization failed");
             return false;
         }
 
@@ -72,32 +78,32 @@ namespace alpha
         m_pGraphics = new GraphicsSystem();
         if (!m_pGraphics->VInitialize())
         {
+            LOG_ERR("Graphics System initialization failed");
             return false;
         }
+
         // create input device manager
+
         // create game logic
         m_pLogic = new LogicSystem();
         if (!m_pLogic->VInitialize())
         {
+            LOG_ERR("Logic System initialization failed");
             return false;
         }
 
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();
 
+        LOG("Alpha Controller initialization completed successfully");
         return true;
     }
 
     bool AlphaController::Update()
     {
         bool success = true;
-        //static int loops = 1000;
-        //static const double sk_maxUpdateTime = 1.0f / 60.0f;
 
-        // update event manager
-        // process any events for me
-
-        // calculate loop time total and elapsed
+        // calculate elapsed time since last frame started rendering
         std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = now - m_start;
         double currentTime = (double)(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 100000.0f);
@@ -165,6 +171,7 @@ namespace alpha
             delete m_pEvents;
         }
 
+        LOG("Alpha Controller shutdown complete");
         return true;
     }
 
