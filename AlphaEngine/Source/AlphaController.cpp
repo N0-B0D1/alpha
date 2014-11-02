@@ -20,6 +20,7 @@ limitations under the License.
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
 #include "Assets/AssetSystem.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -33,6 +34,8 @@ namespace alpha
 
     void AlphaController::Execute()
     {
+        LOG("Alpha Controller beginning execution");
+
         if (this->Initialize())
         {
             for (;;)
@@ -45,6 +48,8 @@ namespace alpha
         }
 
         this->Shutdown();
+
+        LOG("Alpha Controller end of execution");
     }
 
     bool AlphaController::Initialize()
