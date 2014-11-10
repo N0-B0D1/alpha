@@ -15,19 +15,34 @@ limitations under the License.
 */
 
 #include "Logic/LogicSystem.h"
+#include "Entities/EntityManager.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    LogicSystem::LogicSystem() : AlphaSystem(60) { }
+    LogicSystem::LogicSystem() 
+        : AlphaSystem(60)
+        , m_pEntityManager(nullptr)
+    { }
     LogicSystem::~LogicSystem() { }
 
     bool LogicSystem::VInitialize()
     {
+        m_pEntityManager = new EntityManager();
+        if (!m_pEntityManager)
+        {
+            LOG_ERR("LogicSystem: Failed to create EntityManager");
+            return false;
+        }
         return true;
     }
 
     bool LogicSystem::VShutdown()
     {
+        if (m_pEntityManager)
+        {
+            delete m_pEntityManager;
+        }
         return true;
     }
 

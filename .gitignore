@@ -3,3 +3,4 @@ sdk/
 Docs/
 .vimrc
 *.swp
+.ycm_extra_conf.py*

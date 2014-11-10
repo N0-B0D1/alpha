@@ -1,5 +1,5 @@
-#ifndef LOGIC_SYSTEM_H
-#define LOGIC_SYSTEM_H
+#ifndef ENTITY_H
+#define ENTITY_H
 
 /**
 Copyright 2014 Jason R. Wendlandt
@@ -17,26 +17,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
+#include <memory>
+
+#include "AlphaObject.h"
 
 namespace alpha
 {
-    class EntityManager;
-
-    class LogicSystem : public AlphaSystem
+    class Entity : public AlphaObject
     {
     public:
-        LogicSystem();
-        virtual ~LogicSystem();
+        Entity();
+        virtual ~Entity();
 
-        virtual bool VInitialize();
-        virtual bool VShutdown();
-
-    private:
-        virtual bool VUpdate(double currentTime, double elapsedTime);
-        
-        EntityManager *m_pEntityManager;
+        virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
     };
+
+    typedef std::shared_ptr<Entity *> EntityPtr;
 }
 
-#endif // LOGIC_SYSTEM_H
+#endif // ENTITY_H

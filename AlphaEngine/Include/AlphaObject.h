@@ -1,5 +1,5 @@
-#ifndef LOGIC_SYSTEM_H
-#define LOGIC_SYSTEM_H
+#ifndef ALPHA_OBJECT_H
+#define ALPHA_OBJECT_H
 
 /**
 Copyright 2014 Jason R. Wendlandt
@@ -17,26 +17,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
-
 namespace alpha
 {
-    class EntityManager;
-
-    class LogicSystem : public AlphaSystem
+    /** AlphaObjects represent instances of data that update along with
+     *  the system that owns them.
+     */
+    class AlphaObject
     {
     public:
-        LogicSystem();
-        virtual ~LogicSystem();
+        AlphaObject() { }
+        virtual ~AlphaObject() { }
 
-        virtual bool VInitialize();
-        virtual bool VShutdown();
-
-    private:
-        virtual bool VUpdate(double currentTime, double elapsedTime);
-        
-        EntityManager *m_pEntityManager;
+        virtual bool VUpdate() = 0;
     };
 }
 
-#endif // LOGIC_SYSTEM_H
+#endif // ALPHA_OBJECT_

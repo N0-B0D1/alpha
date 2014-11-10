@@ -1,6 +1,3 @@
-#ifndef LOGIC_SYSTEM_H
-#define LOGIC_SYSTEM_H
-
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -17,26 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
+#include "Entities/Entity.h"
 
 namespace alpha
 {
-    class EntityManager;
+    Entity::Entity() { }
+    Entity::~Entity() { }
 
-    class LogicSystem : public AlphaSystem
+    bool Entity::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
     {
-    public:
-        LogicSystem();
-        virtual ~LogicSystem();
-
-        virtual bool VInitialize();
-        virtual bool VShutdown();
-
-    private:
-        virtual bool VUpdate(double currentTime, double elapsedTime);
-        
-        EntityManager *m_pEntityManager;
-    };
+        return true;
+    }
 }
-
-#endif // LOGIC_SYSTEM_H
