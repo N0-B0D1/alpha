@@ -15,21 +15,22 @@ limitations under the License.
 */
 
 #include "Logic/LogicSystem.h"
-#include "Entities/EntityManager.h"
+#include "Entities/EntityFactory.h"
+#include "Entities/Entity.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     LogicSystem::LogicSystem() 
         : AlphaSystem(60)
-        , m_pEntityManager(nullptr)
+        , m_pEntityFactory(nullptr)
     { }
     LogicSystem::~LogicSystem() { }
 
     bool LogicSystem::VInitialize()
     {
-        m_pEntityManager = new EntityManager();
-        if (!m_pEntityManager)
+        m_pEntityFactory = new EntityFactory();
+        if (!m_pEntityFactory)
         {
             LOG_ERR("LogicSystem: Failed to create EntityManager");
             return false;
@@ -39,9 +40,11 @@ namespace alpha
 
     bool LogicSystem::VShutdown()
     {
-        if (m_pEntityManager)
+        m_entities.clear();
+
+        if (m_pEntityFactory)
         {
-            delete m_pEntityManager;
+            delete m_pEntityFactory;
         }
         return true;
     }
@@ -49,5 +52,25 @@ namespace alpha
     bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
         return true;
+    }
+
+    std::shared_ptr<Entity> LogicSystem::GetEntity(const unsigned long entityId)
+    {
+        auto it = m_entities.find(entityId);
+        if (it != m_entities.end())
+        {
+            return it->second;
+        }
+        return std::shared_ptr<Entity>();
+    }
+
+    std::shared_ptr<Entity> LogicSystem::CreateEntity(const char * /*resource*/)
+    {
+        return std::shared_ptr<Entity>();
+    }
+
+    void LogicSystem::DestroyEntity(const unsigned long entityId)
+    {
+        m_entities.erase(m_entities.find(entityId));
     }
 }

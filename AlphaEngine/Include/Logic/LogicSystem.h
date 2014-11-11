@@ -17,11 +17,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <map>
+#include <memory>
 #include "AlphaSystem.h"
+//#include "Entities/Entity.h"
 
 namespace alpha
 {
-    class EntityManager;
+    class EntityFactory;
+    class Entity;
 
     class LogicSystem : public AlphaSystem
     {
@@ -32,10 +36,16 @@ namespace alpha
         virtual bool VInitialize();
         virtual bool VShutdown();
 
+        /** Entity life-cycle methods */
+        std::shared_ptr<Entity> GetEntity(const unsigned long entityId);
+        std::shared_ptr<Entity> CreateEntity(const char * resource);
+        void DestroyEntity(const unsigned long entityId);
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
         
-        EntityManager *m_pEntityManager;
+        EntityFactory *m_pEntityFactory;
+        std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
     };
 }
 

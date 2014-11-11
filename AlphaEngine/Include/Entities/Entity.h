@@ -31,8 +31,6 @@ namespace alpha
 
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
     };
-
-    typedef std::shared_ptr<Entity *> EntityPtr;
 }
 
 #endif // ENTITY_H

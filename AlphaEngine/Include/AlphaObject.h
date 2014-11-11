@@ -28,7 +28,7 @@ namespace alpha
         AlphaObject() { }
         virtual ~AlphaObject() { }
 
-        virtual bool VUpdate() = 0;
+        virtual bool VUpdate(float fCurrentTime, float fElapsedTime) = 0;
     };
 }
 

@@ -1,6 +1,3 @@
-#ifndef ENTITY_MANAGER_H
-#define ENTITY_MANAGER_H
-
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -17,23 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <map>
-
+#include <memory>
+#include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
+#include "Entities/EntityComponent.h"
 
 namespace alpha
 {
-    class EntityManager
+    EntityFactory::EntityFactory()
     {
-    public:
-        EntityManager();
-        virtual ~EntityManager();
 
-        bool Update(double currentTime, double elapsedTime);
+    }
 
-    private:
-        std::map<unsigned long, EntityPtr> m_entities;
-    };
+    std::shared_ptr<Entity> EntityFactory::CreateEntity(const char * /*resource*/)
+    {
+        return std::shared_ptr<Entity>();
+    }
+
+    EntityComponent * EntityFactory::Create(unsigned long componentId)
+    {
+        auto it = m_componentCreationFunctions.find(componentId);
+        if (it != m_componentCreationFunctions.end())
+        {
+            ComponentCreationFunction pFunc = it->second;
+            return pFunc();
+        }
+        return nullptr;
+    }
 }
-
-#endif // ENTITY_MANAGER_H
