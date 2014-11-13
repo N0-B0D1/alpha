@@ -32,6 +32,11 @@ namespace alpha
     { }
     AlphaController::~AlphaController() { }
 
+    void AlphaController::SetLogic(LogicSystem *pLogic)
+    {
+        m_pLogic = pLogic;
+    }
+
     void AlphaController::Execute()
     {
         LOG("Alpha Controller beginning execution");
@@ -86,6 +91,7 @@ namespace alpha
 
         // create game logic
         m_pLogic = new LogicSystem();
+        //m_pLogic = this->CreateGameLogic();
         if (!m_pLogic->VInitialize())
         {
             LOG_ERR("Logic System initialization failed");
@@ -174,11 +180,14 @@ namespace alpha
         LOG("Alpha Controller shutdown complete");
         return true;
     }
-
+/*
+    template <class GameLogic>
     int InitiateAlpha()
     {
+        GameLogic logic;
         AlphaController controller;
         controller.Execute();
         return 0;
     }
+    */
 }

@@ -64,9 +64,9 @@ namespace alpha
         return std::shared_ptr<Entity>();
     }
 
-    std::shared_ptr<Entity> LogicSystem::CreateEntity(const char * /*resource*/)
+    std::shared_ptr<Entity> LogicSystem::CreateEntity(const char * resource)
     {
-        return std::shared_ptr<Entity>();
+        return m_pEntityFactory->CreateEntity(resource);
     }
 
     void LogicSystem::DestroyEntity(const unsigned long entityId)

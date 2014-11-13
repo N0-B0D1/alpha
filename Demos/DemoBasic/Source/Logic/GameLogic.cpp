@@ -14,18 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaController.h"
 #include "Logic/GameLogic.h"
 
-#if WIN32
-    #include <Windows.h>
-
-    //INT WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE, LPSTR /*strCmdLine*/, INT)
-    int WINAPI wWinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPWSTR /*lpCmdLine*/, _In_ int /*nCmdShow*/)
-#else
-    int main(int /*argc*/, char ** /*argv*/)
-#endif
-    {
-        int error = alpha::template InitiateAlpha<GameLogic>();
-        return error;
-    }
+GameLogic::GameLogic() { }

@@ -18,6 +18,7 @@ limitations under the License.
 */
 
 #include <chrono>
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -35,8 +36,9 @@ namespace alpha
         AlphaController();
         virtual ~AlphaController();
 
+        void SetLogic(LogicSystem *pLogic);
         void Execute();
-
+        
     private:
         // non-copyable
         AlphaController(const AlphaController&);
@@ -66,7 +68,15 @@ namespace alpha
         AssetSystem * m_pAssets;
 	};
 
-    extern int InitiateAlpha();
+    template <class GameLogic> 
+    int InitiateAlpha()
+    {
+        GameLogic *logic = new GameLogic();
+        AlphaController controller;
+        controller.SetLogic(logic);
+        controller.Execute();
+        return 0;
+    }
 }
 
 #endif // ALPHA_CONTROLLER_H

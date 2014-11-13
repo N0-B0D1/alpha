@@ -1,3 +1,6 @@
+#ifndef GAME_LOGIC_H
+#define GAME_LOGIC_H
+
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -14,18 +17,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaController.h"
-#include "Logic/GameLogic.h"
+#include "Logic/LogicSystem.h"
 
-#if WIN32
-    #include <Windows.h>
+class GameLogic : public alpha::LogicSystem
+{
+public:
+    GameLogic();
+};
 
-    //INT WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE, LPSTR /*strCmdLine*/, INT)
-    int WINAPI wWinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPWSTR /*lpCmdLine*/, _In_ int /*nCmdShow*/)
-#else
-    int main(int /*argc*/, char ** /*argv*/)
-#endif
-    {
-        int error = alpha::template InitiateAlpha<GameLogic>();
-        return error;
-    }
+#endif // GAME_LOGIC_H
