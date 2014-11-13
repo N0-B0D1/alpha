@@ -90,7 +90,7 @@ namespace alpha
         // create input device manager
 
         // create game logic
-        m_pLogic = new LogicSystem();
+        //m_pLogic = new LogicSystem();
         //m_pLogic = this->CreateGameLogic();
         if (!m_pLogic->VInitialize())
         {

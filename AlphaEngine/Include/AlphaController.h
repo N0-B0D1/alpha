@@ -49,7 +49,6 @@ namespace alpha
         bool Shutdown();
 
         /** main loop timer */
-        //AlphaClock m_clock;
         std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
         double m_timeLastFrame = 0.0f;
         double m_timeAccumulator = 0.0f;
