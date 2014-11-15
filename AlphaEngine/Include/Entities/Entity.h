@@ -19,17 +19,15 @@ limitations under the License.
 
 #include <memory>
 
-#include "AlphaObject.h"
-
 namespace alpha
 {
-    class Entity : public AlphaObject
+    class Entity
     {
     public:
         Entity();
         virtual ~Entity();
 
-        virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
+        bool VUpdate(float fCurrentTime, float fElapsedTime);
     };
 }
 

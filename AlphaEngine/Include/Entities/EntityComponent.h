@@ -17,17 +17,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaObject.h"
-
 namespace alpha
 {
-    class EntityComponent : public AlphaObject
+    class EntityComponent
     {
     public:
         EntityComponent();
         virtual ~EntityComponent();
 
-        virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
+        bool VUpdate(float fCurrentTime, float fElapsedTime);
     };
 }
 
