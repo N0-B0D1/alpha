@@ -60,6 +60,10 @@ endif (WIN32)
 if (UNIX)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/Unix)
 endif (UNIX)
+
+#include 3rdParty dependencies
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/include)
+
 add_library(
         AlphaEngine 
         ${HEADER_FILES} 
@@ -88,4 +92,7 @@ install(FILES ${GRAPHICS_HEADER_FILES} DESTINATION include/AlphaEngine/Graphics)
 install(FILES ${ASSETS_HEADER_FILES} DESTINATION include/AlphaEngine/Assets)
 install(FILES ${EVENTS_HEADER_FILES} DESTINATION include/AlphaEngine/Events)
 install(FILES ${ENTITY_HEADER_FILES} DESTINATION include/AlphaEngine/Entities)
-install(TARGETS AlphaEngine DESTINATION lib)
+
+#install(TARGETS AlphaEngine DESTINATION lib)
+install(TARGETS AlphaEngine DESTINATION lib/Release CONFIGURATIONS Release)
+install(TARGETS AlphaEngine DESTINATION lib/Debug CONFIGURATIONS Debug)

@@ -1,6 +1,5 @@
 build/
 sdk/
-3rdParty/
 Docs/
 .vimrc
 *.swp

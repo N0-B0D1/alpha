@@ -11,6 +11,9 @@ endif()
 
 project(ALPHA)
 
+# build 3rdParty dependencies
+add_subdirectory(3rdParty)
+
 
 set(CMAKE_CXX_FLAGS_DEBUG "-DALPHA_DEBUG")
 
@@ -37,9 +40,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 # set install location to relative directory
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/sdk" CACHE PATH "ALPHA install prefix")
 
-set(ALPHA_LIBRARIES AlphaEngine)
+set(ALPHA_LIBRARIES AlphaEngine lua)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+# build Engine
 add_subdirectory(AlphaEngine)
+
+# build Demos
 add_subdirectory(Demos)
