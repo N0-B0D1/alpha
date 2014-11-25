@@ -14,6 +14,13 @@ project(ALPHA)
 # build 3rdParty dependencies
 add_subdirectory(3rdParty)
 
+# set build target variables
+if (WIN32)
+    set(ALPHA_BUILD_TARGET_DIR "Win32")
+elseif (UNIX)
+    set(ALPHA_BUILD_TARGET_DIR "Unix")
+endif ()
+
 
 set(CMAKE_CXX_FLAGS_DEBUG "-DALPHA_DEBUG")
 

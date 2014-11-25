@@ -1,97 +1,65 @@
 
 PROJECT(AlphaEngine)
 
-
-# define header files for the library
+# start headers
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.h")
 source_group(Header FILES ${HEADER_FILES})
-file(GLOB LOGIC_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Logic/*.h")
-source_group(Header\\Logic FILES ${LOGIC_HEADER_FILES})
-file(GLOB TOOLBOX_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Toolbox/*.h")
-source_group(Header\\Toolbox FILES ${TOOLBOX_HEADER_FILES})
-file(GLOB GRAPHICS_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Graphics/*.h")
-if (WIN32)
-    file(GLOB GRAPHICS_PLAT_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Win32/Graphics/*.h")
-    list(APPEND GRAPHICS_HEADER_FILES ${GRAPHICS_PLAT_HEADER_FILES})
-endif (WIN32)
-if (UNIX)
-    file(GLOB GRAPHICS_PLAT_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Unix/Graphics/*.h")
-    list(APPEND GRAPHICS_HEADER_FILES ${GRAPHICS_PLAT_HEADER_FILES})
-endif (UNIX)
-source_group(Header\\Graphics FILES ${GRAPHICS_HEADER_FILES})
-file(GLOB ASSETS_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Assets/*.h")
-source_group(Header\\Assets FILES ${ASSETS_HEADER_FILES})
-file(GLOB EVENTS_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Events/*.h")
-source_group(Header\\Events FILES ${EVENTS_HEADER_FILES})
-file(GLOB ENTITY_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Entities/*.h")
-source_group(Header\\Entities FILES ${ENTITY_HEADER_FILES})
 
-
-# define source files for the library
+# start sources
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 source_group(Source FILES ${SOURCE_FILES})
-file(GLOB LOGIC_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Logic/*.cpp")
-source_group(Source\\Logic FILES ${LOGIC_SOURCE_FILES})
-file(GLOB TOOLBOX_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Toolbox/*.cpp")
-source_group(Source\\Toolbox FILES ${TOOLBOX_SOURCE_FILES})
-file(GLOB GRAPHICS_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Graphics/*.cpp")
-if (WIN32)
-    file(GLOB GRAPHICS_PLAT_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Win32/Graphics/*.cpp")
-    list(APPEND GRAPHICS_SOURCE_FILES ${GRAPHICS_PLAT_SOURCE_FILES})
-endif (WIN32)
-if (UNIX)
-    file(GLOB GRAPHICS_PLAT_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Unix/Graphics/*.cpp")
-    list(APPEND GRAPHICS_SOURCE_FILES ${GRAPHICS_PLAT_SOURCE_FILES})
-endif (UNIX)
-source_group(Source\\Graphics FILES ${GRAPHICS_SOURCE_FILES})
-file(GLOB ASSETS_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Assets/*.cpp")
-source_group(Source\\Assets FILES ${ASSETS_SOURCE_FILES})
-file(GLOB EVENTS_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Events/*.cpp")
-source_group(Source\\Events FILES ${EVENTS_SOURCE_FILES})
-file(GLOB ENTITY_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Entities/*.cpp")
-source_group(Source\\Entities FILES ${ENTITY_SOURCE_FILES})
+
+install(FILES ${HEADER_FILES} DESTINATION include/AlphaEngine)
+
+
+function (include_alpha_source sub_dir)
+
+    # better than nothing for now
+    # XXX should figure out how to replace '/' with '\\',
+    # and if that will even work for source_group's
+    set(SUB_GROUP ${sub_dir})
+    string(REGEX REPLACE "/" "_" SUB_GROUP ${SUB_GROUP})
+    
+    # add header files
+    file(GLOB SUB_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/${sub_dir}/*.h")
+    file(GLOB SUB_PLAT_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR}/${sub_dir}/*.h")
+    list(APPEND SUB_HEADER_FILES ${SUB_PLAT_HEADER_FILES})
+    source_group(Header\\${SUB_GROUP} FILES ${SUB_HEADER_FILES})
+    
+    # add sub group to final list of header files for building
+    set(HEADER_FILES ${HEADER_FILES} ${SUB_HEADER_FILES} PARENT_SCOPE)
+
+    # add source files
+    file(GLOB SUB_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/${sub_dir}/*.cpp")
+    file(GLOB SUB_PLAT_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/${ALPHA_BUILD_TARGET_DIR}/${sub_dir}/*.cpp")
+    list(APPEND SUB_SOURCE_FILES ${SUB_PLAT_SOURCE_FILES})
+    source_group(Source\\${SUB_GROUP} FILES ${SUB_SOURCE_FILES})
+    
+    # add sub group source files to final list of source files for building
+    set(SOURCE_FILES ${SOURCE_FILES} ${SUB_SOURCE_FILES} PARENT_SCOPE)
+    
+    # install any header files for exporting the final SDK
+    install(FILES ${SUB_HEADER_FILES} DESTINATION include/AlphaEngine/${sub_dir})
+    
+endfunction ()
+
+
+include_alpha_source("Logic")
+include_alpha_source("Toolbox")
+include_alpha_source("Graphics")
+include_alpha_source("Assets")
+include_alpha_source("Events")
+include_alpha_source("Entities")
 
 
 # make engine project
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
-if (WIN32)
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/Win32)
-endif (WIN32)
-if (UNIX)
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/Unix)
-endif (UNIX)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR})
 
 #include 3rdParty dependencies
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/include)
 
-add_library(
-        AlphaEngine 
-        ${HEADER_FILES} 
-        ${LOGIC_HEADER_FILES}
-        ${TOOLBOX_HEADER_FILES}
-        ${GRAPHICS_HEADER_FILES}
-        ${ASSETS_HEADER_FILES}
-        ${EVENTS_HEADER_FILES}
-        ${ENTITY_HEADER_FILES}
-
-        ${SOURCE_FILES}
-        ${LOGIC_SOURCE_FILES}
-        ${TOOLBOX_SOURCE_FILES}
-        ${GRAPHICS_SOURCE_FILES}
-        ${ASSETS_SOURCE_FILES}
-        ${EVENTS_SOURCE_FILES}
-        ${ENTITY_SOURCE_FILES}
-    )
-    
-
-# install to sdk folder
-install(FILES ${HEADER_FILES} DESTINATION include/AlphaEngine)
-install(FILES ${LOGIC_HEADER_FILES} DESTINATION include/AlphaEngine/Logic)
-install(FILES ${TOOLBOX_HEADER_FILES} DESTINATION include/AlphaEngine/Toolbox)
-install(FILES ${GRAPHICS_HEADER_FILES} DESTINATION include/AlphaEngine/Graphics)
-install(FILES ${ASSETS_HEADER_FILES} DESTINATION include/AlphaEngine/Assets)
-install(FILES ${EVENTS_HEADER_FILES} DESTINATION include/AlphaEngine/Events)
-install(FILES ${ENTITY_HEADER_FILES} DESTINATION include/AlphaEngine/Entities)
+add_library(AlphaEngine ${HEADER_FILES} ${SOURCE_FILES})
 
 #install(TARGETS AlphaEngine DESTINATION lib)
 install(TARGETS AlphaEngine DESTINATION lib/Release CONFIGURATIONS Release)
