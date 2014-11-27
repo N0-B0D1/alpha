@@ -64,7 +64,7 @@ namespace alpha
         GraphicsSystem *m_pGraphics;
 
         /** Asset Management System */
-        AssetSystem * m_pAssets;
+        std::shared_ptr<AssetSystem> m_pAssets;
 	};
 
     template <class GameLogic> 

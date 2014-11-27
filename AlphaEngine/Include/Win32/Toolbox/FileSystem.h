@@ -1,3 +1,6 @@
+#ifndef FILE_SYSTEM_H
+#define FILE_SYSTEM_H
+
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -14,17 +17,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Entities/Entity.h"
+#include <windows.h>
 
-namespace alpha
-{
-    Entity::Entity(unsigned long entityId)
-        : m_entityId(entityId)
-    { }
-    Entity::~Entity() { }
+char * OSGetBaseDirectory();
+char * OSJoinPath(const char * left, const char * right);
 
-    bool Entity::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
-    {
-        return true;
-    }
-}
+#endif // FILE_SYSTEM_H

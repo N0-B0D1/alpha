@@ -24,10 +24,15 @@ namespace alpha
     class Entity
     {
     public:
-        Entity();
+        explicit Entity(unsigned long entityId);
         virtual ~Entity();
 
         bool VUpdate(float fCurrentTime, float fElapsedTime);
+
+        unsigned long GetId() const { return m_entityId; }
+
+    private:
+        unsigned long m_entityId;
     };
 }
 

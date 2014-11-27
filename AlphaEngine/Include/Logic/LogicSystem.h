@@ -24,6 +24,7 @@ limitations under the License.
 
 namespace alpha
 {
+    class AssetSystem;
     class EntityFactory;
     class Entity;
 
@@ -33,7 +34,7 @@ namespace alpha
         LogicSystem();
         virtual ~LogicSystem();
 
-        virtual bool VInitialize();
+        virtual bool VInitialize(std::shared_ptr<AssetSystem> pAssets);
         virtual bool VShutdown();
 
         /** Entity life-cycle methods */
@@ -46,6 +47,8 @@ namespace alpha
         
         EntityFactory *m_pEntityFactory;
         std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
+
+        std::shared_ptr<AssetSystem> m_pAssets;
     };
 }
 

@@ -39,3 +39,6 @@ endif (MSVC)
 # install demo to sdk folder
 install(TARGETS DemoBasic DESTINATION bin)
 
+# make content files available for debugging
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
+

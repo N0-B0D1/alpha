@@ -36,21 +36,18 @@ namespace alpha
         virtual bool VInitialize();
         virtual bool VShutdown();
 
-        /**
-         * XXX
-         * Temporary way to get/load and asset while we are still single threaded.
-         * Eventually this should be replaced with an event/response cycle
-         * for background loading an asset
-         */
-        std::shared_ptr<Asset> GetAsset(std::string name);
+        /** Retrieve or create an asset that tracks a specific asset file in the system */
+        std::shared_ptr<Asset> GetAsset(const char * name);
 
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
-        std::shared_ptr <Asset> LoadAsset(std::string name);
+        std::shared_ptr <Asset> LoadAsset(const char * name);
 
         typedef std::map<std::string, std::shared_ptr<Asset>> AssetMap;
         AssetMap m_assets;
+
+        char * m_contentPath;
     };
 }
 

@@ -24,13 +24,14 @@ namespace alpha
 {
     class Entity;
     class EntityComponent;
+    class Asset;
 
     class EntityFactory
     {
     public:
         EntityFactory();
 
-        std::shared_ptr<Entity> CreateEntity(const char *resource);
+        std::shared_ptr<Entity> CreateEntity(std::shared_ptr<Asset> asset);
 
         // component creation function
         template <class SubClass>
@@ -55,6 +56,8 @@ namespace alpha
     private:
         typedef EntityComponent * (*ComponentCreationFunction)(void);
         std::map<unsigned long, ComponentCreationFunction> m_componentCreationFunctions;
+
+        unsigned int m_lastEntityId = 0;
     };
 }
 

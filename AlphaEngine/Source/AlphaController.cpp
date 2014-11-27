@@ -72,7 +72,7 @@ namespace alpha
         }
 
         // Initialize asset repository
-        m_pAssets = new AssetSystem();
+        m_pAssets = std::make_shared<AssetSystem>();
         if (!m_pAssets->VInitialize())
         {
             LOG_ERR("Asset System initialization failed");
@@ -92,7 +92,7 @@ namespace alpha
         // create game logic
         //m_pLogic = new LogicSystem();
         //m_pLogic = this->CreateGameLogic();
-        if (!m_pLogic->VInitialize())
+        if (!m_pLogic->VInitialize(m_pAssets))
         {
             LOG_ERR("Logic System initialization failed");
             return false;
@@ -169,7 +169,6 @@ namespace alpha
         if (m_pAssets)
         {
             m_pAssets->VShutdown();
-            delete m_pAssets;
         }
         if (m_pEvents)
         {
@@ -180,14 +179,4 @@ namespace alpha
         LOG("Alpha Controller shutdown complete");
         return true;
     }
-/*
-    template <class GameLogic>
-    int InitiateAlpha()
-    {
-        GameLogic logic;
-        AlphaController controller;
-        controller.Execute();
-        return 0;
-    }
-    */
 }

@@ -18,17 +18,15 @@ limitations under the License.
 #include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
+#include "Assets/AssetSystem.h"
 
 namespace alpha
 {
-    EntityFactory::EntityFactory()
-    {
+    EntityFactory::EntityFactory() { }
 
-    }
-
-    std::shared_ptr<Entity> EntityFactory::CreateEntity(const char * /*resource*/)
+    std::shared_ptr<Entity> EntityFactory::CreateEntity(std::shared_ptr<Asset> /*asset*/)
     {
-        return std::shared_ptr<Entity>();
+        return std::make_shared<Entity>(m_lastEntityId++);
     }
 
     EntityComponent * EntityFactory::Create(unsigned long componentId)

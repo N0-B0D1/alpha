@@ -18,17 +18,20 @@ limitations under the License.
 #include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
 #include "Toolbox/Logger.h"
+#include "Assets/AssetSystem.h"
 
 namespace alpha
 {
-    LogicSystem::LogicSystem() 
+    LogicSystem::LogicSystem()
         : AlphaSystem(60)
         , m_pEntityFactory(nullptr)
     { }
     LogicSystem::~LogicSystem() { }
 
-    bool LogicSystem::VInitialize()
+    bool LogicSystem::VInitialize(std::shared_ptr<AssetSystem> pAssets)
     {
+        m_pAssets = pAssets;
+
         m_pEntityFactory = new EntityFactory();
         if (!m_pEntityFactory)
         {
@@ -66,7 +69,10 @@ namespace alpha
 
     std::shared_ptr<Entity> LogicSystem::CreateEntity(const char * resource)
     {
-        return m_pEntityFactory->CreateEntity(resource);
+        auto asset = m_pAssets->GetAsset(resource);
+        auto entity = m_pEntityFactory->CreateEntity(asset);
+        m_entities[entity->GetId()] = entity;
+        return entity;
     }
 
     void LogicSystem::DestroyEntity(const unsigned long entityId)

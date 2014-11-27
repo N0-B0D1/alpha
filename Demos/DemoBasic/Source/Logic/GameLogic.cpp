@@ -15,5 +15,18 @@ limitations under the License.
 */
 
 #include "Logic/GameLogic.h"
+#include "Assets/AssetSystem.h"
 
 GameLogic::GameLogic() { }
+GameLogic::~GameLogic() { }
+
+bool GameLogic::VInitialize(std::shared_ptr<alpha::AssetSystem> pAssets)
+{
+    if (LogicSystem::VInitialize(pAssets))
+    {
+        m_test = CreateEntity("Entities/test.lua");
+        m_test2 = CreateEntity("Entities/test.lua");
+        return true;
+    }
+    return false;
+}

@@ -17,12 +17,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "Entities/Entity.h"
+
 #include "Logic/LogicSystem.h"
+
+class alpha::AssetSystem;
 
 class GameLogic : public alpha::LogicSystem
 {
 public:
     GameLogic();
+    virtual ~GameLogic();
+
+    virtual bool VInitialize(std::shared_ptr<alpha::AssetSystem> pAssets);
+
+private:
+    std::shared_ptr<alpha::Entity> m_test;
+    std::shared_ptr<alpha::Entity> m_test2;
 };
 
 #endif // GAME_LOGIC_H

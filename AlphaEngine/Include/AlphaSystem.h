@@ -27,6 +27,8 @@ namespace alpha
      */
     class AlphaSystem
     {
+        friend class AlphaController;
+
     public:
         AlphaSystem(uint8_t hertz);
         virtual ~AlphaSystem();

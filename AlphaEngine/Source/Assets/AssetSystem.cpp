@@ -17,6 +17,7 @@ limitations under the License.
 #include <sys/stat.h>
 
 #include "Assets/AssetSystem.h"
+#include "Toolbox/FileSystem.h"
 
 namespace alpha
 {
@@ -25,11 +26,15 @@ namespace alpha
 
     bool AssetSystem::VInitialize()
     {
+        char * base = OSGetBaseDirectory();
+        m_contentPath = OSJoinPath(base, "Content");
+        free(base);
         return true;
     }
 
     bool AssetSystem::VShutdown()
     {
+        free(m_contentPath);
         return true;
     }
 
@@ -41,25 +46,29 @@ namespace alpha
         return true;
     }
 
-    std::shared_ptr<Asset> AssetSystem::GetAsset(std::string name)
+    std::shared_ptr<Asset> AssetSystem::GetAsset(const char * name)
     {
         auto it = m_assets.find(name);
         if (it == m_assets.end())
+        {
             return this->LoadAsset(name); // std::shared_ptr<Asset>();
+        }
         return it->second;
     }
 
-    std::shared_ptr<Asset> AssetSystem::LoadAsset(std::string name)
+    std::shared_ptr<Asset> AssetSystem::LoadAsset(const char * name)
     {
         // get meta data about the file, and "lazy load" the asset
         // The idea here is to get the structure set up as fast as possible
         // with information about any needed assets, then later the assets
         // will actually be loaded once they are closer to being used
 
+        char * path = OSJoinPath(m_contentPath, name);
+
         struct stat fileStats;
-        if (stat(name.c_str(), &fileStats) >= 0)
+        if (stat(path, &fileStats) >= 0)
         {
-            auto asset = std::make_shared<Asset>(name, fileStats);
+            auto asset = std::make_shared<Asset>(path, fileStats);
             m_assets[name] = asset;
             return asset;
         }
