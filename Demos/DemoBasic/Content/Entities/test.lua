@@ -1,9 +1,8 @@
 -- test table
-test_entity = {
-    components = {
-        TransformComponent = {
-            x = 0.0;
-            y = 0.0;
-        }
+components = {
+    TransformComponent = {
+        x = 0,
+        y = 0,
+        z = 0
     }
 }

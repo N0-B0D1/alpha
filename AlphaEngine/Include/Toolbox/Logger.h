@@ -50,7 +50,7 @@ namespace alpha
                     break;
             }
 
-            m_outStream << msg << std::endl;;
+            m_outStream << msg << std::endl;
 
             m_writeMutex.unlock();
         }

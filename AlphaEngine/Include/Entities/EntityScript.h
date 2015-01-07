@@ -1,5 +1,5 @@
-#ifndef ASSET_H
-#define ASSET_H
+#ifndef ENTITY_SCRIPT_H
+#define ENTITY_SCRIPT_H
 
 /**
 Copyright 2014 Jason R. Wendlandt
@@ -17,24 +17,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <sys/stat.h>
-#include <string>
+#include "Scripting/LuaScript.h"
 
 namespace alpha
 {
-    class Asset
+    class EntityScript : public LuaScript
     {
     public:
-        Asset(const char * path, struct stat fileStats);
-        virtual ~Asset();
+        explicit EntityScript(std::shared_ptr<Asset> asset);
+        virtual ~EntityScript();
 
-        char * GetData();
-
-    private:
-        const char * m_pPath;
-        struct stat m_fileStats;
-        char *m_pBuffer;
+        void LoadEntityData();
     };
 }
 
-#endif // ASSET_H
+#endif // ENTITY_SCRIPT_H

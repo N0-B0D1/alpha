@@ -18,15 +18,29 @@ limitations under the License.
 #include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
+#include "Entities/EntityScript.h"
 #include "Assets/AssetSystem.h"
 
 namespace alpha
 {
     EntityFactory::EntityFactory() { }
 
-    std::shared_ptr<Entity> EntityFactory::CreateEntity(std::shared_ptr<Asset> /*asset*/)
+    std::shared_ptr<Entity> EntityFactory::CreateEntity(std::shared_ptr<Asset> asset)
     {
-        return std::make_shared<Entity>(m_lastEntityId++);
+        auto entity = std::make_shared<Entity>(m_lastEntityId++);
+        auto script = new EntityScript(asset);
+
+        // get components data
+        //auto components = script->getComponents();
+
+        // make each component, and add it to the entity
+
+        // dispose of the script
+        // XXX we probably want to hold onto it for a limited amout of time
+        // for reuse, the general case is probably not to make one single entity.
+        delete script;
+
+        return entity;
     }
 
     EntityComponent * EntityFactory::Create(unsigned long componentId)

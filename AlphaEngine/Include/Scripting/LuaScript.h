@@ -1,5 +1,5 @@
-#ifndef ASSET_H
-#define ASSET_H
+#ifndef LUA_SCRIPT_H
+#define LUA_SCRIPT_H
 
 /**
 Copyright 2014 Jason R. Wendlandt
@@ -17,24 +17,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <sys/stat.h>
-#include <string>
+#include <vector>
+
+struct lua_State;
 
 namespace alpha
 {
-    class Asset
+    class Asset;
+
+    class LuaScript
     {
     public:
-        Asset(const char * path, struct stat fileStats);
-        virtual ~Asset();
+        explicit LuaScript();
+        virtual ~LuaScript();
 
-        char * GetData();
+        void Add(std::shared_ptr<Asset> asset);
+
+        void Load();
+        void Run();
 
     private:
-        const char * m_pPath;
-        struct stat m_fileStats;
-        char *m_pBuffer;
+        lua_State *m_pLuaState;
+        std::shared_ptr<Asset> m_pScriptAsset;
+
+        std::vector<std::shared_ptr<Asset> > m_scriptAssets;
     };
 }
 
-#endif // ASSET_H
+#endif // LUA_SCRIPT_H

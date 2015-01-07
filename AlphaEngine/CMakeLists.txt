@@ -50,6 +50,7 @@ include_alpha_source("Graphics")
 include_alpha_source("Assets")
 include_alpha_source("Events")
 include_alpha_source("Entities")
+include_alpha_source("Scripting")
 
 
 # make engine project
@@ -57,7 +58,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR})
 
 #include 3rdParty dependencies
-include_directories(${CMAKE_SOURCE_DIR}/3rdParty/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/lua/src)
 
 add_library(AlphaEngine ${HEADER_FILES} ${SOURCE_FILES})
 

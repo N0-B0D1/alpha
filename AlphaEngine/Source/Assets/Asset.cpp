@@ -18,10 +18,63 @@ limitations under the License.
 
 namespace alpha
 {
-    Asset::Asset(std::string name, struct stat fileStats)
-        : m_name(name)
+    Asset::Asset(const char * path, struct stat fileStats)
+        : m_pPath(path)
         , m_fileStats(fileStats)
         , m_pBuffer(nullptr)
     { }
     Asset::~Asset() { }
+
+    char * Asset::GetData()
+    {
+        if (!m_pBuffer)
+        {
+            /*
+            long fsize = 0;
+            size_t file_size = 0;
+
+            // open the file
+            FILE *file_pointer;
+            //file_pointer = fopen(file_path.c_str(), "r");
+
+            if (!fopen_s(&file_pointer, file_path.c_str(), "rb"))
+            {
+                // get the file size
+                fseek(file_pointer, 0, SEEK_END);
+                fsize = ftell(file_pointer);
+                rewind(file_pointer);
+
+                // allocate memory for the file in the given buffer
+                *buffer = (char *)malloc(sizeof(char) * fsize);
+                if (*buffer == NULL) assert(false && "Out of memory, unable to read asset file.");
+
+                // copy file contents to buffer
+                file_size = fread(*buffer, 1, fsize, file_pointer);
+                if (file_size != static_cast<size_t>(fsize)) assert(false && "An error occured while reading the asset file contents.");
+
+                // close the file
+                fclose(file_pointer);
+            }
+
+            return file_size;
+            */
+
+            FILE *fp;
+
+            if (!fopen_s(&fp, m_pPath, "rb"))
+            {
+                size_t result;
+
+                m_pBuffer = (char *)malloc((sizeof(char) * m_fileStats.st_size) + 1);
+                memset(m_pBuffer, 0, (sizeof(char) * m_fileStats.st_size) + 1);
+
+                if (m_pBuffer != nullptr)
+                {
+                    result = fread(m_pBuffer, 1, m_fileStats.st_size, fp);
+                }
+                fclose(fp);
+            }
+        }
+        return m_pBuffer;
+    }
 }

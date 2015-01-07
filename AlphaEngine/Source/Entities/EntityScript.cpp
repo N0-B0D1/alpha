@@ -1,6 +1,3 @@
-#ifndef ASSET_H
-#define ASSET_H
-
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -17,24 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <sys/stat.h>
-#include <string>
+#include <memory>
+
+#include "Scripting/LuaScript.h"
+#include "Entities/EntityScript.h"
 
 namespace alpha
 {
-    class Asset
+    EntityScript::EntityScript(std::shared_ptr<Asset> asset)
     {
-    public:
-        Asset(const char * path, struct stat fileStats);
-        virtual ~Asset();
+        this->Add(asset);
+        this->Load();
+        this->Run();
+    }
+    EntityScript::~EntityScript() { }
 
-        char * GetData();
-
-    private:
-        const char * m_pPath;
-        struct stat m_fileStats;
-        char *m_pBuffer;
-    };
+    void EntityScript::LoadEntityData()
+    {
+        // load component data
+    }
 }
-
-#endif // ASSET_H
