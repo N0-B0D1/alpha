@@ -21,7 +21,9 @@ limitations under the License.
 
 #include "Logic/LogicSystem.h"
 
-class alpha::AssetSystem;
+namespace alpha {
+    class AssetSystem;
+}
 
 class GameLogic : public alpha::LogicSystem
 {
