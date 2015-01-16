@@ -36,6 +36,9 @@ namespace alpha
         void Load();
         void Run();
 
+    protected:
+        void LoadTable(const char * name);
+
     private:
         lua_State *m_pLuaState;
         std::shared_ptr<Asset> m_pScriptAsset;

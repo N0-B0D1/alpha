@@ -26,8 +26,6 @@ namespace alpha
     public:
         explicit EntityScript(std::shared_ptr<Asset> asset);
         virtual ~EntityScript();
-
-        void LoadEntityData();
     };
 }
 

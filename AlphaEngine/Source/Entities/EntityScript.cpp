@@ -28,9 +28,4 @@ namespace alpha
         this->Run();
     }
     EntityScript::~EntityScript() { }
-
-    void EntityScript::LoadEntityData()
-    {
-        // load component data
-    }
 }

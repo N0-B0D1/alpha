@@ -28,17 +28,20 @@ namespace alpha
     std::shared_ptr<Entity> EntityFactory::CreateEntity(std::shared_ptr<Asset> asset)
     {
         auto entity = std::make_shared<Entity>(m_lastEntityId++);
-        auto script = new EntityScript(asset);
+        auto script = std::make_shared<EntityScript>(asset);
 
-        // get components data
-        //auto components = script->getComponents();
+        // attach script to the entity.
+
+        // store script in the factory so it can be reused.
 
         // make each component, and add it to the entity
+        // for component in registered component list.
+        //   get data for component from entity script.
+        //   make the component if data exists for it.
 
         // dispose of the script
         // XXX we probably want to hold onto it for a limited amout of time
         // for reuse, the general case is probably not to make one single entity.
-        delete script;
 
         return entity;
     }

@@ -68,4 +68,17 @@ namespace alpha
             lua_pop(m_pLuaState, 1);
         }
     }
+
+    /**
+     * Loads a global variable into the lua state, and tests to see if it is a valid table
+     */
+    void LuaScript::LoadTable(const char * name)
+    {
+        lua_getglobal(m_pLuaState, name);
+        if (!lua_istable(m_pLuaState, -1))
+        {
+            LOG_WARN("LUA global is not a valid table.");
+        }
+        
+    }
 }
