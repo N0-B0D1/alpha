@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <cstring>
 #include "Assets/Asset.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -27,6 +29,7 @@ namespace alpha
 
     char * Asset::GetData()
     {
+        LOG("getting asset data");
         if (!m_pBuffer)
         {
             /*
@@ -61,16 +64,25 @@ namespace alpha
 
             FILE *fp;
 
-            if (!fopen_s(&fp, m_pPath, "rb"))
+            //if (!fopen_s(&fp, m_pPath, "rb"))
+            LOG("opening file:");
+            LOG(m_pPath);
+            fp = fopen(m_pPath, "rb");
+            if (!fp)
             {
-                size_t result;
+                LOG("File opened successfully");
 
-                m_pBuffer = (char *)malloc((sizeof(char) * m_fileStats.st_size) + 1);
-                memset(m_pBuffer, 0, (sizeof(char) * m_fileStats.st_size) + 1);
+                //size_t result;
+                size_t bufSize = (sizeof(char) * m_fileStats.st_size) + 1;
+                m_pBuffer = new char[m_fileStats.st_size + 1];
+                memset(m_pBuffer, 0, bufSize);
+                //memset(m_pBuffer, 0, sizeof(*m_pBuffer));
 
                 if (m_pBuffer != nullptr)
                 {
-                    result = fread(m_pBuffer, 1, m_fileStats.st_size, fp);
+                    //result = fread(m_pBuffer, 1, m_fileStats.st_size, fp);
+                    //fread(m_pBuffer, 1, m_fileStats.st_size, fp);
+                    fread(m_pBuffer, 1, bufSize, fp);
                 }
                 fclose(fp);
             }

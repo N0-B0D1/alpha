@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <memory>
+#include <string.h>
 
 extern "C" {
 #include <lua.h>

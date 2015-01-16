@@ -19,7 +19,10 @@ limitations under the License.
 
 #include <windows.h>
 
-char * OSGetBaseDirectory();
-char * OSJoinPath(const char * left, const char * right);
+namespace alpha 
+{
+    char * OSGetBaseDirectory();
+    char * OSJoinPath(const char * left, const char * right);
+}
 
 #endif // FILE_SYSTEM_H

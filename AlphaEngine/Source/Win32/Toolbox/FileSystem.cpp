@@ -16,38 +16,41 @@ limitations under the License.
 
 #include "Toolbox/FileSystem.h"
 
-char * OSGetBaseDirectory()
+namespace alpha 
 {
-    char * dir = (char *)malloc(sizeof(char) * (MAX_PATH + 1));
-    memset(dir, 0, sizeof(dir));
-
-    GetModuleFileName(NULL, dir, MAX_PATH);
-
-    // remove the trailing file name, we only want the directory path
-    for (int i = strlen(dir); i >= 0; --i)
+    char * OSGetBaseDirectory()
     {
-        char c = dir[i];
-        if (c == '\\')
+        char * dir = (char *)malloc(sizeof(char) * (MAX_PATH + 1));
+        memset(dir, 0, sizeof(dir));
+
+        GetModuleFileName(NULL, dir, MAX_PATH);
+
+        // remove the trailing file name, we only want the directory path
+        for (int i = strlen(dir); i >= 0; --i)
         {
-            dir[i] = '\0';
-            break;
+            char c = dir[i];
+            if (c == '\\')
+            {
+                dir[i] = '\0';
+                break;
+            }
         }
+
+        return dir;
     }
 
-    return dir;
-}
+    char * OSJoinPath(const char * left, const char * right)
+    {
+        int leftLen = strlen(left) + 1;
+        int rightLen = strlen(right) + 1;
 
-char * OSJoinPath(const char * left, const char * right)
-{
-    int leftLen = strlen(left) + 1;
-    int rightLen = strlen(right) + 1;
+        char * path = (char *)malloc(sizeof(char) * (leftLen + rightLen + 2));
+        memset(path, 0, sizeof(path));
 
-    char * path = (char *)malloc(sizeof(char) * (leftLen + rightLen + 2));
-    memset(path, 0, sizeof(path));
+        strcat_s(path, leftLen + rightLen + 2, left);
+        strcat_s(path, leftLen + rightLen + 2, "\\\0");
+        strcat_s(path, leftLen + rightLen + 2, right);
 
-    strcat_s(path, leftLen + rightLen + 2, left);
-    strcat_s(path, leftLen + rightLen + 2, "\\\0");
-    strcat_s(path, leftLen + rightLen + 2, right);
-
-    return path;
+        return path;
+    }
 }
