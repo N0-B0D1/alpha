@@ -24,18 +24,33 @@ endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DALPHA_DEBUG")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+# set compiler specific flags
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(warnings "-Wall -Wextra -Werror")
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-        set(ALPHA_CXX_FLAGS "-g -std=c++0x -lX11 -lGL -lGLU")
+        set(ALPHA_CXX_FLAGS "-g -std=c++11 -lX11 -lGL -lGLU")
     else()
-        set(ALPHA_CXX_FLAGS "-std=c++0x -lX11 -lGL -lGLU")
+        set(ALPHA_CXX_FLAGS "-std=c++11 -lX11 -lGL -lGLU")
     endif()
+
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(warnings "-Wall -Wextra -Werror")
+    FIND_LIBRARY(X11_LIB X11)
+    FIND_LIBRARY(GL_LIB GL)
+    FIND_LIBRARY(GLUT_LIB GLU)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+        set(ALPHA_CXX_FLAGS "-g -std=c++11")
+    else()
+        set(ALPHA_CXX_FLAGS "-std=c++11")
+    endif()
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(warnings "/W4 /WX /EHsc")
     set(ALPHA_CXX_FLAGS "")
+
 endif()
+
+# apply flags to global settings
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${ALPHA_CXX_FLAGS} ${CMAKE_CXX_FLAGS} ${warnings}")
 
@@ -47,7 +62,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 # set install location to relative directory
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/sdk" CACHE PATH "ALPHA install prefix")
 
-set(ALPHA_LIBRARIES AlphaEngine lua)
+#set(ALPHA_LIBRARIES AlphaEngine lua)
+set(ALPHA_LIBRARIES AlphaEngine lua ${X11_LIB} ${GL_LIB} ${GLUT_LIB})
 
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
