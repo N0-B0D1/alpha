@@ -31,13 +31,11 @@ namespace alpha
     {
         if (!m_pBuffer)
         {
-            FILE *fp;
-
             //if (!fopen_s(&fp, m_pPath, "rb"))
             LOG("Loading file into memory: ", m_pPath);
 
-            fp = fopen(m_pPath, "rb");
-            if (!fp)
+            FILE * fp = fopen(m_pPath, "rb");
+            if (fp)
             {
                 LOG("File handler opened, attempting to load.");
                 //size_t result;

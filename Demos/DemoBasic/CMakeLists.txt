@@ -29,9 +29,9 @@ add_executable(
 target_link_libraries(DemoBasic ${ALPHA_LIBRARIES})
 
 # Windows link and project settings for Visual Studio
-if (WIN32)
-    target_link_libraries(DemoBasic d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib)
-endif (WIN32)
+#if (WIN32)
+#    target_link_libraries(DemoBasic d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib)
+#endif (WIN32)
 if (MSVC)
     set(CMAKE_CREATE_WIN32_EXE "/SUBSYSTEM:WINDOWS /ENTRY:\"mainCRTStartup\"")
 endif (MSVC)
@@ -40,5 +40,10 @@ endif (MSVC)
 install(TARGETS DemoBasic DESTINATION bin)
 
 # make content files available for debugging
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Content/Entities/test.lua)
+if (MSVC)
+	# XXX need to do this for other build targets as well
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
+else ()
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Content/Entities/test.lua)
+endif (MSVC)
 

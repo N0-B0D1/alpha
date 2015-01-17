@@ -38,6 +38,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     FIND_LIBRARY(X11_LIB X11)
     FIND_LIBRARY(GL_LIB GL)
     FIND_LIBRARY(GLUT_LIB GLU)
+	set(PLATFORM_LIBS ${X11_LIB} ${GL_LIB} ${GLUT_LIB})
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         set(ALPHA_CXX_FLAGS "-g -std=c++11")
     else()
@@ -45,7 +46,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     endif()
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(warnings "/W4 /WX /EHsc")
+	set(PLATFORM_LIBS d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib)
+	# 4996 - disables warning for unsafe functions such as fopen.
+    set(warnings "/W4 /WX /EHsc /wd4996")
     set(ALPHA_CXX_FLAGS "")
 
 endif()
@@ -63,7 +66,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/sdk" CACHE PATH "ALPHA install prefix")
 
 #set(ALPHA_LIBRARIES AlphaEngine lua)
-set(ALPHA_LIBRARIES AlphaEngine lua ${X11_LIB} ${GL_LIB} ${GLUT_LIB})
+set(ALPHA_LIBRARIES AlphaEngine lua ${PLATFORM_LIBS})
 
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

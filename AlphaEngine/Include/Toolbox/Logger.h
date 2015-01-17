@@ -3,8 +3,12 @@
 
 #include <fstream>
 #include <sstream>
+
 #include <memory>
 #include <mutex>
+
+#include <chrono>
+#include <ctime>
 
 namespace alpha
 {
@@ -12,9 +16,9 @@ namespace alpha
 
     enum Severity
     {
-        DEBUG,
-        WARNING,
-        ERROR,
+        SDEBUG,
+        SWARNING,
+        SERROR,
     };
 
     class Logger
@@ -24,14 +28,10 @@ namespace alpha
             : m_path(path)
             , m_lineNumber(0)
         {
-            //m_outStream.open(path.c_str(), std::ios_base::binary | std::ios_base::out);
             // remove the file if it already exists, so we can start a fresh log
             remove(path.c_str());
         }
-        virtual ~Logger()
-        {
-            //m_outStream.close();
-        }
+        virtual ~Logger() { }
 
         template<Severity severity, typename...Args>
         void print( Args...args )
@@ -41,23 +41,23 @@ namespace alpha
             m_outStream.open(m_path.c_str(), std::ios_base::app | std::ios_base::out);
 
             //if (m_outStream.open)
-            {                
-                m_outStream << this->GetLineNumber();
+            {
+                //m_outStream << this->GetLineNumber();
+                m_outStream << this->GetTimestamp();
 
                 switch (severity)
                 {
-                    case Severity::DEBUG:
+                    case Severity::SDEBUG:
                         m_outStream << "[  DEBUG  ] : ";
                         break;
-                    case Severity::WARNING:
+                    case Severity::SWARNING:
                         m_outStream << "[*WARNING*] : ";
                         break;
-                    case Severity::ERROR:
+                    case Severity::SERROR:
                         m_outStream << "[!!ERROR!!] : ";
                         break;
                 }
 
-                //m_outStream << msg << std::endl;
                 print_impl(args...);
             }
             m_outStream.close();
@@ -68,8 +68,7 @@ namespace alpha
     private:
         void print_impl()
         {
-            //policy->write( get_logline_header() + log_stream.str() );
-            //m_outStream << this.GetLineNumber();
+            // finish with a newline, so it logs cleanly
             m_outStream << std::endl;
         }
          
@@ -87,14 +86,29 @@ namespace alpha
             number.str("");
             number.fill('0');
             number.width(7);
-            number << m_lineNumber++ << " -- ";
+            number << ++m_lineNumber << " -- ";
             
             return number.str();
         }
 
+        std::string GetTimestamp()
+        {
+            auto now = std::chrono::system_clock::now();
+            auto now_time = std::chrono::system_clock::to_time_t(now);
+            //return std::ctime(&now_time);
+
+            struct tm * timeinfo;
+            timeinfo = std::localtime(&now_time);
+
+            char buf[10];
+            std::strftime(buf, 10, "%H:%M:%S", timeinfo);
+
+            return std::string(buf);
+        }
+
         const std::string m_path;
 
-        unsigned m_lineNumber;
+        unsigned int m_lineNumber;
         std::mutex m_writeMutex;
         
         std::ofstream m_outStream;
@@ -102,10 +116,9 @@ namespace alpha
 
     static Logger s_logger("alpha.log");
 
-    #define LOG s_logger.print<Severity::DEBUG>
-    #define LOG_ERR s_logger.print<Severity::ERROR>
-    #define LOG_WARN s_logger.print<Severity::WARNING>
-
+    #define LOG s_logger.print<Severity::SDEBUG>
+    #define LOG_ERR s_logger.print<Severity::SERROR>
+    #define LOG_WARN s_logger.print<Severity::SWARNING>
 
 #else
 

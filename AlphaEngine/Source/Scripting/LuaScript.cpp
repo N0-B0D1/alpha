@@ -54,7 +54,7 @@ namespace alpha
         {
             auto data = script->GetData();
             if (data)
-                {
+            {
                 //std::vector<unsigned char> data = script->GetData();
                 //std::vector<unsigned char> buffer = data.get();
                 //char * buffer = reinterpret_cast<char *>(&data[0]);
