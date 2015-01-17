@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <sys/stat.h>
 #include <string>
+#include <vector>
 
 namespace alpha
 {
@@ -28,12 +29,13 @@ namespace alpha
         Asset(const char * path, struct stat fileStats);
         virtual ~Asset();
 
-        char * GetData();
+        std::vector<unsigned char> GetData();
 
     private:
         const char * m_pPath;
         struct stat m_fileStats;
-        char *m_pBuffer;
+        //char *m_pBuffer;
+        std::vector<unsigned char> m_data;
     };
 }
 

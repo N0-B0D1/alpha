@@ -42,7 +42,6 @@ namespace alpha
 
             //if (m_outStream.open)
             {
-                //m_outStream << this->GetLineNumber();
                 m_outStream << this->GetTimestamp();
 
                 switch (severity)
@@ -79,23 +78,10 @@ namespace alpha
             print_impl(rest...);    
         }
 
-        std::string GetLineNumber()
-        {
-            std::stringstream number;
-
-            number.str("");
-            number.fill('0');
-            number.width(7);
-            number << ++m_lineNumber << " -- ";
-            
-            return number.str();
-        }
-
         std::string GetTimestamp()
         {
             auto now = std::chrono::system_clock::now();
             auto now_time = std::chrono::system_clock::to_time_t(now);
-            //return std::ctime(&now_time);
 
             struct tm * timeinfo;
             timeinfo = std::localtime(&now_time);

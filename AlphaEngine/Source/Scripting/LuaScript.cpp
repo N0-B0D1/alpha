@@ -52,14 +52,14 @@ namespace alpha
         // load each script into the lua state
         for (auto script : m_scriptAssets)
         {
-            auto data = script->GetData();
-            if (data)
+            std::vector<unsigned char> data = script->GetData();
+            //if (data)
+            if (data.size() > 0)
             {
-                //std::vector<unsigned char> data = script->GetData();
-                //std::vector<unsigned char> buffer = data.get();
-                //char * buffer = reinterpret_cast<char *>(&data[0]);
+                char * buffer = reinterpret_cast<char *>(&data[0]);
                 LOG("Attempting to load buffer data into LUA environment");
-                int error = luaL_loadbuffer(m_pLuaState, data, strlen(data), "line");
+                //int error = luaL_loadbuffer(m_pLuaState, data, strlen(data), "line");
+                int error = luaL_loadbuffer(m_pLuaState, buffer, strlen(buffer), "line");
                 if (error)
                 {
                     LOG_ERR("LUA: ", lua_tostring(m_pLuaState, -1));
