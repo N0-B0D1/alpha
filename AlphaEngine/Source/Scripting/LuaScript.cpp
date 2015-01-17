@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <memory>
 #include <string.h>
+#include <vector>
 
 extern "C" {
 #include <lua.h>
@@ -51,12 +52,23 @@ namespace alpha
         // load each script into the lua state
         for (auto script : m_scriptAssets)
         {
-            char *buffer = script->GetData();
-            int error = luaL_loadbuffer(m_pLuaState, buffer, strlen(buffer), "line");
-            if (error)
+            auto data = script->GetData();
+            if (data)
+                {
+                //std::vector<unsigned char> data = script->GetData();
+                //std::vector<unsigned char> buffer = data.get();
+                //char * buffer = reinterpret_cast<char *>(&data[0]);
+                LOG("Attempting to load buffer data into LUA environment");
+                int error = luaL_loadbuffer(m_pLuaState, data, strlen(data), "line");
+                if (error)
+                {
+                    LOG_ERR("LUA: ", lua_tostring(m_pLuaState, -1));
+                    lua_pop(m_pLuaState, 1);
+                }
+            }
+            else
             {
-                LOG_ERR(lua_tostring(m_pLuaState, -1));
-                lua_pop(m_pLuaState, 1);
+                LOG_ERR("Failed to retrieve data for LUA script.");
             }
         }
     }
@@ -65,7 +77,7 @@ namespace alpha
     {
         if (lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0))
         {
-            LOG_ERR(lua_tostring(m_pLuaState, -1));
+            LOG_ERR("LUA: ", lua_tostring(m_pLuaState, -1));
             lua_pop(m_pLuaState, 1);
         }
     }
@@ -78,7 +90,7 @@ namespace alpha
         lua_getglobal(m_pLuaState, name);
         if (!lua_istable(m_pLuaState, -1))
         {
-            LOG_WARN("LUA global is not a valid table.");
+            LOG_WARN("LUA: global is not a valid table.");
         }
         
     }

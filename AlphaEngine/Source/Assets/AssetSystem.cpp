@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "Assets/AssetSystem.h"
 #include "Toolbox/FileSystem.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -28,6 +29,8 @@ namespace alpha
     {
         char * base = OSGetBaseDirectory();
         m_contentPath = OSJoinPath(base, "Content");
+
+        LOG("Opened AssetSystem for directory: ", m_contentPath);
         free(base);
         return true;
     }
@@ -51,6 +54,7 @@ namespace alpha
         auto it = m_assets.find(name);
         if (it == m_assets.end())
         {
+            LOG("Asset not found in memory '", name, "', creating new asset.");
             return this->LoadAsset(name); // std::shared_ptr<Asset>();
         }
         return it->second;
@@ -68,11 +72,13 @@ namespace alpha
         struct stat fileStats;
         if (stat(path, &fileStats) >= 0)
         {
+            LOG("File found, creating asset.");
             auto asset = std::make_shared<Asset>(path, fileStats);
             m_assets[name] = asset;
             return asset;
         }
 
+        LOG_WARN("File not found in content directory.");
         return std::shared_ptr<Asset>();
     }
 }

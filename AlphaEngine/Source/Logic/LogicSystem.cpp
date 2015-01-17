@@ -28,10 +28,8 @@ namespace alpha
     { }
     LogicSystem::~LogicSystem() { }
 
-    bool LogicSystem::VInitialize(std::shared_ptr<AssetSystem> pAssets)
+    bool LogicSystem::VInitialize()
     {
-        m_pAssets = pAssets;
-
         m_pEntityFactory = new EntityFactory();
         if (!m_pEntityFactory)
         {
@@ -57,6 +55,11 @@ namespace alpha
         return true;
     }
 
+    void LogicSystem::SetAssetSystem(std::shared_ptr<AssetSystem> pAssets)
+    {
+        m_pAssets = pAssets;
+    }
+
     std::shared_ptr<Entity> LogicSystem::GetEntity(const unsigned long entityId)
     {
         auto it = m_entities.find(entityId);
@@ -70,9 +73,14 @@ namespace alpha
     std::shared_ptr<Entity> LogicSystem::CreateEntity(const char * resource)
     {
         auto asset = m_pAssets->GetAsset(resource);
-        auto entity = m_pEntityFactory->CreateEntity(asset);
-        m_entities[entity->GetId()] = entity;
-        return entity;
+        if (asset != nullptr)
+        {
+            auto entity = m_pEntityFactory->CreateEntity(asset);
+            m_entities[entity->GetId()] = entity;
+            return entity;
+        }
+
+        return std::shared_ptr<Entity>();
     }
 
     void LogicSystem::DestroyEntity(const unsigned long entityId)

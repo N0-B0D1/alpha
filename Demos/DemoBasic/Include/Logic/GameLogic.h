@@ -31,7 +31,7 @@ public:
     GameLogic();
     virtual ~GameLogic();
 
-    virtual bool VInitialize(std::shared_ptr<alpha::AssetSystem> pAssets);
+    virtual bool VInitialize();
 
 private:
     std::shared_ptr<alpha::Entity> m_test;

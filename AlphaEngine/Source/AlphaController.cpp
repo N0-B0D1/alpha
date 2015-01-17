@@ -34,6 +34,7 @@ namespace alpha
 
     void AlphaController::SetLogic(LogicSystem *pLogic)
     {
+        LOG("AlphaController created.");
         m_pLogic = pLogic;
     }
 
@@ -63,7 +64,7 @@ namespace alpha
 
     bool AlphaController::Initialize()
     {
-        // Event management system is allways first
+        // Event management system is always first
         m_pEvents = new EventManager;
         if (!m_pEvents->Initialize())
         {
@@ -90,9 +91,8 @@ namespace alpha
         // create input device manager
 
         // create game logic
-        //m_pLogic = new LogicSystem();
-        //m_pLogic = this->CreateGameLogic();
-        if (!m_pLogic->VInitialize(m_pAssets))
+        m_pLogic->SetAssetSystem(m_pAssets);
+        if (!m_pLogic->VInitialize())
         {
             LOG_ERR("Logic System initialization failed");
             return false;
@@ -160,20 +160,24 @@ namespace alpha
         {
             m_pLogic->VShutdown();
             delete m_pLogic;
+            LOG("Logic disposed successfully.");
         }
         if (m_pGraphics)
         {
             m_pGraphics->VShutdown();
             delete m_pGraphics;
+            LOG("Graphics disposed successfully.");
         }
         if (m_pAssets)
         {
             m_pAssets->VShutdown();
+            LOG("Asset system disposed successfully.");
         }
         if (m_pEvents)
         {
             m_pEvents->Shutdown();
             delete m_pEvents;
+            LOG("Event manager disposed successfully.");
         }
 
         LOG("Alpha Controller shutdown complete");

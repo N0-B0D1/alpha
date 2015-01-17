@@ -34,8 +34,13 @@ namespace alpha
         LogicSystem();
         virtual ~LogicSystem();
 
-        virtual bool VInitialize(std::shared_ptr<AssetSystem> pAssets);
+        virtual bool VInitialize();
         virtual bool VShutdown();
+
+        /** Set AssetSystem
+         * This must be set before any entities can be created.
+         */
+        void SetAssetSystem(std::shared_ptr<AssetSystem> pAssets);
 
         /** Entity life-cycle methods */
         std::shared_ptr<Entity> GetEntity(const unsigned long entityId);

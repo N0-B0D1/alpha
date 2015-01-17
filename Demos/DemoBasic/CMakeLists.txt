@@ -40,5 +40,5 @@ endif (MSVC)
 install(TARGETS DemoBasic DESTINATION bin)
 
 # make content files available for debugging
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Content/Entities/test.lua)
 
