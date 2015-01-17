@@ -30,7 +30,11 @@ namespace alpha
         char *dir = new char[MAX_PATH + 1];
         memset(dir, 0, sizeof(*dir));
 
-        readlink("/proc/self/exe", dir, MAX_PATH);
+        int len = readlink("/proc/self/exe", dir, MAX_PATH);
+        if (len != -1)
+        {
+            dir[len] = '\0';
+        }
 
         // remove the trailing file name, we only want the directory path
         for (int i = strlen(dir); i >= 0; --i)
