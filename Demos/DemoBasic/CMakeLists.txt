@@ -29,9 +29,6 @@ add_executable(
 target_link_libraries(DemoBasic ${ALPHA_LIBRARIES})
 
 # Windows link and project settings for Visual Studio
-#if (WIN32)
-#    target_link_libraries(DemoBasic d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib)
-#endif (WIN32)
 if (MSVC)
     set(CMAKE_CREATE_WIN32_EXE "/SUBSYSTEM:WINDOWS /ENTRY:\"mainCRTStartup\"")
 endif (MSVC)

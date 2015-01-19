@@ -58,7 +58,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR})
 
 #include 3rdParty dependencies
-include_directories(${CMAKE_SOURCE_DIR}/3rdParty/lua/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/Lua/src)
 
 add_library(AlphaEngine ${HEADER_FILES} ${SOURCE_FILES})
 

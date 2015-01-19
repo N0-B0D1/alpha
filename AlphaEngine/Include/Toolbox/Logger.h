@@ -26,7 +26,6 @@ namespace alpha
     public:
         explicit Logger(const std::string & path)
             : m_path(path)
-            , m_lineNumber(0)
         {
             // remove the file if it already exists, so we can start a fresh log
             remove(path.c_str());
@@ -93,10 +92,7 @@ namespace alpha
         }
 
         const std::string m_path;
-
-        unsigned int m_lineNumber;
-        std::mutex m_writeMutex;
-        
+        std::mutex m_writeMutex;        
         std::ofstream m_outStream;
     };
 

@@ -8,11 +8,8 @@ if(WIN32)
   set(CMAKE_SUPPRESS_REGENERATION true)
 endif()
 
-
 project(ALPHA)
 
-# build 3rdParty dependencies
-add_subdirectory(3rdParty)
 
 # set build target variables
 if (WIN32)
@@ -66,9 +63,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/sdk" CACHE PATH "ALPHA install prefix")
 
 #set(ALPHA_LIBRARIES AlphaEngine lua)
-set(ALPHA_LIBRARIES AlphaEngine lua ${PLATFORM_LIBS})
+set(ALPHA_LIBRARIES AlphaEngine Lua ${PLATFORM_LIBS})
 
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# build 3rdParty libraries
+add_subdirectory(3rdParty)
 
 # build Engine
 add_subdirectory(AlphaEngine)
