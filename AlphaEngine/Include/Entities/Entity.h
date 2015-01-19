@@ -21,18 +21,22 @@ limitations under the License.
 
 namespace alpha
 {
+    class EntityScript;
+
     class Entity
     {
     public:
-        explicit Entity(unsigned long entityId);
+        explicit Entity(unsigned long entityId, std::shared_ptr<EntityScript> script);
         virtual ~Entity();
 
         bool VUpdate(float fCurrentTime, float fElapsedTime);
 
-        unsigned long GetId() const { return m_entityId; }
+        unsigned long GetId() const;
+        std::shared_ptr<EntityScript> GetScript() const;
 
     private:
         unsigned long m_entityId;
+        std::shared_ptr<EntityScript> m_script;
     };
 }
 

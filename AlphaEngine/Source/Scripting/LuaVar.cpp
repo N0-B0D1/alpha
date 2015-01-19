@@ -14,28 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Entities/Entity.h"
+#include "Scripting/LuaVar.h"
 
 namespace alpha
 {
-    Entity::Entity(unsigned long entityId, std::shared_ptr<EntityScript> script)
-        : m_entityId(entityId)
-        , m_script(script)
+    LuaTable::LuaTable(const std::string & name)
+        : LuaVar(name)
     { }
-    Entity::~Entity() { }
+    LuaTable::~LuaTable() { }
 
-    bool Entity::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
+    LUA_VARTYPE LuaTable::GetVarType() const { return VT_TABLE; }
+
+    void LuaTable::Push(std::string key, std::shared_ptr<LuaVar> value)
     {
-        return true;
+        m_vars[key] = value;
     }
 
-    unsigned long Entity::GetId() const
+    /**
+     * Find the LuaVar with the given key, if it exists (shallow search)
+     */
+    std::shared_ptr<LuaVar> LuaTable::Get(const std::string & key)
     {
-        return m_entityId;
-    }
-
-    std::shared_ptr<EntityScript> Entity::GetScript() const
-    {
-        return m_script;
+        auto search = m_vars.find(key);
+        if (search != m_vars.end())
+        {
+            return search->second;
+        }
+        return nullptr;
     }
 }

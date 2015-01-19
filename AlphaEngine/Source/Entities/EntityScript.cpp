@@ -15,8 +15,10 @@ limitations under the License.
 */
 
 #include <memory>
+#include <map>
 
 #include "Scripting/LuaScript.h"
+#include "Scripting/LuaVar.h"
 #include "Entities/EntityScript.h"
 
 namespace alpha
@@ -26,6 +28,22 @@ namespace alpha
         this->Add(asset);
         this->Load();
         this->Run();
+
+        // once the script environment is prepared, load and store the components table.
+        m_components = this->GetGlobalTable("components");
     }
     EntityScript::~EntityScript() { }
+
+    /**
+     * Checks to see if the given component name is present in the components LuaTable loaded from the entity script.
+     */
+    bool EntityScript::HasComponent(const std::string & name)
+    {
+        auto search = m_components->Get(name);
+        if (search != nullptr)
+        {
+            return true;
+        }
+        return false;
+    }
 }

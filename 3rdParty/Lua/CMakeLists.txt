@@ -1,5 +1,5 @@
 
-project(lua)
+project(lua CXX)
 
 # define header files for the library
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")

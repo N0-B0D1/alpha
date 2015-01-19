@@ -21,11 +21,19 @@ limitations under the License.
 
 namespace alpha
 {
+    class EntityComponent;
+    class LuaTable;
+
     class EntityScript : public LuaScript
     {
     public:
         explicit EntityScript(std::shared_ptr<Asset> asset);
         virtual ~EntityScript();
+
+        bool HasComponent(const std::string & name);
+
+    private:
+        std::shared_ptr<LuaTable> m_components;
     };
 }
 

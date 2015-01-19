@@ -24,6 +24,8 @@ struct lua_State;
 namespace alpha
 {
     class Asset;
+    class LuaTable;
+    class LuaVar;
 
     class LuaScript
     {
@@ -37,12 +39,15 @@ namespace alpha
         void Run();
 
     protected:
-        void LoadTable(const char * name);
+        std::shared_ptr<LuaTable> GetGlobalTable(const std::string & key);
 
     private:
-        lua_State *m_pLuaState;
-        std::shared_ptr<Asset> m_pScriptAsset;
+        std::shared_ptr<LuaVar> BuildTable(std::string table_name, int index);
+        std::shared_ptr<LuaVar> BuildString(std::string name, std::string value);
+        std::shared_ptr<LuaVar> BuildNumber(std::string name, double value);
+        std::shared_ptr<LuaVar> BuildBoolean(std::string name, bool value);
 
+        lua_State *m_pLuaState;
         std::vector<std::shared_ptr<Asset> > m_scriptAssets;
     };
 }

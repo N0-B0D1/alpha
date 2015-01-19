@@ -25,6 +25,7 @@ extern "C" {
 }
 
 #include "Scripting/LuaScript.h"
+#include "Scripting/LuaVar.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
 
@@ -53,12 +54,10 @@ namespace alpha
         for (auto script : m_scriptAssets)
         {
             std::vector<unsigned char> data = script->GetData();
-            //if (data)
             if (data.size() > 0)
             {
                 char * buffer = reinterpret_cast<char *>(&data[0]);
                 LOG("Attempting to load buffer data into LUA environment");
-                //int error = luaL_loadbuffer(m_pLuaState, data, strlen(data), "line");
                 int error = luaL_loadbuffer(m_pLuaState, buffer, strlen(buffer), "line");
                 if (error)
                 {
@@ -83,15 +82,101 @@ namespace alpha
     }
 
     /**
-     * Loads a global variable into the lua state, and tests to see if it is a valid table
+     * Recursively traverses a global table and creates LuaVar representations for each key/value pair.
      */
-    void LuaScript::LoadTable(const char * name)
+    std::shared_ptr<LuaTable> LuaScript::GetGlobalTable(const std::string & key)
     {
-        lua_getglobal(m_pLuaState, name);
-        if (!lua_istable(m_pLuaState, -1))
+        int stack_top = lua_gettop(m_pLuaState);
+
+        // load the global variable onto the stack
+        // and verify it is actually a table.
+        int type = lua_getglobal(m_pLuaState, key.c_str());
+        if (type != LUA_TTABLE)
         {
-            LOG_WARN("LUA: global is not a valid table.");
+            LOG_WARN("Attempt to access global variable [", key, "] as table failed, it is not a table, <", lua_typename(m_pLuaState, lua_type(m_pLuaState, -1)), "> detected.");
+            lua_pop(m_pLuaState, 1);
+            return nullptr;
         }
-        
+
+        // Recurse the table key/values and build a table class
+        auto table = this->BuildTable(key, lua_gettop(m_pLuaState));
+
+        // pop the global table from the stack
+        // so that we dont leave anything lingering...
+        lua_pop(m_pLuaState, 1);
+
+#if ALPHA_DEBUG
+        if (stack_top != lua_gettop(m_pLuaState))
+        {
+            LOG_ERR("Stack top should be ", stack_top, ", actual value is: ", lua_gettop(m_pLuaState));
+        }
+#endif
+
+        // cast and return the LuaTable
+        return std::dynamic_pointer_cast<LuaTable>(table);
+    }
+
+    std::shared_ptr<LuaVar> LuaScript::BuildTable(std::string table_name, int index)
+    {
+        std::shared_ptr<LuaTable> table = std::make_shared<LuaTable>(table_name);
+
+        lua_pushnil(m_pLuaState);
+        while (lua_next(m_pLuaState, index) != 0)
+        {
+            /* now 'key' at index -2, 'value' at index -1 */
+            std::string key = lua_tostring(m_pLuaState, -2);
+
+            // switch on the value type, and create LuaVar's depending on the type
+            // for now we only support basic types, and sub tables.  This could be
+            // expanded to support other values such as nil, or even functions.
+            switch (lua_type(m_pLuaState, -1))
+            {
+            case LUA_TSTRING:
+                table->Push(key, this->BuildString(key, lua_tostring(m_pLuaState, -1)));
+                break;
+            case LUA_TNUMBER:
+                table->Push(key, this->BuildNumber(key, lua_tonumber(m_pLuaState, -1)));
+                break;
+            case LUA_TBOOLEAN:
+                switch (lua_toboolean(m_pLuaState, -1))
+                {
+                case 0:
+                    table->Push(key, this->BuildBoolean(key, false));
+                    break;
+                case 1:
+                    table->Push(key, this->BuildBoolean(key, true));
+                    break;
+                default:
+                    LOG_WARN("Invalid boolean value, could not push to LuaTable");
+                }
+                break;
+            case LUA_TTABLE:
+                // recurse to make a new table
+                table->Push(key, this->BuildTable(lua_tostring(m_pLuaState, -2), lua_gettop(m_pLuaState)));
+                break;
+            default:
+                LOG_WARN("Unsupported type in table: ", lua_typename(m_pLuaState, lua_type(m_pLuaState, -1)));
+            }
+
+            /* pop value, not the key */
+            lua_pop(m_pLuaState, 1);
+        }
+
+        return table;
+    }
+
+    std::shared_ptr<LuaVar> LuaScript::BuildString(std::string name, std::string value)
+    {
+        return std::shared_ptr<LuaVar>(new LuaStatic<std::string>(name, value));
+    }
+
+    std::shared_ptr<LuaVar> LuaScript::BuildNumber(std::string name, double value)
+    {
+        return std::shared_ptr<LuaVar>(new LuaStatic<double>(name, value));
+    }
+
+    std::shared_ptr<LuaVar> LuaScript::BuildBoolean(std::string name, bool value)
+    {
+        return std::shared_ptr<LuaVar>(new LuaStatic<bool>(name, value));
     }
 }
