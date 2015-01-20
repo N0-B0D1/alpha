@@ -18,6 +18,18 @@ elseif (UNIX)
     set(ALPHA_BUILD_TARGET_DIR "Unix")
 endif ()
 
+# specify output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+
+# set install location to relative directory
+set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/sdk" CACHE PATH "ALPHA install prefix")
+
+# build 3rdParty libraries
+# do these before we set the compiler flags, so that they build cleanly.
+# LUA for instance, complains about a lot of type conversions.
+add_subdirectory(3rdParty)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DALPHA_DEBUG")
 
@@ -54,21 +66,8 @@ endif()
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${ALPHA_CXX_FLAGS} ${CMAKE_CXX_FLAGS} ${warnings}")
 
-# specify output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
-
-# set install location to relative directory
-set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/sdk" CACHE PATH "ALPHA install prefix")
-
 #set(ALPHA_LIBRARIES AlphaEngine lua)
 set(ALPHA_LIBRARIES AlphaEngine Lua ${PLATFORM_LIBS})
-
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-# build 3rdParty libraries
-add_subdirectory(3rdParty)
 
 # build Engine
 add_subdirectory(AlphaEngine)
