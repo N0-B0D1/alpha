@@ -26,7 +26,6 @@ namespace alpha
 {
     char * OSGetBaseDirectory()
     {
-        //char * dir = (char *)malloc(sizeof(char) * (MAX_PATH + 1));
         char *dir = new char[MAX_PATH + 1];
         memset(dir, 0, sizeof(*dir));
 
@@ -61,8 +60,6 @@ namespace alpha
         strcat(path, left);
         strcat(path, "/\0");
         strcat(path, right);
-
-        LOG(path);
 
         return path;
     }

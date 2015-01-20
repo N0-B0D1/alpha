@@ -46,13 +46,13 @@ namespace alpha
                 switch (severity)
                 {
                     case Severity::SDEBUG:
-                        m_outStream << "[  DEBUG  ] : ";
+                        m_outStream << " [  DEBUG  ] : ";
                         break;
                     case Severity::SWARNING:
-                        m_outStream << "[*WARNING*] : ";
+                        m_outStream << " [*WARNING*] : ";
                         break;
                     case Severity::SERROR:
-                        m_outStream << "[!!ERROR!!] : ";
+                        m_outStream << " [!!ERROR!!] : ";
                         break;
                 }
 

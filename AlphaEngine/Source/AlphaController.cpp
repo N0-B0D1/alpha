@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include "AlphaController.h"
-
 #include "Events/EventManager.h"
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
@@ -29,18 +28,20 @@ namespace alpha
         , m_pLogic(nullptr)
         , m_pGraphics(nullptr)
         , m_pAssets(nullptr)
-    { }
+    {
+        LOG("<AlphaController> Constructed.");
+    }
     AlphaController::~AlphaController() { }
+
 
     void AlphaController::SetLogic(LogicSystem *pLogic)
     {
-        LOG("AlphaController created.");
         m_pLogic = pLogic;
     }
 
     void AlphaController::Execute()
     {
-        LOG("Alpha Controller beginning execution");
+        LOG("<AlphaController> Execution start.");
 
         if (this->Initialize())
         {
@@ -54,12 +55,12 @@ namespace alpha
         }
         else
         {
-            LOG_ERR("Alpha Controller initialization failed");
+            LOG_ERR("<AlphaController> Initialization failed!");
         }
 
         this->Shutdown();
 
-        LOG("Alpha Controller end of execution");
+        LOG("<AlphaController> Execution complete.");
     }
 
     bool AlphaController::Initialize()
@@ -68,7 +69,7 @@ namespace alpha
         m_pEvents = new EventManager;
         if (!m_pEvents->Initialize())
         {
-            LOG_ERR("Event Manager initialization failed");
+            LOG_ERR("<EventManager> Initialization failed!");
             return false;
         }
 
@@ -76,7 +77,7 @@ namespace alpha
         m_pAssets = std::make_shared<AssetSystem>();
         if (!m_pAssets->VInitialize())
         {
-            LOG_ERR("Asset System initialization failed");
+            LOG_ERR("<AssetSystem> Initialization failed!");
             return false;
         }
 
@@ -84,7 +85,7 @@ namespace alpha
         m_pGraphics = new GraphicsSystem();
         if (!m_pGraphics->VInitialize())
         {
-            LOG_ERR("Graphics System initialization failed");
+            LOG_ERR("<GraphicsSystem> Initialization failed!");
             return false;
         }
 
@@ -94,14 +95,14 @@ namespace alpha
         m_pLogic->SetAssetSystem(m_pAssets);
         if (!m_pLogic->VInitialize())
         {
-            LOG_ERR("Logic System initialization failed");
+            LOG_ERR("<LogicSystem> Initialization failed!");
             return false;
         }
 
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();
 
-        LOG("Alpha Controller initialization completed successfully");
+        LOG("<AlphaController> Initialization complete.");
         return true;
     }
 
@@ -160,27 +161,27 @@ namespace alpha
         {
             m_pLogic->VShutdown();
             delete m_pLogic;
-            LOG("Logic disposed successfully.");
+            LOG("<LogicSystem> Disposed.");
         }
         if (m_pGraphics)
         {
             m_pGraphics->VShutdown();
             delete m_pGraphics;
-            LOG("Graphics disposed successfully.");
+            LOG("<GraphicsSystem> Disposed.");
         }
         if (m_pAssets)
         {
             m_pAssets->VShutdown();
-            LOG("Asset system disposed successfully.");
+            LOG("<AssetSystem> Disposed.");
         }
         if (m_pEvents)
         {
             m_pEvents->Shutdown();
             delete m_pEvents;
-            LOG("Event manager disposed successfully.");
+            LOG("<EventManager> Disposed.");
         }
 
-        LOG("Alpha Controller shutdown complete");
+        LOG("<AlphaController> Shutdown complete.");
         return true;
     }
 }
