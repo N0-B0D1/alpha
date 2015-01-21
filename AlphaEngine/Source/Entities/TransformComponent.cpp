@@ -1,6 +1,3 @@
-#ifndef ENTITY_SCRIPT_H
-#define ENTITY_SCRIPT_H
-
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -17,26 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <memory>
-
-#include "Scripting/LuaScript.h"
+#include "Entities/TransformComponent.h"
 
 namespace alpha
 {
-    class EntityComponent;
-    class LuaTable;
+    TransformComponent::TransformComponent() { }
+    TransformComponent::~TransformComponent() { }
 
-    class EntityScript : public LuaScript
+    bool TransformComponent::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
     {
-    public:
-        explicit EntityScript(std::shared_ptr<Asset> asset);
-        virtual ~EntityScript();
+        return true;
+    }
 
-        bool HasComponent(const std::string & name);
-
-    private:
-        std::shared_ptr<LuaTable> m_components;
-    };
+    std::string TransformComponent::VGetName() const
+    {
+        return TransformComponent::sk_name;
+    }
 }
-
-#endif // ENTITY_SCRIPT_H

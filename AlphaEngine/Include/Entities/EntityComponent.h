@@ -17,15 +17,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string>
+
 namespace alpha
 {
     class EntityComponent
     {
     public:
-        EntityComponent();
         virtual ~EntityComponent();
 
-        bool VUpdate(float fCurrentTime, float fElapsedTime);
+        virtual bool VUpdate(float fCurrentTime, float fElapsedTime) = 0;
+
+        unsigned int GetID() const;
+        virtual std::string VGetName() const = 0;
+
+        static unsigned int GetIDFromName(const std::string & name);
     };
 }
 

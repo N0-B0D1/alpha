@@ -35,7 +35,6 @@ namespace alpha
         //   get data for component from entity script.
         //   make the component if data exists for it.
 
-
         return entity;
     }
 

@@ -14,15 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <functional>
+#include <string>
+
 #include "Entities/EntityComponent.h"
 
 namespace alpha
 {
-    EntityComponent::EntityComponent() { }
     EntityComponent::~EntityComponent() { }
 
-    bool EntityComponent::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
+    unsigned int EntityComponent::GetID() const
     {
-        return true;
+        return GetIDFromName(this->VGetName());
+    }
+
+    unsigned int EntityComponent::GetIDFromName(const std::string & name)
+    {
+        static std::hash<std::string> string_hash;
+        return string_hash(name);
     }
 }
