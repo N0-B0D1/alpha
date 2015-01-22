@@ -18,18 +18,25 @@ limitations under the License.
 */
 
 #include "Entities/EntityComponent.h"
+#include "Math/Vector3.h"
 
 namespace alpha
 {
     class TransformComponent : public EntityComponent
     {
+    public:
         static const std::string sk_name;
+
     public:
         TransformComponent();
         virtual ~TransformComponent();
 
+        virtual void VInitialize(std::shared_ptr<LuaVar> var);
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
         virtual std::string VGetName() const;
+
+        //! Transform position
+        Vector3 m_position;
     };
 }
 

@@ -15,6 +15,9 @@ limitations under the License.
 */
 
 #include "Entities/Entity.h"
+#include "Entities/EntityComponent.h"
+
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -37,5 +40,37 @@ namespace alpha
     std::shared_ptr<EntityScript> Entity::GetScript() const
     {
         return m_script;
+    }
+
+    void Entity::Add(unsigned int component_id, std::shared_ptr<EntityComponent> component)
+    {
+        auto it = m_components.find(component_id);
+        if (it != m_components.end())
+        {
+            LOG_WARN("  <Entity> Attempt to add a component type that already exists: <type: ", component->VGetName());
+        }
+        else 
+        {
+            m_components[component_id] = component;
+        }
+    }
+
+    std::shared_ptr<EntityComponent> Entity::Get(unsigned int component_id)
+    {
+        auto it = m_components.find(component_id);
+        if (it != m_components.end())
+        {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    void Entity::Remove(unsigned int component_id)
+    {
+        auto it = m_components.find(component_id);
+        if (it != m_components.end())
+        {
+            m_components.erase(it);
+        }
     }
 }

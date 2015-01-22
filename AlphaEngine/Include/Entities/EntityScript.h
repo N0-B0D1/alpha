@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <map>
 #include <memory>
 
 #include "Scripting/LuaScript.h"
@@ -33,6 +34,7 @@ namespace alpha
         virtual ~EntityScript();
 
         bool HasComponent(const std::string & name);
+        const std::map<std::string, std::shared_ptr<LuaVar> > & GetComponentVars();
 
     private:
         std::shared_ptr<LuaTable> m_components;

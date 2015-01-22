@@ -46,4 +46,10 @@ namespace alpha
         }
         return false;
     }
+
+    //! Get a list of the components specified by the script.
+    const std::map<std::string, std::shared_ptr<LuaVar> > & EntityScript::GetComponentVars()
+    {
+        return m_components->GetAll();
+    }
 }

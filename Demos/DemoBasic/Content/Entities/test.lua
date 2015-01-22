@@ -1,8 +1,8 @@
 -- test table
 components = {
     transform = {
-        x = 0,
-        y = 0,
-        z = 0
+        x = 10.5,
+        y = -1,
+        z = -20
     }
 }

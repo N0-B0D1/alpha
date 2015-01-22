@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <functional>
 #include <map>
 #include <memory>
 
@@ -25,37 +26,36 @@ namespace alpha
     class Entity;
     class EntityComponent;
     class Asset;
+    class LuaVar;
 
     class EntityFactory
     {
     public:
         EntityFactory();
 
+        //! Creates an entity using the components outlined in the given script asset
         std::shared_ptr<Entity> CreateEntity(std::shared_ptr<Asset> asset);
 
-        // component creation function
+        //! Register a component, and allow the factory to generate them when creating an entity.
         template <class SubClass>
-        EntityComponent * ComponentObjectCreationFunction(void) { return new SubClass; }
-
-        // register a component, and allow the factory to generate them
-        // when creating an entity.
-        template <class SubClass>
-        bool RegisterComponent(unsigned long componentId)
+        bool RegisterComponent(unsigned int componentId)
         {
             auto it = m_componentCreationFunctions.find(componentId);
             if (it == m_componentCreationFunctions.end())
             {
-                m_componentCreationFunctions[componentId] = &ComponentObjectCreationFunction<SubClass>;
+                // hurray for lambdas!
+                m_componentCreationFunctions[componentId] = [] () {
+                    return new SubClass;
+                };
                 return true;
             }
             return false;
         }
 
-        EntityComponent * Create(unsigned long componentId);
+        std::shared_ptr<EntityComponent> CreateComponent(const std::string & name, std::shared_ptr<LuaVar> data);
 
     private:
-        typedef EntityComponent * (*ComponentCreationFunction)(void);
-        std::map<unsigned long, ComponentCreationFunction> m_componentCreationFunctions;
+        std::map<unsigned int, std::function<EntityComponent *()> > m_componentCreationFunctions;
 
         unsigned int m_lastEntityId = 0;
     };

@@ -58,7 +58,8 @@ namespace alpha
         virtual LUA_VARTYPE GetVarType() const;
 
         void Push(std::string key, std::shared_ptr<LuaVar> value);
-        std::shared_ptr<LuaVar> Get(const std::string & key);
+        std::shared_ptr<LuaVar> Get(const std::string & key) const;
+        const std::map<std::string, std::shared_ptr<LuaVar> > & GetAll() const;
 
     private:
         std::map<std::string, std::shared_ptr<LuaVar> > m_vars;

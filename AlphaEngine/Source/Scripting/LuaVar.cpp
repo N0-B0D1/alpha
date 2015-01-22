@@ -33,7 +33,7 @@ namespace alpha
     /**
      * Find the LuaVar with the given key, if it exists (shallow search)
      */
-    std::shared_ptr<LuaVar> LuaTable::Get(const std::string & key)
+    std::shared_ptr<LuaVar> LuaTable::Get(const std::string & key) const
     {
         auto search = m_vars.find(key);
         if (search != m_vars.end())
@@ -41,5 +41,11 @@ namespace alpha
             return search->second;
         }
         return nullptr;
+    }
+
+    //! Get all variables that exist in this LUA table
+    const std::map<std::string, std::shared_ptr<LuaVar> > & LuaTable::GetAll() const
+    {
+        return m_vars;
     }
 }

@@ -1,6 +1,3 @@
-#ifndef ENTITY_COMPONENT_H
-#define ENTITY_COMPONENT_H
-
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -17,26 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <memory>
-#include <string>
+#include "Math/Vector3.h"
 
 namespace alpha
 {
-    class LuaVar;
+    Vector3::Vector3() { }
+    Vector3::Vector3(float fx, float fy, float fz)
+        : x(fx), y(fy), z(fz)
+    { }
 
-    class EntityComponent
+    Vector3::Vector3(const Vector3 &vec)
     {
-    public:
-        virtual ~EntityComponent();
+        this->x = vec.x;
+        this->y = vec.y;
+        this->z = vec.z;
+    }
 
-        virtual void VInitialize(std::shared_ptr<LuaVar> var) = 0;
-        virtual bool VUpdate(float fCurrentTime, float fElapsedTime) = 0;
+    Vector3::~Vector3() { }
 
-        unsigned int GetID() const;
-        virtual std::string VGetName() const = 0;
-
-        static unsigned int GetIDFromName(const std::string & name);
-    };
+    Vector3 & Vector3::operator=(const Vector3 & right)
+    {
+        this->x = right.x;
+        this->y = right.y;
+        this->z = right.z;
+        return *this;
+    }
 }
-
-#endif // ENTITY_COMPONENT_H
