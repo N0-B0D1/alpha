@@ -20,22 +20,51 @@ limitations under the License.
 #include <memory>
 #include <string>
 
+#include "Math/Transform.h"
+
 namespace alpha
 {
     class LuaVar;
 
+    /** \brief Abstract base class for all entity components. 
+     * A component might represet a single piece of logic or renderable instanced for the entity it 
+     * is attached to. 
+     * */
     class EntityComponent
     {
     public:
         virtual ~EntityComponent();
 
+        /** Initialize the component from a script variable. */
         virtual void VInitialize(std::shared_ptr<LuaVar> var) = 0;
+        /** Tick the component. */
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime) = 0;
 
+        /** Get the hashed string ID for the derived component. */
         unsigned int GetID() const;
+        /** Get the name that represents the component type, NOT the component instance. */
         virtual std::string VGetName() const = 0;
-
+        /** Hashes the given string and returns the unsigned int representation. */
         static unsigned int GetIDFromName(const std::string & name);
+
+    protected:
+        /** Reference to this components parent, null if is top-level component */ 
+        std::shared_ptr<EntityComponent> m_parent;
+    };
+
+    /** \brief A component base class used to represent a geometrical object in the scene.
+     * A scene component always has a transform which represents its relative position, orientation, 
+     * and scale relative to its parent component.  If the parent is null then the transform is relative 
+     * to the world. 
+     */
+    class SceneComponent : public EntityComponent
+    {
+    public:
+        virtual ~SceneComponent();
+
+    private:
+        /** This components relative transform */
+        Transform m_transform;
     };
 }
 
