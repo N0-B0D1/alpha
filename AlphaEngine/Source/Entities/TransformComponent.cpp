@@ -45,9 +45,9 @@ namespace alpha
         auto vary = std::dynamic_pointer_cast<LuaStatic<double> >(table->Get("y"));
         auto varz = std::dynamic_pointer_cast<LuaStatic<double> >(table->Get("z"));
 
-        this->m_position.x = varx->GetValue();
-        this->m_position.y = vary->GetValue();
-        this->m_position.z = varz->GetValue();
+        this->m_position.x = static_cast<float>(varx->GetValue());
+        this->m_position.y = static_cast<float>(vary->GetValue());
+        this->m_position.z = static_cast<float>(varz->GetValue());
 
         LOG(" .... test position.x = (", this->m_position.x, ", ", this->m_position.y, ", ", this->m_position.z, ")");
     }

@@ -20,6 +20,7 @@ limitations under the License.
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
 #include "Entities/TransformComponent.h"
+#include "Entities/PrimitiveComponent.h"
 #include "Entities/EntityScript.h"
 
 #include "Assets/AssetSystem.h"
@@ -30,6 +31,7 @@ namespace alpha
     EntityFactory::EntityFactory()
     {
         RegisterComponent<TransformComponent>(EntityComponent::GetIDFromName(TransformComponent::sk_name));
+        RegisterComponent<PrimitiveComponent>(EntityComponent::GetIDFromName(PrimitiveComponent::sk_name));
     }
 
     std::shared_ptr<Entity> EntityFactory::CreateEntity(std::shared_ptr<Asset> asset)

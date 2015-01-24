@@ -19,6 +19,10 @@ limitations under the License.
 
 #include "Entities/EntityComponent.h"
 
+#include "Scripting/LuaVar.h"
+#include "Math/Transform.h"
+#include "Toolbox/Logger.h"
+
 namespace alpha
 {
     EntityComponent::~EntityComponent() { }
@@ -32,5 +36,44 @@ namespace alpha
     {
         static std::hash<std::string> string_hash;
         return string_hash(name);
+    }
+
+    SceneComponent::~SceneComponent() { }
+
+    void SceneComponent::VInitialize(std::shared_ptr<LuaVar> var)
+    {
+        // var should represent the transform table from the SceneComponent
+        // not the top level scene component.
+
+        if (var->GetVarType() != VT_TABLE)
+        {
+            LOG_ERR("Script variable data does not represent a valid transform table.");
+            return;
+        }
+
+        std::shared_ptr<LuaTable> table = std::dynamic_pointer_cast<LuaTable>(var);
+
+        // get the position, scale, and rotation tables.
+        std::shared_ptr<LuaTable> position = std::dynamic_pointer_cast<LuaTable>(table->Get("position"));
+        std::shared_ptr<LuaTable> rotation = std::dynamic_pointer_cast<LuaTable>(table->Get("rotation"));
+        std::shared_ptr<LuaTable> scale = std::dynamic_pointer_cast<LuaTable>(table->Get("scale"));
+
+        // get x, y, z values for each position, scale, and rotation.
+        m_transform.position.x = this->GetAxis(position, "x");
+        m_transform.position.y = this->GetAxis(position, "y");
+        m_transform.position.z = this->GetAxis(position, "z");
+
+        m_transform.scale.x = this->GetAxis(scale, "x");
+        m_transform.scale.y = this->GetAxis(scale, "y");
+        m_transform.scale.z = this->GetAxis(scale, "z");
+
+        LOG(" .... test position = (", this->m_transform.position.x, ", ", this->m_transform.position.y, ", ", this->m_transform.position.z, ")");
+        LOG(" .... test scale = (", this->m_transform.scale.x, ", ", this->m_transform.scale.y, ", ", this->m_transform.scale.z, ")");
+    }
+
+    float SceneComponent::GetAxis(std::shared_ptr<LuaTable> table, const std::string axis)
+    {
+        std::shared_ptr<LuaStatic<double> > var = std::dynamic_pointer_cast<LuaStatic<double>>(table->Get(axis));
+        return static_cast<float>(var->GetValue());
     }
 }

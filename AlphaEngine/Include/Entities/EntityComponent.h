@@ -25,6 +25,7 @@ limitations under the License.
 namespace alpha
 {
     class LuaVar;
+    class LuaTable;
 
     /** \brief Abstract base class for all entity components. 
      * A component might represet a single piece of logic or renderable instanced for the entity it 
@@ -62,7 +63,13 @@ namespace alpha
     public:
         virtual ~SceneComponent();
 
+        /** Base SceneComponent handles initialization of transform data */
+        virtual void VInitialize(std::shared_ptr<LuaVar> var);
+
     private:
+        /** Helper function for retrieving x, y, or z vars from script tables */
+        float GetAxis(std::shared_ptr<LuaTable> table, const std::string axis);
+
         /** This components relative transform */
         Transform m_transform;
     };

@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "Entities/PrimitiveComponent.h"
 
+#include "Scripting/LuaVar.h"
+
 namespace alpha
 {
     const std::string PrimitiveComponent::sk_name = "primitive";
@@ -23,9 +25,14 @@ namespace alpha
     PrimitiveComponent::~PrimitiveComponent() { }
 
     //! Provides logic for how to initialize a transform component from Lua script data
-    void PrimitiveComponent::VInitialize(std::shared_ptr<LuaVar> /*var*/)
+    void PrimitiveComponent::VInitialize(std::shared_ptr<LuaVar> var)
     {
-
+        std::shared_ptr<LuaTable> table = std::dynamic_pointer_cast<LuaTable>(var);
+        std::shared_ptr<LuaVar> transform = table->Get("transform");
+        if (transform != nullptr)
+        {
+            SceneComponent::VInitialize(transform);
+        }
     }
 
     bool PrimitiveComponent::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
