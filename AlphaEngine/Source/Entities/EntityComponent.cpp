@@ -27,6 +27,22 @@ namespace alpha
 {
     EntityComponent::~EntityComponent() { }
 
+    void EntityComponent::SetParent(const std::shared_ptr<EntityComponent> & parent)
+    {
+        m_parent = parent;
+    }
+
+    void EntityComponent::Attach(unsigned int component_id, std::shared_ptr<EntityComponent> component)
+    {
+        auto it = m_components.find(component_id);
+        if (it == m_components.end())
+        {
+            m_components[component_id] = component;
+            return;
+        }
+        LOG_WARN("  <EntityComponent> Attempt to add a component type that already exists: type: ", component->VGetName());
+    }
+
     unsigned int EntityComponent::GetID() const
     {
         return GetIDFromName(this->VGetName());

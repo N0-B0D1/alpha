@@ -19,18 +19,17 @@ limitations under the License.
 #include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
-#include "Entities/TransformComponent.h"
 #include "Entities/PrimitiveComponent.h"
 #include "Entities/EntityScript.h"
 
 #include "Assets/AssetSystem.h"
+#include "Scripting/LuaVar.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     EntityFactory::EntityFactory()
     {
-        RegisterComponent<TransformComponent>(EntityComponent::GetIDFromName(TransformComponent::sk_name));
         RegisterComponent<PrimitiveComponent>(EntityComponent::GetIDFromName(PrimitiveComponent::sk_name));
     }
 
@@ -60,35 +59,76 @@ namespace alpha
         auto vars = script->GetComponentVars();
         for (auto var_pair : vars)
         {
-            unsigned int component_id = EntityComponent::GetIDFromName(var_pair.first.c_str());
-            std::shared_ptr<EntityComponent> component = this->CreateComponent(var_pair.first, var_pair.second);
-
-            if (component != nullptr)
+            if (var_pair.second->GetVarType() == VT_TABLE)
             {
-                entity->Add(component_id, component);
-                LOG("EntityFactory -> Component added to entity: ", var_pair.first);
-            }
-            else
-            {
-                LOG_WARN("EntityFactory -> Attempted to add an invalid component type: ", var_pair.first);
+                std::shared_ptr<EntityComponent> component = this->CreateComponent(var_pair.second);
+                if (component != nullptr)
+                {
+                    // hash the component variable name, which will become this components unique identifier in the entity.
+                    // this will allow use to reference the variable by its script variable name if needed, and also 
+                    // potentially reference the same component for any entities that are spawned from the same lua script.
+                    auto variable_name_hash = EntityComponent::GetIDFromName(var_pair.first);
+                    LOG("EntityFactory -> Component added to entity: ", var_pair.first);
+                    entity->Add(variable_name_hash, component);
+                }
             }
         }
 
         return entity;
     }
 
-    std::shared_ptr<EntityComponent> EntityFactory::CreateComponent(const std::string & name, std::shared_ptr<LuaVar> data)
+    std::shared_ptr<EntityComponent> EntityFactory::CreateComponent(std::shared_ptr<LuaVar> var)
     {
-        unsigned int component_id = EntityComponent::GetIDFromName(name.c_str());
-        auto it = m_componentCreationFunctions.find(component_id);
+        // convert var data to a table so we can access its elements
+        auto table = std::dynamic_pointer_cast<LuaTable>(var);
 
-        if (it != m_componentCreationFunctions.end())
+        // get the type name for this component
+        auto type_name = std::dynamic_pointer_cast<LuaStatic<std::string>>(table->Get("type"));
+        if (type_name != nullptr)
         {
-            std::function<EntityComponent *()> func = it->second;
-            std::shared_ptr<EntityComponent> component(func());
-            component->VInitialize(data);
-            return component;
+            LOG("EntityFactory -> Attempting to create component type: ", type_name->GetValue());
+
+            // convert the type name into a component it
+            unsigned int component_id = EntityComponent::GetIDFromName(type_name->GetValue());
+
+            // get the creation function for this component type, if it exists
+            auto it = m_componentCreationFunctions.find(component_id);
+            if (it != m_componentCreationFunctions.end())
+            {
+                // make the component, and initialize it will the var data
+                std::function<EntityComponent *()> func = it->second;
+                std::shared_ptr<EntityComponent> component(func());
+                component->VInitialize(table);
+
+                // if var data contains a 'components' variable
+                // then create each component in that table and
+                // add it to this component
+                std::shared_ptr<LuaVar> child_components = table->Get("components");
+                if (child_components != nullptr && child_components->GetVarType() == VT_TABLE)
+                {
+                    auto child_table = std::dynamic_pointer_cast<LuaTable>(child_components);
+                    for (auto var_pair : child_table->GetAll())
+                    {
+                        if (var_pair.second->GetVarType() == VT_TABLE)
+                        {
+                            //unsigned int child_component_id = EntityComponent::GetIDFromName(var_pair.first);
+                            auto child_component = this->CreateComponent(var_pair.second);
+                            if (child_component != nullptr)
+                            {
+                                auto hash_child_name = EntityComponent::GetIDFromName(var_pair.first);
+                                component->Attach(hash_child_name, child_component);
+                                child_component->SetParent(component);
+                            }
+                        }
+                    }
+                }
+
+                return component;
+            }
+
+            LOG_WARN("EntityFactory -> Attempted to add an invalid component type: ", type_name->GetValue());
         }
+
         return nullptr;
     }
 }

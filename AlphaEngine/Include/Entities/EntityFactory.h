@@ -28,15 +28,17 @@ namespace alpha
     class Asset;
     class LuaVar;
 
+    /** \brief Factory used to build entities based off of lua scripts.
+     */
     class EntityFactory
     {
     public:
         EntityFactory();
 
-        //! Creates an entity using the components outlined in the given script asset
+        /** Creates an entity using the components outlined in the given script asset */
         std::shared_ptr<Entity> CreateEntity(std::shared_ptr<Asset> asset);
 
-        //! Register a component, and allow the factory to generate them when creating an entity.
+        /** Register a component, and allow the factory to generate them when creating an entity. */
         template <class SubClass>
         bool RegisterComponent(unsigned int componentId)
         {
@@ -44,17 +46,16 @@ namespace alpha
             if (it == m_componentCreationFunctions.end())
             {
                 // hurray for lambdas!
-                m_componentCreationFunctions[componentId] = [] () {
-                    return new SubClass;
-                };
+                m_componentCreationFunctions[componentId] = [] () { return new SubClass; };
                 return true;
             }
             return false;
         }
 
-        std::shared_ptr<EntityComponent> CreateComponent(const std::string & name, std::shared_ptr<LuaVar> data);
-
     private:
+        /** Creates a component using a registered creation function, if it exists. */
+        std::shared_ptr<EntityComponent> CreateComponent(std::shared_ptr<LuaVar> var);
+
         std::map<unsigned int, std::function<EntityComponent *()> > m_componentCreationFunctions;
 
         unsigned int m_lastEntityId = 0;

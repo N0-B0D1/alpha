@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -36,10 +37,16 @@ namespace alpha
     public:
         virtual ~EntityComponent();
 
+        /** set the parent component */
+        void SetParent(const std::shared_ptr<EntityComponent> & parent);
+
         /** Initialize the component from a script variable. */
         virtual void VInitialize(std::shared_ptr<LuaVar> var) = 0;
         /** Tick the component. */
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime) = 0;
+
+        /** Add a child component to this component */
+        void Attach(unsigned int component_id, std::shared_ptr<EntityComponent> component);
 
         /** Get the hashed string ID for the derived component. */
         unsigned int GetID() const;
@@ -51,6 +58,9 @@ namespace alpha
     protected:
         /** Reference to this components parent, null if is top-level component */ 
         std::shared_ptr<EntityComponent> m_parent;
+
+        /** Child components, any component can be a child of another component for the greatest flexibility. */
+        std::map<unsigned int, std::shared_ptr<EntityComponent> > m_components;
     };
 
     /** \brief A component base class used to represent a geometrical object in the scene.
