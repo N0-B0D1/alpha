@@ -8,7 +8,11 @@ components = {
 		y = -1,
 		z = -20
 	},
-	primitive0 = {
+	root = {
+        -- by setting the root node like this, and having all other
+        -- scene components exist as children of the root node, we
+        -- can set the root nodes transform, and that will become the
+        -- Entities transform in the world.
 		type = "primitive",
 		transform = {
 			position = { x = 0.0, y = 0.0, z = 0.0 },
@@ -26,5 +30,5 @@ components = {
 				},
 			}
 		}
-	},
+	}
 }
