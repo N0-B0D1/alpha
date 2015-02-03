@@ -1,5 +1,5 @@
-#ifndef RENDERER_H
-#define RENDERER_H
+#ifndef GRAPHICS_WINDOW_H
+#define GRAPHICS_WINDOW_H
 
 /**
 Copyright 2014 Jason R. Wendlandt
@@ -18,37 +18,27 @@ limitations under the License.
 */
 
 #include <Windows.h>
-#include <d3d11_1.h>
-
-//#include "AlphaSystem.h"
 
 namespace alpha
 {
-    class GraphicsWindow;
-
-    class GraphicsRenderer
+    class GraphicsWindow
     {
     public:
-        GraphicsRenderer();
-        virtual ~GraphicsRenderer();
+        GraphicsWindow();
+        virtual ~GraphicsWindow();
 
         bool Initialize();
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render();
+        HWND GetHWND() const;
 
     private:
-        //virtual bool VUpdate(double currentTime, double elapsedTime);
+        static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-        // DirectX methods
-        //static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-        //HRESULT InitializeWindow();
-        HRESULT InitializeDevice();
-        void CleanupDevice();
-
-        GraphicsWindow *m_pWindow;
+        HINSTANCE m_hInstance;
+        HWND m_hWnd;
     };
 }
 
-#endif // RENDERER_H
+#endif // GRAPHICS_WINDOW_H

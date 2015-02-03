@@ -17,11 +17,13 @@ limitations under the License.
 #include <DirectXColors.h>
 
 #include "Graphics/GraphicsRenderer.h"
+#include "Graphics/GraphicsWindow.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    HINSTANCE               m_hInstance = nullptr;
-    HWND                    m_hWnd = nullptr;
+    //HINSTANCE               m_hInstance = nullptr;
+    //HWND                    m_hWnd = nullptr;
     D3D_DRIVER_TYPE         m_driverType = D3D_DRIVER_TYPE_NULL;
     D3D_FEATURE_LEVEL       m_featureLevel = D3D_FEATURE_LEVEL_11_1;
     ID3D11Device*           m_pd3dDevice = nullptr;
@@ -38,13 +40,17 @@ namespace alpha
     bool GraphicsRenderer::Initialize()
     {
         /** TODO pass in hInstance and nCmdShow options */
-        m_hInstance = GetModuleHandle(NULL);
-        if (FAILED(this->InitializeWindow())) 
+        //m_hInstance = GetModuleHandle(NULL);
+        //if (FAILED(this->InitializeWindow()))
+        m_pWindow = new GraphicsWindow();
+        if (!m_pWindow->Initialize())
         {
+            LOG_ERR("Failed to create and open game window.");
             return false;
         }
         if (FAILED(this->InitializeDevice()))
         {
+            LOG_ERR("Failed to initialize graphics device.");
             return false;
         }
         return true;
@@ -52,104 +58,44 @@ namespace alpha
 
     bool GraphicsRenderer::Shutdown()
     {
+        // close game window
+        if (!m_pWindow->Shutdown())
+        {
+            LOG_ERR("Failed to close game window.");
+        }
+        delete m_pWindow;
+
+        // cleanup graphics device
         this->CleanupDevice();
+
         return true;
     }
 
-    bool GraphicsRenderer::Update(double /*currentTime*/, double /*elapsedTime*/)
+    bool GraphicsRenderer::Update(double currentTime, double elapsedTime)
     {
-        MSG msg;
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+        // play nicely with windows ...
+        bool success = m_pWindow->Update(currentTime, elapsedTime);
 
-        if (msg.message == WM_QUIT)
-        {
-            //SendMessage(m_hWnd, WM_CLOSE, 0, 0);
-            return false;
-        }
-        return true;
+        // update scene
+
+        return success;
     }
 
     void GraphicsRenderer::Render()
     {
         // do something cool
-        m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::MidnightBlue);
+        m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
         m_pSwapChain->Present(0, 0);
-    }
-
-    LRESULT CALLBACK GraphicsRenderer::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        PAINTSTRUCT ps;
-        HDC hdc;
-
-        switch (message)
-        {
-        case WM_PAINT:
-            hdc = BeginPaint(hWnd, &ps);
-            EndPaint(hWnd, &ps);
-            break;
-
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            break;
-
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-
-        return 0;
-    }
-
-    HRESULT GraphicsRenderer::InitializeWindow()
-    {
-        // Register class
-        WNDCLASSEX wcex = {};
-        wcex.cbSize = sizeof(WNDCLASSEX);
-        wcex.style = CS_HREDRAW | CS_VREDRAW;
-        wcex.lpfnWndProc = WndProc;
-        wcex.cbClsExtra = 0;
-        wcex.cbWndExtra = 0;
-        wcex.hInstance = m_hInstance;
-        wcex.hIcon = LoadIcon(nullptr, IDI_APPLICATION); // IDI_TUTORIAL1);
-        //wcex.hIcon = nullptr;
-        wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-        wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-        wcex.lpszMenuName = nullptr;
-        wcex.lpszClassName = "ALPHAClass";
-        wcex.hIconSm = LoadIcon(nullptr, IDI_APPLICATION); // LoadIcon(wcex.hInstance, (LPCTSTR)IDI_TUTORIAL1);
-        //wcex.hIconSm = nullptr;
-        DWORD err = RegisterClassEx(&wcex);
-        if (!err)
-        {
-            DWORD err = GetLastError();
-            UNREFERENCED_PARAMETER(err);
-            return E_FAIL;
-        }
-
-        // Create window
-        //g_hInst = hInstance;
-        RECT rc = { 0, 0, 800, 600 };
-        AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-        m_hWnd = CreateWindow("ALPHAClass", "ALPHA Engine", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, m_hInstance, nullptr);
-        if (!m_hWnd)
-        {
-            return E_FAIL;
-        }
-
-        ShowWindow(m_hWnd, 10); // nCmdShow);
-
-        return S_OK;
     }
 
     HRESULT GraphicsRenderer::InitializeDevice()
     {
         HRESULT hr = S_OK;
+        HWND hwnd = m_pWindow->GetHWND();
 
         RECT rc;
-        GetClientRect(m_hWnd, &rc);
+        //GetClientRect(m_hWnd, &rc);
+        GetClientRect(hwnd, &rc);
         UINT width = rc.right - rc.left;
         UINT height = rc.bottom - rc.top;
 
@@ -234,7 +180,7 @@ namespace alpha
             sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
             sd.BufferCount = 1;
 
-            hr = dxgiFactory2->CreateSwapChainForHwnd(m_pd3dDevice, m_hWnd, &sd, nullptr, nullptr, &m_pSwapChain1);
+            hr = dxgiFactory2->CreateSwapChainForHwnd(m_pd3dDevice, hwnd, &sd, nullptr, nullptr, &m_pSwapChain1);
             if (SUCCEEDED(hr))
             {
                 hr = m_pSwapChain1->QueryInterface(__uuidof(IDXGISwapChain), reinterpret_cast<void**>(&m_pSwapChain));
@@ -254,7 +200,7 @@ namespace alpha
             sd.BufferDesc.RefreshRate.Numerator = 60;
             sd.BufferDesc.RefreshRate.Denominator = 1;
             sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-            sd.OutputWindow = m_hWnd;
+            sd.OutputWindow = hwnd;
             sd.SampleDesc.Count = 1;
             sd.SampleDesc.Quality = 0;
             sd.Windowed = TRUE;
@@ -265,18 +211,24 @@ namespace alpha
         dxgiFactory->Release();
 
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         // Create a render target view
         ID3D11Texture2D* pBackBuffer = nullptr;
         hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBackBuffer));
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         hr = m_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &m_pRenderTargetView);
         pBackBuffer->Release();
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, nullptr);
 
@@ -295,8 +247,6 @@ namespace alpha
 
     void GraphicsRenderer::CleanupDevice()
     {
-        CloseWindow(m_hWnd);
-
         if (m_pImmediateContext) m_pImmediateContext->ClearState();
 
         if (m_pRenderTargetView) m_pRenderTargetView->Release();
@@ -307,10 +257,6 @@ namespace alpha
         if (m_pd3dDevice1) m_pd3dDevice1->Release();
         if (m_pd3dDevice) m_pd3dDevice->Release();
 
-        m_hInstance = nullptr;
-        m_hWnd = nullptr;
-        //m_driverType = D3D_DRIVER_TYPE_NULL;
-        //m_featureLevel = D3D_FEATURE_LEVEL_11_1;
         m_pd3dDevice = nullptr;
         m_pd3dDevice1 = nullptr;
         m_pImmediateContext = nullptr;
