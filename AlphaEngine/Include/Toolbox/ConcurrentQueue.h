@@ -27,7 +27,7 @@ namespace alpha
 	{
 	public:
 		ConcurrentQueue() { }
-		virtual ~ConcurrentQueue() { }
+		//virtual ~ConcurrentQueue() { }
 
 		void Push(Data const &data)
 		{
