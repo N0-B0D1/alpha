@@ -54,9 +54,6 @@ namespace alpha
         double m_timeAccumulator = 0.0f;
         double sk_maxUpdateTime = 1.0f / 60.0f;
 
-        /** Event management system */
-        EventManager *m_pEvents;
-
         /** game logic system */
         LogicSystem *m_pLogic;
 

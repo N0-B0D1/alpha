@@ -48,7 +48,7 @@ namespace alpha
         m_window = XCreateWindow(m_pDisplay, m_root, 0, 0, 600, 600, 0, m_pVisualInfo->depth, InputOutput, m_pVisualInfo->visual, CWColormap | CWEventMask, &m_setWindowAttrs);
 
         XMapWindow(m_pDisplay, m_window);
-        XStoreName(m_pDisplay, m_window, "VERY SIMPLE APPLICATION");
+        XStoreName(m_pDisplay, m_window, "ALPHA Engine");
          
         m_glContext = glXCreateContext(m_pDisplay, m_pVisualInfo, NULL, GL_TRUE);
         glXMakeCurrent(m_pDisplay, m_window, m_glContext);

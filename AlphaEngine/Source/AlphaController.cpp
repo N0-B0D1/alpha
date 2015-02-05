@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include "AlphaController.h"
-#include "Events/EventManager.h"
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
 #include "Assets/AssetSystem.h"
@@ -24,8 +23,7 @@ limitations under the License.
 namespace alpha
 {
     AlphaController::AlphaController()
-        : m_pEvents(nullptr)
-        , m_pLogic(nullptr)
+        : m_pLogic(nullptr)
         , m_pGraphics(nullptr)
         , m_pAssets(nullptr)
     {
@@ -65,14 +63,6 @@ namespace alpha
 
     bool AlphaController::Initialize()
     {
-        // Event management system is always first
-        m_pEvents = new EventManager;
-        if (!m_pEvents->Initialize())
-        {
-            LOG_ERR("<EventManager> Initialization failed!");
-            return false;
-        }
-
         // Initialize asset repository
         m_pAssets = std::make_shared<AssetSystem>();
         if (!m_pAssets->VInitialize())
@@ -117,10 +107,6 @@ namespace alpha
         double elapsedTime = currentTime - m_timeLastFrame;
 
         m_timeAccumulator += elapsedTime;
-
-		// pass around events first, so that each system is
-		// prepared for this update phase to begin.
-		m_pEvents->Update(currentTime, sk_maxUpdateTime);
 
         // update systems in discrete chunks of time
         while (m_timeAccumulator >= sk_maxUpdateTime)
@@ -173,12 +159,6 @@ namespace alpha
         {
             m_pAssets->VShutdown();
             LOG("<AssetSystem> Disposed.");
-        }
-        if (m_pEvents)
-        {
-            m_pEvents->Shutdown();
-            delete m_pEvents;
-            LOG("<EventManager> Disposed.");
         }
 
         LOG("<AlphaController> Shutdown complete.");
