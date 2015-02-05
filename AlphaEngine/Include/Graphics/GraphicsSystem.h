@@ -17,7 +17,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+
 #include "AlphaSystem.h"
+
+#include "Events/EventDataSubscriber.h"
+#include "Events/EventData_EntityCreated.h"
 
 namespace alpha
 {
@@ -34,10 +39,19 @@ namespace alpha
 
         void Render();
 
+        /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
+        std::shared_ptr<AEventDataSubscriber> GetEntityCreatedSubscriber() const;
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
+        /** Read the EntityCreated subscription on each update to handle any new entities that need to be rendered. */
+        void ReadSubscription();
 
+        /** Renderer implementation (e.g.: DirectX, OpenGL) */
         GraphicsRenderer *m_pRenderer;
+
+        /** Subscriber for new entity created events */
+        std::shared_ptr<EventDataSubscriber<EventData_EntityCreated>> m_subEntityCreated;
     };
 }
 

@@ -1,3 +1,6 @@
+#ifndef TOOLBOX_UUID_H
+#define TOOLBOX_UUID_H
+
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -14,24 +17,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Events/EventData_EntityCreated.h"
+#include <uuid/uuid.h>
+#include <string>
 
 namespace alpha
 {
-    const std::string EventData_EntityCreated::sk_name = "EventData_EntityCreated";
-
-    EventData_EntityCreated::EventData_EntityCreated(std::shared_ptr<Entity> entity)
-        : m_entity(entity)
-    { }
-    //EventData_EntityCreated::~EventData_EntityCreated() { }
-
-    std::string EventData_EntityCreated::VGetTypeName() const
-    {
-        return EventData_EntityCreated::sk_name;
-    }
-
-    std::shared_ptr<Entity> EventData_EntityCreated::GetEntity() const
-    {
-        return m_entity;
-    }
+    /**
+     * function GenerateUUID
+     *
+     * Generates a universally unique identifer, converts it to a string, then hashes the string.
+     */
+    unsigned int GenerateUUID(void);
 }
+
+#endif // TOOLBOX_UUID_H

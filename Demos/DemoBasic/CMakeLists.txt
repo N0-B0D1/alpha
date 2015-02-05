@@ -17,6 +17,7 @@ source_group(Source\\Logic FILES ${LOGIC_SOURCE_FILES})
 
 # make basic demo project
 include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include)
+include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include/${ALPHA_BUILD_TARGET_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
 add_executable(

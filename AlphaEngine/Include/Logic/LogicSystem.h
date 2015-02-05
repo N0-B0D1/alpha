@@ -20,7 +20,10 @@ limitations under the License.
 #include <map>
 #include <memory>
 #include "AlphaSystem.h"
-//#include "Entities/Entity.h"
+
+#include "Events/EventDataSubscriber.h"
+#include "Events/EventDataPublisher.h"
+#include "Events/EventData_EntityCreated.h"
 
 namespace alpha
 {
@@ -47,6 +50,9 @@ namespace alpha
         std::shared_ptr<Entity> CreateEntity(const char * resource);
         void DestroyEntity(const unsigned long entityId);
 
+        /** event subscriptions */
+        void SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
         
@@ -54,6 +60,9 @@ namespace alpha
         std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
 
         std::shared_ptr<AssetSystem> m_pAssets;
+
+        /** Publisher for new entities created */
+        EventDataPublisher<EventData_EntityCreated> m_pubEntityCreated;
     };
 }
 

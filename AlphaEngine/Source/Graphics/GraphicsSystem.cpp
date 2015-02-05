@@ -15,8 +15,8 @@ limitations under the License.
 */
 
 #include "Graphics/GraphicsSystem.h"
-
 #include "Graphics/GraphicsRenderer.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -33,6 +33,10 @@ namespace alpha
         {
             return false;
         }
+
+        // create event subscribers
+        m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated> >();
+
         return true;
     }
 
@@ -46,13 +50,29 @@ namespace alpha
         return true;
     }
 
-    bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)
-    {
-        return m_pRenderer->Update(currentTime, elapsedTime);
-    }
-
     void GraphicsSystem::Render()
     {
         m_pRenderer->Render();
+    }
+
+    bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)
+    {
+        // add any new entities to the graphics system
+        this->ReadSubscription();
+        return m_pRenderer->Update(currentTime, elapsedTime);
+    }
+
+    void GraphicsSystem::ReadSubscription()
+    {
+        // read any published EventData_EntityCreated events that may have occured since the last update.
+        while(std::shared_ptr<const EventData_EntityCreated> data = m_subEntityCreated->GetNextEvent())
+        {
+            LOG("Graphics system received EntityCreated event");
+        }
+    }
+
+    std::shared_ptr<AEventDataSubscriber> GraphicsSystem::GetEntityCreatedSubscriber() const
+    {
+        return m_subEntityCreated;
     }
 }

@@ -88,6 +88,9 @@ namespace alpha
             LOG_ERR("<LogicSystem> Initialization failed!");
             return false;
         }
+        
+        // wire up pub-sub relations
+        m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
 
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();

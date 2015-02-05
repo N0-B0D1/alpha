@@ -17,12 +17,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-//#include "Events/EventData.h"
+#include <memory>
+
 #include "Toolbox/uuid.h"
+#include "Toolbox/ConcurrentQueue.h"
+
+#include "Events/EventData.h"
 
 namespace alpha
 {
-    class EventData;
+    //class EventData;
 
     /**
      * class AEventDataSubscriber
@@ -37,8 +41,10 @@ namespace alpha
             : m_id(GenerateUUID())
         { }
 
+        /** Retrieve the unique identifier that represents this subscriber instance */
         unsigned int GetID() const { return m_id; }
-        virtual void VQueueEventData(EventData * pEvent) = 0;
+        /** Publish a new event to this subscriber */
+        virtual void VQueueEventData(std::shared_ptr<const EventData> pEvent) = 0;
 
     private:
         unsigned int m_id;
@@ -56,24 +62,25 @@ namespace alpha
     public:
         virtual ~EventDataSubscriber() { }
 
-        EventDataType * GetNextEvent()
+        /** Retrieve the most recent event that has een published to this subscriber */
+        std::shared_ptr<const EventDataType> GetNextEvent()
         {
-            EventData *pEventData = nullptr;
+            std::shared_ptr<const EventData> pEventData = nullptr;
             m_eventData.TryPop(pEventData);
             if (pEventData)
             {
-                return static_cast<EventDataType *>(pEventData);
+                return std::dynamic_pointer_cast<const EventDataType>(pEventData);
             }
             return nullptr;
         }
-        virtual void VQueueEventData(EventData * pEvent)
+
+        virtual void VQueueEventData(std::shared_ptr<const EventData> pEvent)
         {
-            // XXX make a copy of the event data.
             m_eventData.Push(pEvent);
         }
 
     private:
-        ConcurrentQueue<EventData *> m_eventData;
+        ConcurrentQueue<std::shared_ptr<const EventData> > m_eventData;
     };
 }
 

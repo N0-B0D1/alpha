@@ -17,7 +17,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+
 #include "Events/EventData.h"
+#include "Entities/Entity.h"
 
 namespace alpha
 {
@@ -26,9 +29,15 @@ namespace alpha
         static const std::string sk_name;
 
     public:
-        virtual ~EventData_EntityCreated();
+        explicit EventData_EntityCreated(std::shared_ptr<Entity> entity);
+        //virtual ~EventData_EntityCreated();
 
         virtual std::string VGetTypeName() const;
+
+        std::shared_ptr<Entity> GetEntity() const;
+
+    private:
+        std::shared_ptr<Entity> m_entity;
     };
 }
 

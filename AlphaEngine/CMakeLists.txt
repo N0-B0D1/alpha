@@ -15,7 +15,7 @@ install(FILES ${HEADER_FILES} DESTINATION include/AlphaEngine)
 function (include_alpha_source sub_dir)
 
     # better than nothing for now
-    # XXX should figure out how to replace '/' with '\\',
+    # XXX should figure out how to replace '/' with '\\', in windows
     # and if that will even work for source_group's
     set(SUB_GROUP ${sub_dir})
     string(REGEX REPLACE "/" "_" SUB_GROUP ${SUB_GROUP})

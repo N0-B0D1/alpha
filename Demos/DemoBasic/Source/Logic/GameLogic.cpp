@@ -24,8 +24,14 @@ bool GameLogic::VInitialize()
 {
     if (LogicSystem::VInitialize())
     {
-        m_test = CreateEntity("Entities/test.lua");
-        m_test2 = CreateEntity("Entities/test.lua");
+        // create any game specific systems here
+        // this should be a prep spot for setting up the game to run
+
+        //e.g. should not make entities here, as proper events will not be sent or received.
+
+        //m_test = CreateEntity("Entities/test.lua");
+        //m_test2 = CreateEntity("Entities/test.lua");
+
         return true;
     }
     return false;

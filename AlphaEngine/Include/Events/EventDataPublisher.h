@@ -38,8 +38,9 @@ namespace alpha
     class EventDataPublisher
     {
     public:
-        virtual ~EventDataPublisher();
+        virtual ~EventDataPublisher() { }
 
+        /** Add a subscriber to be published to. */
         void Subscribe(std::shared_ptr<AEventDataSubscriber> pSubscriber)
         {
             auto search = m_subscribers.find(pSubscriber->GetID());
@@ -52,6 +53,8 @@ namespace alpha
                 LOG_WARN("Attempt to subscribe to a publisher that is already subscribed to!");
             }
         }
+
+        /** Removes an existing subscriber, if it is already subscribed. */
         void Unsubscribe(std::shared_ptr<AEventDataSubscriber> pSubscriber)
         {
             auto search = m_subscribers.find(pSubscriber->GetID());
@@ -62,6 +65,18 @@ namespace alpha
             else
             {
                 LOG_WARN("Attempt to unsubscribe from a publisher that was not previously subscribed to!");
+            }
+        }
+
+        /** Publish an event to all subscribers */
+        void Publish(std::shared_ptr<const EventDataType> pEvent)
+        {
+            // for each subscriber, copy the event, and pass copy to subscriber.
+            // the subscriber is responsible for freeing the event data memory.
+            for (auto pair : m_subscribers)
+            {
+                //EventDataType *copy = pEvent->VCopy();
+                pair.second->VQueueEventData(pEvent);
             }
         }
 

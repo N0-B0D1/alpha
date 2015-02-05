@@ -24,7 +24,6 @@ namespace alpha
     class EventData
     {
     public:
-        explicit EventData(const float & fTimeStamp = 0.0f);
         virtual ~EventData();
 
         /** Get the hashed string ID for the derived EventData type. */

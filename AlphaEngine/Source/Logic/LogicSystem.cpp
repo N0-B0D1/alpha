@@ -20,6 +20,8 @@ limitations under the License.
 #include "Toolbox/Logger.h"
 #include "Assets/AssetSystem.h"
 
+#include "Events/EventData_EntityCreated.h"
+
 namespace alpha
 {
     LogicSystem::LogicSystem()
@@ -72,19 +74,31 @@ namespace alpha
 
     std::shared_ptr<Entity> LogicSystem::CreateEntity(const char * resource)
     {
+        std::shared_ptr<Entity> new_entity = nullptr;
+
+        // get the entity script resource specified, and make an entity with it
         auto asset = m_pAssets->GetAsset(resource);
         if (asset != nullptr)
         {
-            auto entity = m_pEntityFactory->CreateEntity(asset);
-            m_entities[entity->GetId()] = entity;
-            return entity;
+            new_entity = m_pEntityFactory->CreateEntity(asset);
+            m_entities[new_entity->GetId()] = new_entity;
         }
 
-        return std::shared_ptr<Entity>();
+        // create an Entity Created event, and publish it to all subscribers
+        std::shared_ptr<EventData_EntityCreated> event = std::make_shared<EventData_EntityCreated>(new_entity);
+        m_pubEntityCreated.Publish(event);
+
+        // might be nullptr
+        return new_entity;
     }
 
     void LogicSystem::DestroyEntity(const unsigned long entityId)
     {
         m_entities.erase(m_entities.find(entityId));
+    }
+
+    void LogicSystem::SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
+    {
+        m_pubEntityCreated.Subscribe(pSubscriber);
     }
 }

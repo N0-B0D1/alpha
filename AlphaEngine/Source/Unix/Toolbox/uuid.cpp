@@ -14,24 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Events/EventData_EntityCreated.h"
+#include "Toolbox/uuid.h"
 
 namespace alpha
 {
-    const std::string EventData_EntityCreated::sk_name = "EventData_EntityCreated";
-
-    EventData_EntityCreated::EventData_EntityCreated(std::shared_ptr<Entity> entity)
-        : m_entity(entity)
-    { }
-    //EventData_EntityCreated::~EventData_EntityCreated() { }
-
-    std::string EventData_EntityCreated::VGetTypeName() const
+    unsigned int GenerateUUID(void)
     {
-        return EventData_EntityCreated::sk_name;
+        uuid_t uuid;
+        uuid_generate_random(uuid);
+
+        char s[37];
+        uuid_unparse(uuid, s);
+
+        static std::hash<std::string> string_hash;
+        return string_hash(s);
     }
 
-    std::shared_ptr<Entity> EventData_EntityCreated::GetEntity() const
-    {
-        return m_entity;
-    }
 }
