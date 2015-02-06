@@ -1,6 +1,3 @@
-#ifndef TOOLBOX_UUID_H
-#define TOOLBOX_UUID_H
-
 /**
 Copyright 2014 Jason R. Wendlandt
 
@@ -17,17 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <rpc.h>
-#include <string>
+#include "Toolbox/uuid.h"
 
 namespace alpha
 {
-    /**
-     * function GenerateUUID
-     *
-     * Generates a universally unique identifer, converts it to a string, then hashes the string.
-     */
-    unsigned int GenerateUUID(void);
-}
+    unsigned int GenerateUUID(void)
+    {
+        UUID uuid;
+        UuidCreate(&uuid);
 
-#endif // TOOLBOX_UUID_H
+        unsigned char * str;
+        UuidToStringA(&uuid, &str);
+
+        std::string s((char *)str);
+        RpcStringFreeA(&str);
+
+        static std::hash<std::string> string_hash;
+        return string_hash(s);
+    }
+}

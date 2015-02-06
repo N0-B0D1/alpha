@@ -52,6 +52,7 @@ include_alpha_source("Events")
 include_alpha_source("Entities")
 include_alpha_source("Scripting")
 include_alpha_source("Math")
+include_alpha_source("FSA")
 
 
 # make engine project

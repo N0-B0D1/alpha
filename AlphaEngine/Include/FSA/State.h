@@ -1,8 +1,8 @@
-#ifndef TOOLBOX_UUID_H
-#define TOOLBOX_UUID_H
+#ifndef FINITE_STATE_H
+#define FINITE_STATE_H
 
 /**
-Copyright 2014 Jason R. Wendlandt
+Copyright 2014-2015 Jason R. Wendlandt
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,17 +17,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <rpc.h>
-#include <string>
-
 namespace alpha
 {
-    /**
-     * function GenerateUUID
-     *
-     * Generates a universally unique identifer, converts it to a string, then hashes the string.
-     */
-    unsigned int GenerateUUID(void);
+    class AState
+    {
+    public:
+        virtual ~AState();
+    };
 }
 
-#endif // TOOLBOX_UUID_H
+#endif // FINITE_STATE_H
