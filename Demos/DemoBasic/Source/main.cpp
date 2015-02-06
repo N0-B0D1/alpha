@@ -1,5 +1,5 @@
 /**
-Copyright 2014 Jason R. Wendlandt
+Copyright 2014-2015 Jason R. Wendlandt
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ limitations under the License.
 #include "Logic/GameLogic.h"
 
 #if WIN32
-    #include <Windows.h>
-
-    //INT WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE, LPSTR /*strCmdLine*/, INT)
-    int WINAPI wWinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPWSTR /*lpCmdLine*/, _In_ int /*nCmdShow*/)
+#include <Windows.h>
+int WINAPI wWinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPWSTR /*lpCmdLine*/, _In_ int /*nCmdShow*/)
 #else
-    int main(int /*argc*/, char ** /*argv*/)
+int main(int /*argc*/, char ** /*argv*/)
 #endif
-    {
-        int error = alpha::template InitiateAlpha<GameLogic>();
-        return error;
-    }
+{
+    int error = alpha::template InitiateAlpha<GameLogic>();
+    return error;
+}

@@ -2,7 +2,7 @@
 #define GAME_LOGIC_H
 
 /**
-Copyright 2014 Jason R. Wendlandt
+Copyright 2014-2015 Jason R. Wendlandt
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
