@@ -6,31 +6,29 @@ Alpha is a multi-platform game engine which currently supports Windows and Linux
 Alpha Requirements
 ------------------
 
- - All
-   1. CMake 2.6+
+- All
+ * CMake 2.6+
 
- - Windows
-   1. DirectX 11 (June 2010 SDK)
-   2. Visual Studio 11+
+- Windows
+ * DirectX 11 (June 2010 SDK)
+ * Visual Studio 11+
 
- - Linux
-   1. OpenGL 3/4
-   2. X11
-   3. GCC 4.5+ / Clang 3.1+
+- Linux
+ * OpenGL 3/4
+ * X11
+ * GCC 4.5+ / Clang 3.1+
 
 Building Alpha
 --------------
 
 Alpha uses CMake as its build system, which allows for easy cross-platform build support without having to manage the various solutions, projects, or make files on a per system basis.  The build system has been tested with modern Visual Studio releases (11+) and with Unix Makefiles in linux.  While others may work, they have not been tested.
 
-1. CMake GUI
-
-  1. Set Source Directory to the root alpha directory.
-  2. Set Build Directory to the target output, usually ```/build``` inside alpha root.
-  3. Configure, select target build system (Visual Studio, Unix Makefiles, etc.)
-  4. Generate.
-  5. In build output directory, the generated project solution should have a ALL_BUILD target.  Or simply us make to build everything.
-  6. Building the INSTALL target will output include, libs, and any demo projects to a cmake specified intall directory.
+1. Set Source Directory to the root alpha directory.
+2. Set Build Directory to the target output, usually ```/build``` inside alpha root.
+3. Configure, select target build system (Visual Studio, Unix Makefiles, etc.)
+4. Generate.
+5. In build output directory, the generated project solution should have a ALL_BUILD target.  Or simply us make to build everything.
+6. Building the INSTALL target will output include, libs, and any demo projects to a cmake specified intall directory.
 
 License
 -------
