@@ -15,8 +15,42 @@ limitations under the License.
 */
 
 #include "FSA/StateMachine.h"
+#include "FSA/State.h"
+
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    AStateMachine::~AStateMachine() { }
+    StateMachine::StateMachine(std::shared_ptr<AState> startingState)
+        : m_pCurrentState(startingState)
+    {
+        LOG("StateMachine beginning execution.");
+        // initialize the starting state, so it is ready to immediate update calls
+        m_pCurrentState->VInitialize();
+    }
+
+    bool StateMachine::Update()
+    {
+        // update current state
+        bool complete = m_pCurrentState->VUpdate();
+
+        // if state is complete, advance state
+        if (complete)
+        {
+            LOG("StateMachine shutting down current state.");
+            std::shared_ptr<AState> nextState = m_pCurrentState->VShutdown();
+
+            if (nextState == nullptr)
+            {
+                LOG("StateMachine completed execution.");
+                return false;
+            }
+
+            LOG("StateMachine transitioning to next state.");
+            m_pCurrentState = nextState;
+            m_pCurrentState->VInitialize();
+        }
+
+        return true;
+    }
 }

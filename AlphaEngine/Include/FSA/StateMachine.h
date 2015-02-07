@@ -17,12 +17,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+
 namespace alpha
 {
-    class AStateMachine
+    class AState;
+
+    class StateMachine
     {
     public:
-        virtual ~AStateMachine();
+        /** \brief The Primary Constructor
+         * \param startingState The state which the StateMachien will begin processing from.
+         */
+        explicit StateMachine(std::shared_ptr<AState> startingState);
+
+        /** Update the current state and advance to next state if necessary. */
+        bool Update();
+
+    private:
+        /** Tracks the current active state. */
+        std::shared_ptr<AState> m_pCurrentState;
     };
 }
 

@@ -30,6 +30,7 @@ namespace alpha
     class AssetSystem;
     class EntityFactory;
     class Entity;
+    class StateMachine;
 
     class LogicSystem : public AlphaSystem
     {
@@ -59,6 +60,7 @@ namespace alpha
         EntityFactory *m_pEntityFactory;
         std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
 
+        /** Asset management system handle. */
         std::shared_ptr<AssetSystem> m_pAssets;
 
         /** Publisher for new entities created */

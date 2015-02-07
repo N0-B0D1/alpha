@@ -19,14 +19,15 @@ limitations under the License.
 #include "Entities/Entity.h"
 #include "Toolbox/Logger.h"
 #include "Assets/AssetSystem.h"
-
 #include "Events/EventData_EntityCreated.h"
+#include "FSA/StateMachine.h"
 
 namespace alpha
 {
     LogicSystem::LogicSystem()
         : AlphaSystem(60)
         , m_pEntityFactory(nullptr)
+        , m_pAssets(nullptr)
     { }
     LogicSystem::~LogicSystem() { }
 

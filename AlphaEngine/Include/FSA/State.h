@@ -17,12 +17,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+
 namespace alpha
 {
     class AState
     {
     public:
         virtual ~AState();
+
+        /** Prep the State to run */
+        virtual bool VInitialize() = 0;
+
+        /**
+         * Called by the StateMachine when this is the active state.
+         * Should return false when the state is done and/or ready to transition.
+         */
+        virtual bool VUpdate() = 0;
+
+        /**
+         * Shutdown the state, and prep for transition to next state
+         * This should return the next state that should be transitioned to
+         * or nullptr to tell the StateMachine to exit.
+         */
+        virtual std::shared_ptr<AState> VShutdown() = 0;
     };
 }
 

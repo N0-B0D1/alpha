@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "FSA/State.h"
+#include "FSA/GameState.h"
 
 namespace alpha
 {
-    AState::~AState() { }
+    GameState::~GameState() { }
 }
