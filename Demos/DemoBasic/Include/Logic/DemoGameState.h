@@ -1,3 +1,6 @@
+#ifndef DEMO_GAME_STATE_H
+#define DEMO_GAME_STATE_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -14,22 +17,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Logic/GameLogic.h"
-#include "Assets/AssetSystem.h"
+#include "FSA/GameState.h"
 
-GameLogic::GameLogic() { }
-GameLogic::~GameLogic() { }
-
-bool GameLogic::VInitialize()
+class DemoGameState : public alpha::AGameState
 {
-    if (LogicSystem::VInitialize())
-    {
-        // create any game specific systems here
-        // this should be a prep spot for setting up the game to run
+public:
+    DemoGameState();
+    virtual ~DemoGameState();
 
-        //e.g. should not make entities here, as proper events will not be sent or received.
+    virtual bool VInitialize();
+    virtual bool VUpdate(double currentTime, double elapsedTime);
+    virtual void VTransition(std::shared_ptr<AState> nextState);
+    virtual std::shared_ptr<AState> VShutdown();
 
-        return true;
-    }
-    return false;
-}
+private:
+    std::shared_ptr<alpha::Entity> m_test;
+    std::shared_ptr<alpha::Entity> m_test2;
+};
+
+#endif // DEMO_GAME_STATE_H

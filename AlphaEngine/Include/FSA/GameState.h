@@ -17,11 +17,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string>
+
 #include "FSA/State.h"
 
 namespace alpha
 {
+    class AlphaController;
     class LogicSystem;
+    class Entity;
 
     /**
      * class GameState
@@ -29,16 +33,26 @@ namespace alpha
      * GameState is a special type of state which has access to the game Logic System.
      * Which allows it to do things like load assets and create entities.
      */
-    class GameState : public AState
+    class AGameState : public AState
     {
+        // only friends can touch your privates
+        friend class AlphaController;
     public:
-        virtual ~GameState();
+        virtual ~AGameState();
+
+        virtual void VTransition(std::shared_ptr<AState> nextState);
 
         // Create any helpful methods that might be useful for a programmer building a game using alpha.
         // The Logic System should always be accessed via a helper function, so it does not have to be
         // directely exposed to any derived class.
-        
+
+        /** Provide pass through access to entity life-cycle methods. */
+        std::shared_ptr<Entity> GetEntity(const unsigned long entityId);
+        std::shared_ptr<Entity> CreateEntity(const char * resource);
+        void DestroyEntity(const unsigned long entityId);
+
     private:
+        void SetLogic(std::shared_ptr<LogicSystem> pLogic);
         std::shared_ptr<LogicSystem> m_pLogic;
     };
 }

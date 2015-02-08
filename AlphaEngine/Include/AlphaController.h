@@ -26,6 +26,9 @@ namespace alpha
     class LogicSystem;
     class GraphicsSystem;
     class AssetSystem;
+    class StateMachine;
+    class AState;
+    class AGameState;
 
     /**
      * The AlphaController is the main engine controller which handles the lifecycle of the engine.
@@ -36,7 +39,13 @@ namespace alpha
         AlphaController();
         virtual ~AlphaController();
 
-        void SetLogic(LogicSystem *pLogic);
+        /** Set the game logic */
+        void SetLogic(std::shared_ptr<LogicSystem> pLogic);
+
+        /** Create the state machine and set the starting state. */
+        void SetGameState(std::shared_ptr<AGameState> state);
+
+        /** Begin controller execution. */
         void Execute();
         
     private:
@@ -55,24 +64,17 @@ namespace alpha
         double sk_maxUpdateTime = 1.0f / 60.0f;
 
         /** game logic system */
-        LogicSystem *m_pLogic;
+        std::shared_ptr<LogicSystem> m_pLogic;
 
         /** Graphics render system */
         GraphicsSystem *m_pGraphics;
 
         /** Asset Management System */
         std::shared_ptr<AssetSystem> m_pAssets;
-	};
 
-    template <class GameLogic> 
-    int InitiateAlpha()
-    {
-        GameLogic *logic = new GameLogic();
-        AlphaController controller;
-        controller.SetLogic(logic);
-        controller.Execute();
-        return 0;
-    }
+        /** The game state machine; manages current state and transition to next game state. */
+        std::unique_ptr<StateMachine> m_pGameStateMachine;
+	};
 }
 
 #endif // ALPHA_CONTROLLER_H

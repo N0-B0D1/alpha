@@ -22,20 +22,38 @@ limitations under the License.
 namespace alpha
 {
     StateMachine::StateMachine(std::shared_ptr<AState> startingState)
-        : m_pCurrentState(startingState)
+        : AlphaSystem(60)
+        , m_pCurrentState(startingState)
+    {
+    }
+
+    bool StateMachine::VInitialize()
     {
         LOG("StateMachine beginning execution.");
         // initialize the starting state, so it is ready to immediate update calls
-        m_pCurrentState->VInitialize();
+        return m_pCurrentState->VInitialize();
     }
 
-    bool StateMachine::Update()
+    bool StateMachine::VShutdown()
+    {
+        LOG("StateMachine Shutting down.");
+        if (m_pCurrentState != nullptr)
+        {
+            // if we exited someone else in the engine, a state may still be active
+            // dispose of it here, so it can release and resources if necessary.
+            m_pCurrentState->VShutdown();
+            m_pCurrentState = nullptr;
+        }
+        return true;
+    }
+
+    bool StateMachine::VUpdate(double currentTime, double elapsedTime)
     {
         // update current state
-        bool complete = m_pCurrentState->VUpdate();
+        bool running = m_pCurrentState->VUpdate(currentTime, elapsedTime);
 
         // if state is complete, advance state
-        if (complete)
+        if (!running)
         {
             LOG("StateMachine shutting down current state.");
             std::shared_ptr<AState> nextState = m_pCurrentState->VShutdown();
@@ -43,10 +61,12 @@ namespace alpha
             if (nextState == nullptr)
             {
                 LOG("StateMachine completed execution.");
+                m_pCurrentState = nullptr;
                 return false;
             }
 
             LOG("StateMachine transitioning to next state.");
+            m_pCurrentState->VTransition(nextState);
             m_pCurrentState = nextState;
             m_pCurrentState->VInitialize();
         }

@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "AlphaController.h"
 #include "Logic/GameLogic.h"
+#include "Logic/DemoGameState.h"
 
 #if WIN32
 #include <Windows.h>
@@ -24,6 +25,18 @@ int WINAPI wWinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInst
 int main(int /*argc*/, char ** /*argv*/)
 #endif
 {
-    int error = alpha::template InitiateAlpha<GameLogic>();
-    return error;
+    alpha::AlphaController controller;
+
+    // The controller will manage the logic system life-cycle, no need to delete it
+    std::shared_ptr<GameLogic> logic = std::make_shared<GameLogic>();
+    controller.SetLogic(logic);
+
+    // set starting game state
+    std::shared_ptr<DemoGameState> state = std::make_shared<DemoGameState>();
+    controller.SetGameState(state);
+
+    // begin engine execution
+    controller.Execute();
+
+    return 0;
 }

@@ -14,9 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string>
+
 #include "FSA/GameState.h"
+#include "Logic/LogicSystem.h"
+#include "Entities/Entity.h"
 
 namespace alpha
 {
-    GameState::~GameState() { }
+    AGameState::~AGameState() { }
+
+    void AGameState::VTransition(std::shared_ptr<AState> nextState)
+    {
+        std::shared_ptr<AGameState> state = std::dynamic_pointer_cast<AGameState>(nextState);
+        state->SetLogic(m_pLogic);
+    }
+
+    std::shared_ptr<Entity> AGameState::GetEntity(const unsigned long entityId)
+    {
+        return m_pLogic->GetEntity(entityId);
+    }
+    std::shared_ptr<Entity> AGameState::CreateEntity(const char * resource)
+    {
+        return m_pLogic->CreateEntity(resource);
+    }
+    void AGameState::DestroyEntity(const unsigned long entityId)
+    {
+        m_pLogic->DestroyEntity(entityId);
+    }
+
+    void AGameState::SetLogic(std::shared_ptr<LogicSystem> pLogic)
+    {
+        m_pLogic = pLogic;
+    }
 }

@@ -19,11 +19,13 @@ limitations under the License.
 
 #include <memory>
 
+#include "AlphaSystem.h"
+
 namespace alpha
 {
     class AState;
 
-    class StateMachine
+    class StateMachine : public AlphaSystem
     {
     public:
         /** \brief The Primary Constructor
@@ -31,10 +33,16 @@ namespace alpha
          */
         explicit StateMachine(std::shared_ptr<AState> startingState);
 
-        /** Update the current state and advance to next state if necessary. */
-        bool Update();
+        virtual bool VInitialize();
+        virtual bool VShutdown();
 
     private:
+        /** \brief Update the current state and advance to next state if necessary.
+        * \param currentTime The current global tick time.
+        * \param elapsedTime Time elapsed since last update.
+        */
+        virtual bool VUpdate(double currentTime, double elapsedTime);
+
         /** Tracks the current active state. */
         std::shared_ptr<AState> m_pCurrentState;
     };

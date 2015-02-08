@@ -18,6 +18,7 @@ limitations under the License.
 */
 
 #include <memory>
+#include <string>
 
 namespace alpha
 {
@@ -33,7 +34,12 @@ namespace alpha
          * Called by the StateMachine when this is the active state.
          * Should return false when the state is done and/or ready to transition.
          */
-        virtual bool VUpdate() = 0;
+        virtual bool VUpdate(double currentTime, double elapsedTime) = 0;
+
+        /**
+         * \brief Transition allows custom logic for passing data between current and next state.
+         */
+        virtual void VTransition(std::shared_ptr<AState> nextState) = 0;
 
         /**
          * Shutdown the state, and prep for transition to next state

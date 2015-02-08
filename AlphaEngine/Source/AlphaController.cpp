@@ -19,6 +19,8 @@ limitations under the License.
 #include "Graphics/GraphicsSystem.h"
 #include "Assets/AssetSystem.h"
 #include "Toolbox/Logger.h"
+#include "FSA/StateMachine.h"
+#include "FSA/GameState.h"
 
 namespace alpha
 {
@@ -32,9 +34,29 @@ namespace alpha
     AlphaController::~AlphaController() { }
 
 
-    void AlphaController::SetLogic(LogicSystem *pLogic)
+    void AlphaController::SetLogic(std::shared_ptr<LogicSystem> pLogic)
     {
-        m_pLogic = pLogic;
+        if (m_pLogic == nullptr)
+        {
+            m_pLogic = pLogic;
+        }
+        else
+        {
+            LOG_WARN("<AlphaController>", " Attempted to attach game logic after it has already been attached.");
+        }
+    }
+
+    void AlphaController::SetGameState(std::shared_ptr<AGameState> state)
+    {
+        if (m_pGameStateMachine == nullptr)
+        {
+            state->SetLogic(m_pLogic);
+            m_pGameStateMachine = std::make_unique<StateMachine>(state);
+        }
+        else
+        {
+            LOG_WARN("<AlphaController>", " Attempted to attach game state after it has already been attached.");
+        }
     }
 
     void AlphaController::Execute()
@@ -81,16 +103,29 @@ namespace alpha
 
         // create input device manager
 
-        // create game logic
+        // initialize the game logic
         m_pLogic->SetAssetSystem(m_pAssets);
         if (!m_pLogic->VInitialize())
         {
             LOG_ERR("<LogicSystem> Initialization failed!");
             return false;
         }
-        
+
         // wire up pub-sub relations
         m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
+
+        // initialize the specified game state
+        // if no state has been specified, then fail to startup
+        if (m_pGameStateMachine == nullptr)
+        {
+            LOG_ERR("<AlphaController> No Game State specified.");
+            return false;
+        }
+        if (!m_pGameStateMachine->VInitialize())
+        {
+            LOG_ERR("<AlphaController> Game State failed to initialize.");
+            return false;
+        }
 
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();
@@ -114,10 +149,18 @@ namespace alpha
         // update systems in discrete chunks of time
         while (m_timeAccumulator >= sk_maxUpdateTime)
         {
-
+            // update asset system, which should cull least recently used items from memory
             m_pAssets->Update(currentTime, sk_maxUpdateTime);
+
+            // update logic which will udpate entities
             m_pLogic->Update(currentTime, sk_maxUpdateTime);
+
+            // update current game state
+            success = m_pGameStateMachine->Update(currentTime, sk_maxUpdateTime);
+
+            // update graphics, which will create any new elements for the scene, or remove them as needed.
             success = m_pGraphics->Update(currentTime, sk_maxUpdateTime);
+
             if (!success)
             {
                 return false;
@@ -146,10 +189,14 @@ namespace alpha
         // destroy systems in reverse order
         // shutdown needs to be smart about deleting things that might not exist
         // in case something failed during initialization, and we are only half built
+        if (m_pGameStateMachine)
+        {
+            m_pGameStateMachine->VShutdown();
+            LOG("<GameStateMachine> Disposed.");
+        }
         if (m_pLogic)
         {
             m_pLogic->VShutdown();
-            delete m_pLogic;
             LOG("<LogicSystem> Disposed.");
         }
         if (m_pGraphics)
