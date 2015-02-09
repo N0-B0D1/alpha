@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+
 #include "AlphaController.h"
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
@@ -51,7 +53,7 @@ namespace alpha
         if (m_pGameStateMachine == nullptr)
         {
             state->SetLogic(m_pLogic);
-            m_pGameStateMachine = std::make_unique<StateMachine>(state);
+            m_pGameStateMachine = std::unique_ptr<StateMachine>(new StateMachine(state));
         }
         else
         {
