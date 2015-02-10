@@ -67,7 +67,7 @@ namespace alpha
         std::shared_ptr<LogicSystem> m_pLogic;
 
         /** Graphics render system */
-        GraphicsSystem *m_pGraphics;
+        std::unique_ptr<GraphicsSystem> m_pGraphics;
 
         /** Asset Management System */
         std::shared_ptr<AssetSystem> m_pAssets;

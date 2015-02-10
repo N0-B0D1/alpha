@@ -96,7 +96,7 @@ namespace alpha
         }
 
         // create graphcs
-        m_pGraphics = new GraphicsSystem();
+        m_pGraphics = std::unique_ptr<GraphicsSystem>(new GraphicsSystem());
         if (!m_pGraphics->VInitialize())
         {
             LOG_ERR("<GraphicsSystem> Initialization failed!");
@@ -204,7 +204,6 @@ namespace alpha
         if (m_pGraphics)
         {
             m_pGraphics->VShutdown();
-            delete m_pGraphics;
             LOG("<GraphicsSystem> Disposed.");
         }
         if (m_pAssets)
