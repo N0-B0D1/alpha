@@ -28,7 +28,7 @@ namespace alpha
     class Entity
     {
     public:
-        explicit Entity(unsigned long entityId, std::shared_ptr<EntityScript> script);
+        Entity(unsigned long entityId, std::shared_ptr<EntityScript> script);
         virtual ~Entity();
 
         bool VUpdate(float fCurrentTime, float fElapsedTime);
@@ -40,6 +40,11 @@ namespace alpha
         void Add(unsigned int component_id, std::shared_ptr<EntityComponent> component);
         std::shared_ptr<EntityComponent> Get(unsigned int component_id);
         void Remove(unsigned int component_id);
+
+        /**
+         * \brief Retrieve the map container containing all elements contained in this Entity.
+         */
+        const std::map<unsigned int, std::shared_ptr<EntityComponent> > GetComponents() const;
 
     private:
         unsigned long m_entityId;

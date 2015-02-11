@@ -15,23 +15,51 @@ limitations under the License.
 */
 
 #include "Graphics/SceneManager.h"
+#include "Graphics/SceneNode.h"
+#include "Entities/Entity.h"
+#include "Entities/EntityComponent.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
     SceneManager::~SceneManager() { }
 
-    bool SceneManager::Add(const std::shared_ptr<Entity> & /*entity*/)
+    bool SceneManager::Add(const std::shared_ptr<Entity> & entity)
     {
-        return true;
+        auto search = m_nodes.find(entity->GetId());
+        if (search == m_nodes.end())
+        {
+            auto components = entity->GetComponents();
+            for (auto component : components)
+            {
+                if (component.second->VIsRenderable())
+                {
+                    // make a scene node for this component
+                    LOG("SceneManager ", "Creating component for entity.");
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
-    bool SceneManager::Update(const std::shared_ptr<Entity> & /*entity*/)
+    bool SceneManager::Update(const std::shared_ptr<Entity> & entity)
     {
-        return true;
+        auto search = m_nodes.find(entity->GetId());
+        if (search != m_nodes.end())
+        {
+            return true;
+        }
+        return false;
     }
 
-    bool SceneManager::Remove(const std::shared_ptr<Entity> & /*entity*/)
+    bool SceneManager::Remove(const std::shared_ptr<Entity> & entity)
     {
-        return true;
+        auto search = m_nodes.find(entity->GetId());
+        if (search != m_nodes.end())
+        {
+            return true;
+        }
+        return false;
     }
 }

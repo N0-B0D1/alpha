@@ -73,4 +73,9 @@ namespace alpha
             m_components.erase(it);
         }
     }
+
+    const std::map<unsigned int, std::shared_ptr<EntityComponent> > Entity::GetComponents() const
+    {
+        return m_components;
+    }
 }

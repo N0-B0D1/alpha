@@ -55,6 +55,9 @@ namespace alpha
         /** Hashes the given string and returns the unsigned int representation. */
         static unsigned int GetIDFromName(const std::string & name);
 
+        /** Helper function for quickly identifying a SceneComponent from a non-renderable logic component. */
+        virtual bool VIsRenderable() const;
+
     protected:
         /** Reference to this components parent, null if is top-level component */ 
         std::shared_ptr<EntityComponent> m_parent;
@@ -75,6 +78,8 @@ namespace alpha
 
         /** Base SceneComponent handles initialization of transform data */
         virtual void VInitialize(std::shared_ptr<LuaVar> var);
+
+        virtual bool VIsRenderable() const;
 
     private:
         /** Helper function for retrieving x, y, or z vars from script tables */

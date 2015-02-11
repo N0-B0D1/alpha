@@ -16,23 +16,29 @@ limitations under the License.
 
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/GraphicsRenderer.h"
+#include "Graphics/SceneManager.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     GraphicsSystem::GraphicsSystem()
         : AlphaSystem(30)
-        , m_pRenderer(0)
+        , m_pRenderer(nullptr)
+        , m_pSceneManager(nullptr)
     { }
     GraphicsSystem::~GraphicsSystem() { }
 
     bool GraphicsSystem::VInitialize()
     {
+        // OS specific renderer
         m_pRenderer = new GraphicsRenderer();
         if (!m_pRenderer->Initialize())
         {
             return false;
         }
+
+        // Scene renerable manager
+        m_pSceneManager = std::unique_ptr<SceneManager>(new SceneManager());
 
         // create event subscribers
         m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated> >();
@@ -58,7 +64,10 @@ namespace alpha
     bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)
     {
         // add any new entities to the graphics system
+        // update any existing entities in the scene
+        // remove and destroyed entities from the scene.
         this->ReadSubscription();
+
         return m_pRenderer->Update(currentTime, elapsedTime);
     }
 
@@ -68,6 +77,7 @@ namespace alpha
         while(std::shared_ptr<const EventData_EntityCreated> data = m_subEntityCreated->GetNextEvent())
         {
             LOG("Graphics system received EntityCreated event");
+            m_pSceneManager->Add(data->GetEntity());
         }
     }
 

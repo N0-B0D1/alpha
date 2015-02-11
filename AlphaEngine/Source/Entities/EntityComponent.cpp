@@ -54,6 +54,11 @@ namespace alpha
         return string_hash(name);
     }
 
+    bool EntityComponent::VIsRenderable() const
+    {
+        return false;
+    }
+
     SceneComponent::~SceneComponent() { }
 
     void SceneComponent::VInitialize(std::shared_ptr<LuaVar> var)
@@ -85,6 +90,11 @@ namespace alpha
 
         LOG(" .... test position = (", this->m_transform.position.x, ", ", this->m_transform.position.y, ", ", this->m_transform.position.z, ")");
         LOG(" .... test scale = (", this->m_transform.scale.x, ", ", this->m_transform.scale.y, ", ", this->m_transform.scale.z, ")");
+    }
+
+    bool SceneComponent::VIsRenderable() const
+    {
+        return true;
     }
 
     float SceneComponent::GetAxis(std::shared_ptr<LuaTable> table, const std::string axis)

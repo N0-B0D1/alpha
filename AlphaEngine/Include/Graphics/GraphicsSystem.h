@@ -27,6 +27,7 @@ limitations under the License.
 namespace alpha
 {
     class GraphicsRenderer;
+    class SceneManager;
 
     class GraphicsSystem : public AlphaSystem
     {
@@ -49,6 +50,9 @@ namespace alpha
 
         /** Renderer implementation (e.g.: DirectX, OpenGL) */
         GraphicsRenderer *m_pRenderer;
+
+        /** SceneManager for tracking logic and propagation of renderable objects in the Scene */
+        std::unique_ptr<SceneManager> m_pSceneManager;
 
         /** Subscriber for new entity created events */
         std::shared_ptr<EventDataSubscriber<EventData_EntityCreated>> m_subEntityCreated;
