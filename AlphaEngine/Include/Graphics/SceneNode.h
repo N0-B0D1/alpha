@@ -17,12 +17,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+#include <vector>
+#include "Math/Transform.h"
+
 namespace alpha
 {
     class SceneNode
     {
     public:
+        SceneNode();
         virtual ~SceneNode();
+
+    private:
+        /** Pointer to this nodes parent node, nullptr if this is the root node. */
+        std::shared_ptr<SceneNode> m_parent;
+
+        /** A list of children nodes that belong to this scene node. */
+        std::vector<std::shared_ptr<SceneNode> > m_children;
+
+        /** The transform that represents this scene nodes position, scale, and rotation in the world. */
+        Transform m_transform;
     };
 }
 

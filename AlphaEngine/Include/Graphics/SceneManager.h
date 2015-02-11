@@ -23,6 +23,7 @@ limitations under the License.
 namespace alpha
 {
     class Entity;
+    class SceneNode;
 
     /**
      * \brief The SceneManager manages the logical scene layout.
@@ -49,7 +50,8 @@ namespace alpha
         bool Remove(const std::shared_ptr<Entity> & entity);
 
     private:
-        //std::map<unsigned int, std::shared_ptr<Entity> > m_nodes;
+        /** Map of entity ID to SceneNode tree */
+        std::map<unsigned int, std::shared_ptr<SceneNode> > m_nodes;
     };
 }
 

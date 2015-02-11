@@ -18,5 +18,8 @@ limitations under the License.
 
 namespace alpha
 {
+    SceneNode::SceneNode()
+        : m_parent(nullptr)
+    { }
     SceneNode::~SceneNode() { }
 }
