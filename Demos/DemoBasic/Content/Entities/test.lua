@@ -14,13 +14,6 @@
 
 -- component data table
 components = {
-	-- transform is an invalid component type, and should raise a warning in the log file.
-    transform0 = {
-		type = "transform",
-		x = 10.5,
-		y = -1,
-		z = -20
-	},
 	root = {
         -- by setting the root node like this, and having all other
         -- scene components exist as children of the root node, we

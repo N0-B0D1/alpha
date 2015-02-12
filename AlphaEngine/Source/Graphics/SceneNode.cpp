@@ -15,11 +15,14 @@ limitations under the License.
 */
 
 #include "Graphics/SceneNode.h"
+#include "Entities/EntityComponent.h"
 
 namespace alpha
 {
-    SceneNode::SceneNode()
+    SceneNode::SceneNode(std::shared_ptr<SceneComponent> component, std::map<unsigned int, std::shared_ptr<SceneNode> > children)
         : m_parent(nullptr)
+        , m_children(children)
+        , m_pSceneComponent(component)
     { }
     SceneNode::~SceneNode() { }
 }

@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <memory>
 #include <vector>
+#include "Entities/EntityComponent.h"
 #include "Math/Transform.h"
 
 namespace alpha
@@ -26,7 +27,7 @@ namespace alpha
     class SceneNode
     {
     public:
-        SceneNode();
+        SceneNode(std::shared_ptr<SceneComponent> component, std::map<unsigned int, std::shared_ptr<SceneNode> > children);
         virtual ~SceneNode();
 
     private:
@@ -34,10 +35,13 @@ namespace alpha
         std::shared_ptr<SceneNode> m_parent;
 
         /** A list of children nodes that belong to this scene node. */
-        std::vector<std::shared_ptr<SceneNode> > m_children;
+        std::map<unsigned int, std::shared_ptr<SceneNode> > m_children;
 
         /** The transform that represents this scene nodes position, scale, and rotation in the world. */
         Transform m_transform;
+
+        /** A handle to the SceneComponent which this SceneNode represents */
+        std::shared_ptr<SceneComponent> m_pSceneComponent;
     };
 }
 

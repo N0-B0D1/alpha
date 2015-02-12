@@ -43,6 +43,11 @@ namespace alpha
         LOG_WARN("  <EntityComponent> Attempt to add a component type that already exists: type: ", component->VGetName());
     }
 
+    const std::map<unsigned int, std::shared_ptr<EntityComponent> > EntityComponent::GetComponents() const
+    {
+        return m_components;
+    }
+
     unsigned int EntityComponent::GetID() const
     {
         return GetIDFromName(this->VGetName());

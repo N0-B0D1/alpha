@@ -48,6 +48,9 @@ namespace alpha
         /** Add a child component to this component */
         void Attach(unsigned int component_id, std::shared_ptr<EntityComponent> component);
 
+        /** Get all sub-components in this entity. */
+        const std::map<unsigned int, std::shared_ptr<EntityComponent> > GetComponents() const;
+
         /** Get the hashed string ID for the derived component. */
         unsigned int GetID() const;
         /** Get the name that represents the component type, NOT the component instance. */

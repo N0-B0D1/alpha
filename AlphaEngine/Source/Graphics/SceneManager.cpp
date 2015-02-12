@@ -26,18 +26,12 @@ namespace alpha
 
     bool SceneManager::Add(const std::shared_ptr<Entity> & entity)
     {
-        auto search = m_nodes.find(entity->GetId());
+        unsigned int entity_id = entity->GetId();
+        auto search = m_nodes.find(entity_id);
         if (search == m_nodes.end())
         {
             auto components = entity->GetComponents();
-            for (auto component : components)
-            {
-                if (component.second->VIsRenderable())
-                {
-                    // make a scene node for this component
-                    LOG("SceneManager ", "Creating component for entity.");
-                }
-            }
+            m_nodes[entity_id] = this->CreateNodes(components);
             return true;
         }
         return false;
@@ -61,5 +55,38 @@ namespace alpha
             return true;
         }
         return false;
+    }
+
+    std::map<unsigned int, std::shared_ptr<SceneNode> > SceneManager::CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components)
+    {
+        std::map<unsigned int, std::shared_ptr<SceneNode> > nodes;
+
+        for (auto component : components)
+        {
+            LOG("SceneManager ", "Creating SceneNode for entity.");
+
+            // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
+            std::map<unsigned int, std::shared_ptr<SceneNode> > child_nodes = this->CreateNodes(component.second->GetComponents());
+
+            std::shared_ptr<SceneNode> node = nullptr;
+            if (component.second->VIsRenderable())
+            {
+                // make a scene node for this component
+                std::shared_ptr<SceneComponent> scene_component = std::dynamic_pointer_cast<SceneComponent>(component.second);
+                node = std::make_shared<SceneNode>(scene_component, child_nodes);
+            }
+            else
+            {
+                // XXX if this component is not renderable, create a space node for it
+                // For now this is just the easy approach, so that the scene node 
+                // hierarchy mirrors the component hierarchy
+                // We could potentially add debug/editor render data for these nodes later?
+                node = std::make_shared<SceneNode>(nullptr, child_nodes);
+            }
+
+            nodes[component.first] = node;
+        }
+
+        return nodes;
     }
 }

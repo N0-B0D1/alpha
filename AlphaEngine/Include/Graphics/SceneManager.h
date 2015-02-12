@@ -23,6 +23,7 @@ limitations under the License.
 namespace alpha
 {
     class Entity;
+    class EntityComponent;
     class SceneNode;
 
     /**
@@ -50,8 +51,13 @@ namespace alpha
         bool Remove(const std::shared_ptr<Entity> & entity);
 
     private:
-        /** Map of entity ID to SceneNode tree */
-        std::map<unsigned int, std::shared_ptr<SceneNode> > m_nodes;
+        /**
+         * \brief Given an entity component, recuresively add SceneNodes.
+         */
+        std::map<unsigned int, std::shared_ptr<SceneNode> > CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components);
+
+        /** Map of entity ID to SceneNode maps */
+        std::map<unsigned int, std::map<unsigned int, std::shared_ptr<SceneNode> > > m_nodes;
     };
 }
 

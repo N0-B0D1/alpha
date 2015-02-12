@@ -42,14 +42,17 @@ namespace alpha
         void Remove(unsigned int component_id);
 
         /**
-         * \brief Retrieve the map container containing all elements contained in this Entity.
+         * \brief Retrieve the map container of all components belonging to this entity instance.
          */
         const std::map<unsigned int, std::shared_ptr<EntityComponent> > GetComponents() const;
 
     private:
         unsigned long m_entityId;
+
+        /** The script instance that this entity is based on. */
         std::shared_ptr<EntityScript> m_script;
 
+        /** Map containing every component belonging to this entity. */
         std::map<unsigned int, std::shared_ptr<EntityComponent> > m_components;
     };
 }
