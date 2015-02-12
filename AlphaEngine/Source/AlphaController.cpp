@@ -97,6 +97,7 @@ namespace alpha
 
         // create graphcs
         m_pGraphics = std::unique_ptr<GraphicsSystem>(new GraphicsSystem());
+        m_pGraphics->SetAssetSystem(m_pAssets);
         if (!m_pGraphics->VInitialize())
         {
             LOG_ERR("<GraphicsSystem> Initialization failed!");

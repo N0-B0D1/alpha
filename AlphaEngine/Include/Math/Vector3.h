@@ -19,20 +19,18 @@ limitations under the License.
 
 namespace alpha
 {
-    class Vector3
+    struct Vector3
     {
-    public:
-        Vector3();
-        Vector3(float fx, float fy, float fz);
-        Vector3(const Vector3 &vec);
-        virtual ~Vector3();
-
-        Vector3 & operator=(const Vector3 & right);
-
-        //! Vector position attributes
         float x;
         float y;
         float z;
+
+        Vector3();
+        Vector3(float fx, float fy, float fz);
+        Vector3(const Vector3 &vec);
+
+        Vector3 & operator=(const Vector3 & right);
+
     };
 }
 

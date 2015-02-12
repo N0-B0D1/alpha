@@ -14,16 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <d3d11_1.h>
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
 #include <DirectXColors.h>
 
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/GraphicsWindow.h"
+#include "Math/Vector3.h"
+#include "Math/Vector4.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    //HINSTANCE               m_hInstance = nullptr;
-    //HWND                    m_hWnd = nullptr;
     D3D_DRIVER_TYPE         m_driverType = D3D_DRIVER_TYPE_NULL;
     D3D_FEATURE_LEVEL       m_featureLevel = D3D_FEATURE_LEVEL_11_1;
     ID3D11Device*           m_pd3dDevice = nullptr;
@@ -33,6 +36,61 @@ namespace alpha
     IDXGISwapChain*         m_pSwapChain = nullptr;
     IDXGISwapChain1*        m_pSwapChain1 = nullptr;
     ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
+    ID3D11VertexShader*     m_pVertexShader = nullptr;
+    ID3D11PixelShader*      m_pPixelShader = nullptr;
+    ID3D11InputLayout*      m_pVertexLayout = nullptr;
+    ID3D11Buffer*           m_pVertexBuffer = nullptr;
+    ID3D11Buffer*           m_pIndexBuffer = nullptr;
+    ID3D11Buffer*           m_pConstantBuffer = nullptr;
+    DirectX::XMMATRIX       m_World;
+    DirectX::XMMATRIX       m_View;
+    DirectX::XMMATRIX       m_Projection;
+
+    struct SimpleVertex
+    {
+        Vector3 Pos;
+        Vector4 Color;
+    };
+
+    struct ConstantBuffer
+    {
+        DirectX::XMMATRIX mWorld;
+        DirectX::XMMATRIX mView;
+        DirectX::XMMATRIX mProjection;
+    };
+
+    // XXX stupid helper function, TODO load from Asset system, and insert into graphics system
+    HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
+    {
+        HRESULT hr = S_OK;
+
+        DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+        // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
+        // Setting this flag improves the shader debugging experience, but still allows 
+        // the shaders to be optimized and to run exactly the way they will run in 
+        // the release configuration of this program.
+        dwShaderFlags |= D3DCOMPILE_DEBUG;
+
+        // Disable optimizations to further improve shader debugging
+        dwShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+        ID3DBlob* pErrorBlob = nullptr;
+        hr = D3DCompileFromFile(szFileName, nullptr, nullptr, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
+        if (FAILED(hr))
+        {
+            if (pErrorBlob)
+            {
+                OutputDebugStringA(reinterpret_cast<const char*>(pErrorBlob->GetBufferPointer()));
+                pErrorBlob->Release();
+            }
+            return hr;
+        }
+        if (pErrorBlob) pErrorBlob->Release();
+
+        return S_OK;
+    }
 
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
@@ -83,8 +141,43 @@ namespace alpha
 
     void GraphicsRenderer::Render()
     {
-        // do something cool
+        // Update our time
+        static float t = 0.0f;
+        if (m_driverType == D3D_DRIVER_TYPE_REFERENCE)
+        {
+            t += (float)DirectX::XM_PI * 0.0125f;
+        }
+        else
+        {
+            static ULONGLONG timeStart = 0;
+            ULONGLONG timeCur = GetTickCount64();
+            if (timeStart == 0)
+                timeStart = timeCur;
+            t = (timeCur - timeStart) / 1000.0f;
+        }
+
+        //
+        // Animate the cube
+        //
+        m_World = DirectX::XMMatrixRotationY(t);
+
+        // clear ... zap!
         m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
+
+        // update variables
+        ConstantBuffer cb;
+        cb.mWorld = DirectX::XMMatrixTranspose(m_World);
+        cb.mView = DirectX::XMMatrixTranspose(m_View);
+        cb.mProjection = DirectX::XMMatrixTranspose(m_Projection);
+        m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+        // already added the triangle vertex buffer in init
+        // now render it
+        m_pImmediateContext->VSSetShader(m_pVertexShader, nullptr, 0);
+        m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+        m_pImmediateContext->PSSetShader(m_pPixelShader, nullptr, 0);
+        m_pImmediateContext->DrawIndexed(36, 0, 0);
+
         m_pSwapChain->Present(0, 0);
     }
 
@@ -133,10 +226,14 @@ namespace alpha
             }
 
             if (SUCCEEDED(hr))
+            {
                 break;
+            }
         }
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         // Obtain DXGI factory from device (since we used nullptr for pAdapter above)
         IDXGIFactory1* dxgiFactory = nullptr;
@@ -156,7 +253,9 @@ namespace alpha
             }
         }
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         // Create swap chain
         IDXGIFactory2* dxgiFactory2 = nullptr;
@@ -242,6 +341,151 @@ namespace alpha
         vp.TopLeftY = 0;
         m_pImmediateContext->RSSetViewports(1, &vp);
 
+        // Compile the vertex shader
+        ID3DBlob* pVSBlob = nullptr;
+        hr = CompileShaderFromFile(L"Tutorial04.fx", "VS", "vs_4_0", &pVSBlob);
+        if (FAILED(hr))
+        {
+            //MessageBox(nullptr, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+            return hr;
+        }
+
+        // Create the vertex shader
+        hr = m_pd3dDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &m_pVertexShader);
+        if (FAILED(hr))
+        {
+            pVSBlob->Release();
+            return hr;
+        }
+
+        // Define the input layout
+        D3D11_INPUT_ELEMENT_DESC layout[] =
+        {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        };
+        UINT numElements = ARRAYSIZE(layout);
+
+        // Create the input layout
+        hr = m_pd3dDevice->CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &m_pVertexLayout);
+        pVSBlob->Release();
+        if (FAILED(hr))
+            return hr;
+
+        // Set the input layout
+        m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
+
+        // Compile the pixel shader
+        ID3DBlob* pPSBlob = nullptr;
+        hr = CompileShaderFromFile(L"Tutorial04.fx", "PS", "ps_4_0", &pPSBlob);
+        if (FAILED(hr))
+        {
+            //MessageBox(nullptr, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+            return hr;
+        }
+
+        // Create the pixel shader
+        hr = m_pd3dDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &m_pPixelShader);
+        pPSBlob->Release();
+        if (FAILED(hr))
+            return hr;
+
+        // Create vertex buffer
+        /* Triangle
+        SimpleVertex vertices[] =
+        {
+            Vector3(0.0f, 0.5f, 0.5f),
+            Vector3(0.5f, -0.5f, 0.5f),
+            Vector3(-0.5f, -0.5f, 0.5f),
+        };
+        */
+        // Cube
+        SimpleVertex vertices[] =
+        {
+            { Vector3(-1.0f, 1.0f, -1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f) },
+            { Vector3(1.0f, 1.0f, -1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f) },
+            { Vector3(1.0f, 1.0f, 1.0f), Vector4(0.0f, 1.0f, 1.0f, 1.0f) },
+            { Vector3(-1.0f, 1.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f) },
+            { Vector3(-1.0f, -1.0f, -1.0f), Vector4(1.0f, 0.0f, 1.0f, 1.0f) },
+            { Vector3(1.0f, -1.0f, -1.0f), Vector4(1.0f, 1.0f, 0.0f, 1.0f) },
+            { Vector3(1.0f, -1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f) },
+            { Vector3(-1.0f, -1.0f, 1.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f) },
+        };
+        D3D11_BUFFER_DESC bd;
+        ZeroMemory(&bd, sizeof(bd));
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.ByteWidth = sizeof(SimpleVertex) * 8;
+        bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        bd.CPUAccessFlags = 0;
+        D3D11_SUBRESOURCE_DATA InitData;
+        ZeroMemory(&InitData, sizeof(InitData));
+        InitData.pSysMem = vertices;
+        hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &m_pVertexBuffer);
+        if (FAILED(hr))
+            return hr;
+
+        // Set vertex buffer
+        UINT stride = sizeof(SimpleVertex);
+        UINT offset = 0;
+        m_pImmediateContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
+
+        // Create index buffer
+        WORD indices[] =
+        {
+            3, 1, 0,
+            2, 1, 3,
+
+            0, 5, 4,
+            1, 5, 0,
+
+            3, 4, 7,
+            0, 4, 3,
+
+            1, 6, 5,
+            2, 6, 1,
+
+            2, 7, 6,
+            3, 7, 2,
+
+            6, 4, 5,
+            7, 4, 6,
+        };
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.ByteWidth = sizeof(WORD) * 36;        // 36 vertices needed for 12 triangles in a triangle list
+        bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        bd.CPUAccessFlags = 0;
+        InitData.pSysMem = indices;
+        hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &m_pIndexBuffer);
+        if (FAILED(hr))
+            return hr;
+
+        // Set index buffer
+        m_pImmediateContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+        // Set primitive topology
+        m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+        // Create the constant buffer
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.ByteWidth = sizeof(ConstantBuffer);
+        bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        bd.CPUAccessFlags = 0;
+        hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &m_pConstantBuffer);
+        if (FAILED(hr))
+            return hr;
+
+        // Initialize the world matrix
+        m_World = DirectX::XMMatrixIdentity();
+
+        // Initialize the view matrix
+        DirectX::XMVECTOR Eye = DirectX::XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
+        DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        m_View = DirectX::XMMatrixLookAtLH(Eye, At, Up);
+
+        // Initialize the projection matrix
+        m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, width / (FLOAT)height, 0.01f, 100.0f);
+
         return S_OK;
     }
 
@@ -249,6 +493,7 @@ namespace alpha
     {
         if (m_pImmediateContext) m_pImmediateContext->ClearState();
 
+        if (m_pVertexBuffer) m_pVertexBuffer->Release();
         if (m_pRenderTargetView) m_pRenderTargetView->Release();
         if (m_pSwapChain1) m_pSwapChain1->Release();
         if (m_pSwapChain) m_pSwapChain->Release();

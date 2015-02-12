@@ -1,3 +1,6 @@
+#ifndef VECTOR_4_H
+#define VECTOR_4_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -14,27 +17,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Math/Vector3.h"
-
 namespace alpha
 {
-    Vector3::Vector3() { }
-    Vector3::Vector3(float fx, float fy, float fz)
-        : x(fx), y(fy), z(fz)
-    { }
-
-    Vector3::Vector3(const Vector3 &vec)
+    struct Vector4
     {
-        this->x = vec.x;
-        this->y = vec.y;
-        this->z = vec.z;
-    }
+        float x;
+        float y;
+        float z;
+        float w;
 
-    Vector3 & Vector3::operator=(const Vector3 & right)
-    {
-        this->x = right.x;
-        this->y = right.y;
-        this->z = right.z;
-        return *this;
-    }
+        Vector4();
+        Vector4(float fx, float fy, float fz, float fw);
+        Vector4(const Vector4 &vec);
+
+        Vector4 & operator=(const Vector4 & right);
+
+    };
 }
+
+#endif // VECTOR_4_H

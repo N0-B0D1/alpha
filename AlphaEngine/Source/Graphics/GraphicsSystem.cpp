@@ -17,12 +17,14 @@ limitations under the License.
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/SceneManager.h"
+#include "Assets/AssetSystem.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     GraphicsSystem::GraphicsSystem()
         : AlphaSystem(30)
+        , m_pAssets(nullptr)
         , m_pRenderer(nullptr)
         , m_pSceneManager(nullptr)
     { }
@@ -69,6 +71,11 @@ namespace alpha
         this->ReadSubscription();
 
         return m_pRenderer->Update(currentTime, elapsedTime);
+    }
+
+    void GraphicsSystem::SetAssetSystem(std::shared_ptr<AssetSystem> pAssets)
+    {
+        m_pAssets = pAssets;
     }
 
     void GraphicsSystem::ReadSubscription()

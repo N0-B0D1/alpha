@@ -28,6 +28,7 @@ namespace alpha
 {
     class GraphicsRenderer;
     class SceneManager;
+    class AssetSystem;
 
     class GraphicsSystem : public AlphaSystem
     {
@@ -40,6 +41,8 @@ namespace alpha
 
         void Render();
 
+        void SetAssetSystem(std::shared_ptr<AssetSystem> pAssets);
+
         /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
         std::shared_ptr<AEventDataSubscriber> GetEntityCreatedSubscriber() const;
 
@@ -47,6 +50,9 @@ namespace alpha
         virtual bool VUpdate(double currentTime, double elapsedTime);
         /** Read the EntityCreated subscription on each update to handle any new entities that need to be rendered. */
         void ReadSubscription();
+
+        /** A handle to the main asset system. */
+        std::shared_ptr<AssetSystem> m_pAssets;
 
         /** Renderer implementation (e.g.: DirectX, OpenGL) */
         GraphicsRenderer *m_pRenderer;

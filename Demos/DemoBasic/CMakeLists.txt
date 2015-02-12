@@ -54,7 +54,11 @@ install(TARGETS DemoBasic DESTINATION bin)
 if (MSVC)
 	# XXX need to do this for other build targets as well
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_PS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_PS.hlsl)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_VS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_VS.hlsl)
 else ()
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Content/Entities/test.lua)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_PS.hlsl ${CMAKE_BINARY_DIR}/bin/Content/Shaders/Basic_PS.hlsl)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_VS.hlsl ${CMAKE_BINARY_DIR}/bin/Content/Shaders/Basic_VS.hlsl)
 endif (MSVC)
 

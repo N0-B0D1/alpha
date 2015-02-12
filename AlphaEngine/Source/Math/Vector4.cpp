@@ -14,27 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Math/Vector3.h"
+#include "Math/Vector4.h"
 
 namespace alpha
 {
-    Vector3::Vector3() { }
-    Vector3::Vector3(float fx, float fy, float fz)
-        : x(fx), y(fy), z(fz)
+    Vector4::Vector4() { }
+    Vector4::Vector4(float fx, float fy, float fz, float fw)
+        : x(fx), y(fy), z(fz), w(fw)
     { }
 
-    Vector3::Vector3(const Vector3 &vec)
+    Vector4::Vector4(const Vector4 &vec)
     {
         this->x = vec.x;
         this->y = vec.y;
         this->z = vec.z;
+        this->w = vec.w;
     }
 
-    Vector3 & Vector3::operator=(const Vector3 & right)
+    Vector4 & Vector4::operator=(const Vector4 & right)
     {
         this->x = right.x;
         this->y = right.y;
         this->z = right.z;
+        this->w = right.w;
         return *this;
     }
 }
