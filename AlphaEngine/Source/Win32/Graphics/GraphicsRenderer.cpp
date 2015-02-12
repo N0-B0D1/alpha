@@ -27,6 +27,8 @@ limitations under the License.
 
 namespace alpha
 {
+    const std::string GraphicsRenderer::sk_shader_extension = "hlsl";
+
     D3D_DRIVER_TYPE         m_driverType = D3D_DRIVER_TYPE_NULL;
     D3D_FEATURE_LEVEL       m_featureLevel = D3D_FEATURE_LEVEL_11_1;
     ID3D11Device*           m_pd3dDevice = nullptr;
@@ -179,6 +181,12 @@ namespace alpha
         m_pImmediateContext->DrawIndexed(36, 0, 0);
 
         m_pSwapChain->Present(0, 0);
+    }
+
+    void GraphicsRenderer::SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader)
+    {
+        m_psDefaultShader = psShader;
+        m_vsDefaultShader = vsShader;
     }
 
     HRESULT GraphicsRenderer::InitializeDevice()

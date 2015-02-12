@@ -18,6 +18,7 @@ limitations under the License.
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/SceneManager.h"
 #include "Assets/AssetSystem.h"
+#include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
@@ -32,12 +33,17 @@ namespace alpha
 
     bool GraphicsSystem::VInitialize()
     {
+        // XXX temporary, load some basic shaders to use for everything until proper load pipeline is implemented
+        auto ps_shader = this->LoadShaderFile("Shaders/Basic_PS");
+        auto vs_shader = this->LoadShaderFile("Shaders/Basic_VS");
+
         // OS specific renderer
         m_pRenderer = new GraphicsRenderer();
         if (!m_pRenderer->Initialize())
         {
             return false;
         }
+        m_pRenderer->SetBasicShaders(ps_shader, vs_shader);
 
         // Scene renerable manager
         m_pSceneManager = std::unique_ptr<SceneManager>(new SceneManager());
@@ -91,5 +97,14 @@ namespace alpha
     std::shared_ptr<AEventDataSubscriber> GraphicsSystem::GetEntityCreatedSubscriber() const
     {
         return m_subEntityCreated;
+    }
+
+    std::shared_ptr<Asset> GraphicsSystem::LoadShaderFile(const std::string & name)
+    {
+        std::string shader_path = std::string(name.c_str());
+        shader_path.append(".");
+        shader_path.append(GraphicsRenderer::sk_shader_extension.c_str());
+        std::shared_ptr<Asset> asset = m_pAssets->GetAsset(shader_path.c_str());
+        return asset;
     }
 }

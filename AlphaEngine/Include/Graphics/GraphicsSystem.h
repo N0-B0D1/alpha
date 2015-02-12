@@ -29,6 +29,7 @@ namespace alpha
     class GraphicsRenderer;
     class SceneManager;
     class AssetSystem;
+    class Asset;
 
     class GraphicsSystem : public AlphaSystem
     {
@@ -45,6 +46,10 @@ namespace alpha
 
         /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
         std::shared_ptr<AEventDataSubscriber> GetEntityCreatedSubscriber() const;
+
+        // Helper methods
+        /** Helper method for loading shader asset files */
+        std::shared_ptr<Asset> LoadShaderFile(const std::string & name);
 
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);

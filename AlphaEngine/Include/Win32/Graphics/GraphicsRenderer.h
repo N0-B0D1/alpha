@@ -20,15 +20,19 @@ limitations under the License.
 #include <Windows.h>
 #include <d3d11_1.h>
 
+#include <string>
+
 //#include "AlphaSystem.h"
 
 namespace alpha
 {
     class GraphicsWindow;
+    class Asset;
 
     class GraphicsRenderer
     {
     public:
+        static const std::string sk_shader_extension;
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
@@ -37,6 +41,8 @@ namespace alpha
         bool Shutdown();
 
         void Render();
+
+        void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
 
     private:
         //virtual bool VUpdate(double currentTime, double elapsedTime);
@@ -48,6 +54,9 @@ namespace alpha
         void CleanupDevice();
 
         GraphicsWindow *m_pWindow;
+
+        std::shared_ptr<Asset> m_vsDefaultShader;
+        std::shared_ptr<Asset> m_psDefaultShader;
     };
 }
 
