@@ -34,7 +34,6 @@ namespace alpha
     private:
         const char * m_pPath;
         struct stat m_fileStats;
-        //char *m_pBuffer;
         std::vector<unsigned char> m_data;
     };
 }

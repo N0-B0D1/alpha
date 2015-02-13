@@ -17,13 +17,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+#include <string>
+
+//#include<GL/gl.h>
+#include<GL/glx.h>
+//#include<GL/glu.h>
+
 namespace alpha
 {
 	class RenderWindow;
+    class Asset;
 
     class GraphicsRenderer
     {
     public:
+        static const std::string sk_shader_extension;
+
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
@@ -33,8 +43,23 @@ namespace alpha
 
         void Render();
 
+        /** Set basic GLSL shaders for default usage */
+        void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
+
     private:
-        RenderWindow *m_pWindow; 
+        bool InitializeDevice();
+
+        RenderWindow *m_pWindow;
+
+        std::shared_ptr<Asset> m_vsDefaultShader;
+        std::shared_ptr<Asset> m_psDefaultShader;
+
+        /** OpenGL variables */
+        GLXContext m_glContext;
+
+        GLuint m_VertexBuffer;
+        GLuint m_VertexAttribute;
+        //GLuint m_ShaderProgram;
     };
 }
 

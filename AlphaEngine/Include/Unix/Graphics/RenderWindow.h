@@ -25,7 +25,7 @@ limitations under the License.
 
 #include<GL/gl.h>
 #include<GL/glx.h>
-#include<GL/glu.h>
+//#include<GL/glu.h>
 
 namespace alpha
 {
@@ -41,9 +41,14 @@ namespace alpha
 
         void Render();
 
+        Display * GetDisplay() const;
+        Window GetWindow() const;
+        XVisualInfo * GetVisualInfo() const;
+        XWindowAttributes GetXWindowAttrs() const;
+
     private:
         /** XXX Temporary function to draw something, so we have a little more than a black window */
-        void DrawAQuad();
+        //void DrawAQuad();
 
         Display *m_pDisplay;
         Window m_root;
@@ -52,7 +57,6 @@ namespace alpha
         Colormap m_colorMap;
         XSetWindowAttributes m_setWindowAttrs;
         Window m_window;
-        GLXContext m_glContext;
         XWindowAttributes m_xWindowAttrs;
         XEvent m_xEvent;
 	};
