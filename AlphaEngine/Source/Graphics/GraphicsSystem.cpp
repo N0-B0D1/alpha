@@ -39,11 +39,11 @@ namespace alpha
 
         // OS specific renderer
         m_pRenderer = new GraphicsRenderer();
+        m_pRenderer->SetBasicShaders(ps_shader, vs_shader);
         if (!m_pRenderer->Initialize())
         {
             return false;
         }
-        m_pRenderer->SetBasicShaders(ps_shader, vs_shader);
 
         // Scene renerable manager
         m_pSceneManager = std::unique_ptr<SceneManager>(new SceneManager());

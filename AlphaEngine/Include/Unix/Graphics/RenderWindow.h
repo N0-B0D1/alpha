@@ -46,10 +46,7 @@ namespace alpha
         XVisualInfo * GetVisualInfo() const;
         XWindowAttributes GetXWindowAttrs() const;
 
-    private:
-        /** XXX Temporary function to draw something, so we have a little more than a black window */
-        //void DrawAQuad();
-
+    private: 
         Display *m_pDisplay;
         Window m_root;
         GLint m_att[5] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };

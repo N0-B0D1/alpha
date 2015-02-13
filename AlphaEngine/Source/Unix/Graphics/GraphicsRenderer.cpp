@@ -65,23 +65,24 @@ namespace alpha
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
         // create vertex shader
-        //std::vector<unsigned char> vsData = m_vsDefaultShader->GetData();
-        //char * vsbuffer = reinterpret_cast<char *>(&vsData[0]);
-        //GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-        //glShaderSource(vs, 1, &vsbuffer, nullptr);
-        //glCompileShader(vs);
+        std::vector<unsigned char> vsData = m_vsDefaultShader->GetData();
+        char * vsbuffer = reinterpret_cast<char *>(&vsData[0]);
+        GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vs, 1, &vsbuffer, nullptr);
+        glCompileShader(vs);
         
         // create pixel/fragment shader
-        //std::vector<unsigned char> psData = m_psDefaultShader->GetData();
-        //char * psbuffer = reinterpret_cast<char *>(&psData[0]);
-        //GLuint ps = glCreateShader(GL_FRAGMENT_SHADER);
-        //glShaderSource(ps, 1, &psbuffer, nullptr);
-        //glCompileShader(ps);
+        std::vector<unsigned char> psData = m_psDefaultShader->GetData();
+        char * psbuffer = reinterpret_cast<char *>(&psData[0]);
+        GLuint ps = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(ps, 1, &psbuffer, nullptr);
+        glCompileShader(ps);
 
-        //m_ShaderProgram = glCreateProgram();
-        //glAttachShader(m_ShaderProgram, ps);
-        //glAttachShader(m_ShaderProgram, vs);
-        //glLinkProgram(m_ShaderProgram);
+        // make shader program, to render with
+        m_ShaderProgram = glCreateProgram();
+        glAttachShader(m_ShaderProgram, ps);
+        glAttachShader(m_ShaderProgram, vs);
+        glLinkProgram(m_ShaderProgram);
 
 		return true;
 	}
@@ -118,35 +119,14 @@ namespace alpha
         // draw some stuff, like a cube or some shit.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //glUseProgram(m_ShaderProgram);
-        glBindVertexArray(m_VertexBuffer);
+        // set shader program
+        glUseProgram(m_ShaderProgram);
+
+        glBindVertexArray(m_VertexAttribute);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // swap buffer to display cool new render objects.
-        glXSwapBuffers(display, window);
-
-        /*
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-1., 1., -1., 1., 1., 20.);
-
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        gluLookAt(0., 0., 10., 0., 0., 0., 0., 1., 0.);
-
-        glBegin(GL_QUADS);
-        glColor3f(1., 0., 0.); glVertex3f(-.75, -.75, 0.);
-        glColor3f(0., 1., 0.); glVertex3f( .75, -.75, 0.);
-        glColor3f(0., 0., 1.); glVertex3f( .75,  .75, 0.);
-        glColor3f(1., 1., 0.); glVertex3f(-.75,  .75, 0.);
-        glEnd();
-        */
-        //glUseProgram(theProgram);
-        
-        
+        glXSwapBuffers(display, window); 
     }
 
     void GraphicsRenderer::SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader)
@@ -166,12 +146,13 @@ namespace alpha
 
         glewInit();
 
-        const GLubyte *renderer = glGetString(GL_RENDERER);
-        const GLubyte *version = glGetString(GL_VERSION);
-        LOG("OpenGL Renderer = ", renderer);
-        LOG("OpenGL Version = ", version);
+        m_pRendererInfo = glGetString(GL_RENDERER);
+        m_pVersionInfo = glGetString(GL_VERSION);
+        LOG("OpenGL Renderer = ", m_pRendererInfo);
+        LOG("OpenGL Version = ", m_pVersionInfo);
          
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
 
         return true;
     }
