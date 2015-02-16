@@ -105,12 +105,10 @@ namespace alpha
         // so that we dont leave anything lingering...
         lua_pop(m_pLuaState, 1);
 
-#if ALPHA_DEBUG
         if (stack_top != lua_gettop(m_pLuaState))
         {
             LOG_ERR("Stack top should be ", stack_top, ", actual value is: ", lua_gettop(m_pLuaState));
         }
-#endif
 
         // cast and return the LuaTable
         return std::dynamic_pointer_cast<LuaTable>(table);
