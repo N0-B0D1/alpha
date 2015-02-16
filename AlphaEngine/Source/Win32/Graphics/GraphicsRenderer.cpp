@@ -14,16 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <Windows.h>
+
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 
+#include <vector>
+
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/GraphicsWindow.h"
+#include "Graphics/RenderData.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
+#include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
+
+using namespace DirectX;
 
 namespace alpha
 {
@@ -38,61 +46,40 @@ namespace alpha
     IDXGISwapChain*         m_pSwapChain = nullptr;
     IDXGISwapChain1*        m_pSwapChain1 = nullptr;
     ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
+    ID3D11Texture2D*        m_pDepthStencil = nullptr;
+    ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
+    /*
     ID3D11VertexShader*     m_pVertexShader = nullptr;
     ID3D11PixelShader*      m_pPixelShader = nullptr;
+    ID3D11PixelShader*      m_pPixelShaderSolid = nullptr;
     ID3D11InputLayout*      m_pVertexLayout = nullptr;
     ID3D11Buffer*           m_pVertexBuffer = nullptr;
     ID3D11Buffer*           m_pIndexBuffer = nullptr;
     ID3D11Buffer*           m_pConstantBuffer = nullptr;
+    */
     DirectX::XMMATRIX       m_World;
     DirectX::XMMATRIX       m_View;
     DirectX::XMMATRIX       m_Projection;
 
+
+    /*
     struct SimpleVertex
     {
-        Vector3 Pos;
-        Vector4 Color;
+        XMFLOAT3 Pos;
+        XMFLOAT3 Normal;
     };
 
     struct ConstantBuffer
     {
-        DirectX::XMMATRIX mWorld;
-        DirectX::XMMATRIX mView;
-        DirectX::XMMATRIX mProjection;
+        XMMATRIX mWorld;
+        XMMATRIX mView;
+        XMMATRIX mProjection;
+        XMFLOAT4 vLightDir[2];
+        XMFLOAT4 vLightColor[2];
+        XMFLOAT4 vOutputColor;
     };
+    */
 
-    // XXX stupid helper function, TODO load from Asset system, and insert into graphics system
-    HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
-    {
-        HRESULT hr = S_OK;
-
-        DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#ifdef _DEBUG
-        // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-        // Setting this flag improves the shader debugging experience, but still allows 
-        // the shaders to be optimized and to run exactly the way they will run in 
-        // the release configuration of this program.
-        dwShaderFlags |= D3DCOMPILE_DEBUG;
-
-        // Disable optimizations to further improve shader debugging
-        dwShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
-
-        ID3DBlob* pErrorBlob = nullptr;
-        hr = D3DCompileFromFile(szFileName, nullptr, nullptr, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
-        if (FAILED(hr))
-        {
-            if (pErrorBlob)
-            {
-                OutputDebugStringA(reinterpret_cast<const char*>(pErrorBlob->GetBufferPointer()));
-                pErrorBlob->Release();
-            }
-            return hr;
-        }
-        if (pErrorBlob) pErrorBlob->Release();
-
-        return S_OK;
-    }
 
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
@@ -133,16 +120,15 @@ namespace alpha
 
     bool GraphicsRenderer::Update(double currentTime, double elapsedTime)
     {
-        // play nicely with windows ...
-        bool success = m_pWindow->Update(currentTime, elapsedTime);
-
-        // update scene
-
-        return success;
+        // let any windows messages through
+        return m_pWindow->Update(currentTime, elapsedTime);
     }
 
-    void GraphicsRenderer::Render()
+    void GraphicsRenderer::Render(std::vector<RenderData *> renderables)
     {
+        // 1. pre-render
+        this->PreRender(renderables);
+
         // Update our time
         static float t = 0.0f;
         if (m_driverType == D3D_DRIVER_TYPE_REFERENCE)
@@ -158,28 +144,132 @@ namespace alpha
             t = (timeCur - timeStart) / 1000.0f;
         }
 
+        // Setup our lighting parameters
+        Vector4 vLightDirs[2] =
+        {
+            Vector4(-0.577f, 0.577f, -0.577f, 1.0f),
+            Vector4(0.0f, 0.0f, -1.0f, 1.0f),
+        };
+        Vector4 vLightColors[2] =
+        {
+            Vector4(0.5f, 0.5f, 0.5f, 1.0f),
+            Vector4(0.5f, 0.0f, 0.0f, 1.0f)
+        };
+
+        // clear ... zap!
+        m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
+        m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+        for (RenderData * rd : renderables)
+        {
+            //XMStoreFloat4x4(&rd->m_world, DirectX::XMMatrixRotationY(t));
+
+            // set input layout
+            m_pImmediateContext->IASetInputLayout(rd->m_pInputLayout);
+
+            // Set vertex buffer
+            UINT stride = sizeof(SimpleVertex);
+            UINT offset = 0;
+            m_pImmediateContext->IASetVertexBuffers(0, 1, &rd->m_pVertexBuffer, &stride, &offset);
+
+            // Set index buffer
+            m_pImmediateContext->IASetIndexBuffer(rd->m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+            // Set primitive topology
+            m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+            // update constant buffer
+            ConstantBuffer cb;
+            cb.mWorld = DirectX::XMMatrixTranspose(XMLoadFloat4x4(&rd->m_world));
+            cb.mView = DirectX::XMMatrixTranspose(m_View);
+            cb.mProjection = DirectX::XMMatrixTranspose(m_Projection);
+            cb.vLightDir[0] = vLightDirs[0];
+            cb.vLightDir[1] = vLightDirs[1];
+            cb.vLightColor[0] = vLightColors[0];
+            cb.vLightColor[1] = vLightColors[1];
+            cb.ambient = Vector4(0.2f, 0.2f, 0.2f, 1.0f);
+            cb.vOutputColor = Vector4(0.5f, 0.5f, 0.5f, 1.0f);
+            m_pImmediateContext->UpdateSubresource(rd->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+            // render object
+            m_pImmediateContext->VSSetShader(rd->m_pVertexShader, nullptr, 0);
+            m_pImmediateContext->VSSetConstantBuffers(0, 1, &rd->m_pConstantBuffer);
+            m_pImmediateContext->PSSetShader(rd->m_pPixelShader, nullptr, 0);
+            m_pImmediateContext->PSSetConstantBuffers(0, 1, &rd->m_pConstantBuffer);
+
+            m_pImmediateContext->DrawIndexed(rd->m_indices.size(), 0, 0);
+        }
+
+        /*
         //
         // Animate the cube
         //
         m_World = DirectX::XMMatrixRotationY(t);
 
+        // Setup our lighting parameters
+        Vector4 vLightDirs[2] =
+        {
+            Vector4(-0.577f, 0.577f, -0.577f, 1.0f),
+            Vector4(0.0f, 0.0f, -1.0f, 1.0f),
+        };
+        Vector4 vLightColors[2] =
+        {
+            Vector4(0.5f, 0.5f, 0.5f, 1.0f),
+            Vector4(0.5f, 0.0f, 0.0f, 1.0f)
+        };
+
+        // Rotate the second light around the origin
+        DirectX::XMMATRIX mRotate = DirectX::XMMatrixRotationY(-2.0f * t);
+        DirectX::XMVECTOR vLightDir = DirectX::XMLoadFloat4(&vLightDirs[1]);
+        vLightDir = DirectX::XMVector3Transform(vLightDir, mRotate);
+        DirectX::XMStoreFloat4(&vLightDirs[1], vLightDir);
+
         // clear ... zap!
         m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
+        m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         // update variables
         ConstantBuffer cb;
         cb.mWorld = DirectX::XMMatrixTranspose(m_World);
         cb.mView = DirectX::XMMatrixTranspose(m_View);
         cb.mProjection = DirectX::XMMatrixTranspose(m_Projection);
+        cb.vLightDir[0] = vLightDirs[0];
+        cb.vLightDir[1] = vLightDirs[1];
+        cb.vLightColor[0] = vLightColors[0];
+        cb.vLightColor[1] = vLightColors[1];
+        cb.vOutputColor = Vector4(0, 0, 0, 0);
         m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
         // already added the triangle vertex buffer in init
         // now render it
         m_pImmediateContext->VSSetShader(m_pVertexShader, nullptr, 0);
         m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+
         m_pImmediateContext->PSSetShader(m_pPixelShader, nullptr, 0);
+        m_pImmediateContext->PSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+
         m_pImmediateContext->DrawIndexed(36, 0, 0);
 
+        //
+        // Render each light
+        //
+        for (int m = 0; m < 2; m++)
+        {
+            XMMATRIX mLight = XMMatrixTranslationFromVector(5.0f * XMLoadFloat4(&vLightDirs[m]));
+            XMMATRIX mLightScale = XMMatrixScaling(0.2f, 0.2f, 0.2f);
+            mLight = mLightScale * mLight;
+
+            // Update the world variable to reflect the current light
+            cb.mWorld = XMMatrixTranspose(mLight);
+            cb.vOutputColor = vLightColors[m];
+            m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+            m_pImmediateContext->PSSetShader(m_pPixelShaderSolid, nullptr, 0);
+            m_pImmediateContext->DrawIndexed(36, 0, 0);
+        }
+        */
+
+        // swap buffer that we just drew to.
         m_pSwapChain->Present(0, 0);
     }
 
@@ -195,13 +285,12 @@ namespace alpha
         HWND hwnd = m_pWindow->GetHWND();
 
         RECT rc;
-        //GetClientRect(m_hWnd, &rc);
         GetClientRect(hwnd, &rc);
         UINT width = rc.right - rc.left;
         UINT height = rc.bottom - rc.top;
 
         UINT createDeviceFlags = 0;
-#ifdef _DEBUG
+#ifdef ALPHA_DEBUG
         createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -337,7 +426,35 @@ namespace alpha
             return hr;
         }
 
-        m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, nullptr);
+        // Create depth stencil texture
+        D3D11_TEXTURE2D_DESC descDepth;
+        ZeroMemory(&descDepth, sizeof(descDepth));
+        descDepth.Width = width;
+        descDepth.Height = height;
+        descDepth.MipLevels = 1;
+        descDepth.ArraySize = 1;
+        descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        descDepth.SampleDesc.Count = 1;
+        descDepth.SampleDesc.Quality = 0;
+        descDepth.Usage = D3D11_USAGE_DEFAULT;
+        descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+        descDepth.CPUAccessFlags = 0;
+        descDepth.MiscFlags = 0;
+        hr = m_pd3dDevice->CreateTexture2D(&descDepth, nullptr, &m_pDepthStencil);
+        if (FAILED(hr))
+            return hr;
+
+        // Create the depth stencil view
+        D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+        ZeroMemory(&descDSV, sizeof(descDSV));
+        descDSV.Format = descDepth.Format;
+        descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+        descDSV.Texture2D.MipSlice = 0;
+        hr = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
+        if (FAILED(hr))
+            return hr;
+
+        m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 
         // Setup the viewport
         D3D11_VIEWPORT vp;
@@ -349,28 +466,24 @@ namespace alpha
         vp.TopLeftY = 0;
         m_pImmediateContext->RSSetViewports(1, &vp);
 
+
+
+
+
+
+        /*
+
         // Compile the vertex shader
         ID3DBlob* pVSBlob = nullptr;
-        hr = CompileShaderFromFile(L"Tutorial04.fx", "VS", "vs_4_0", &pVSBlob);
-        if (FAILED(hr))
-        {
-            //MessageBox(nullptr, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-            return hr;
-        }
-
-        // Create the vertex shader
-        hr = m_pd3dDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &m_pVertexShader);
-        if (FAILED(hr))
-        {
-            pVSBlob->Release();
-            return hr;
-        }
+        // create default vertex shader
+        m_pVertexShader = this->CreateVertexShaderFromAsset(m_vsDefaultShader, "VS", &pVSBlob);
 
         // Define the input layout
         D3D11_INPUT_ELEMENT_DESC layout[] =
         {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            //{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         };
         UINT numElements = ARRAYSIZE(layout);
 
@@ -383,46 +496,50 @@ namespace alpha
         // Set the input layout
         m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
 
-        // Compile the pixel shader
-        ID3DBlob* pPSBlob = nullptr;
-        hr = CompileShaderFromFile(L"Tutorial04.fx", "PS", "ps_4_0", &pPSBlob);
-        if (FAILED(hr))
-        {
-            //MessageBox(nullptr, L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-            return hr;
-        }
+        // create default pixel shader
+        m_pPixelShader = this->CreatePixelShaderFromAsset(m_psDefaultShader, "PS");
 
-        // Create the pixel shader
-        hr = m_pd3dDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &m_pPixelShader);
-        pPSBlob->Release();
-        if (FAILED(hr))
-            return hr;
+        // create solid pixel shader
+        m_pPixelShaderSolid = this->CreatePixelShaderFromAsset(m_psDefaultShader, "PSSolid");
 
         // Create vertex buffer
-        /* Triangle
-        SimpleVertex vertices[] =
-        {
-            Vector3(0.0f, 0.5f, 0.5f),
-            Vector3(0.5f, -0.5f, 0.5f),
-            Vector3(-0.5f, -0.5f, 0.5f),
-        };
-        */
         // Cube
         SimpleVertex vertices[] =
         {
-            { Vector3(-1.0f, 1.0f, -1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f) },
-            { Vector3(1.0f, 1.0f, -1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f) },
-            { Vector3(1.0f, 1.0f, 1.0f), Vector4(0.0f, 1.0f, 1.0f, 1.0f) },
-            { Vector3(-1.0f, 1.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f) },
-            { Vector3(-1.0f, -1.0f, -1.0f), Vector4(1.0f, 0.0f, 1.0f, 1.0f) },
-            { Vector3(1.0f, -1.0f, -1.0f), Vector4(1.0f, 1.0f, 0.0f, 1.0f) },
-            { Vector3(1.0f, -1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f) },
-            { Vector3(-1.0f, -1.0f, 1.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f) },
+            { Vector3(-1.0f, 1.0f, -1.0f), Vector3(0.0f, 1.0f, 0.0f) },
+            { Vector3(1.0f, 1.0f, -1.0f), Vector3(0.0f, 1.0f, 0.0f) },
+            { Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 1.0f, 0.0f) },
+            { Vector3(-1.0f, 1.0f, 1.0f), Vector3(0.0f, 1.0f, 0.0f) },
+
+            { Vector3(-1.0f, -1.0f, -1.0f), Vector3(0.0f, -1.0f, 0.0f) },
+            { Vector3(1.0f, -1.0f, -1.0f), Vector3(0.0f, -1.0f, 0.0f) },
+            { Vector3(1.0f, -1.0f, 1.0f), Vector3(0.0f, -1.0f, 0.0f) },
+            { Vector3(-1.0f, -1.0f, 1.0f), Vector3(0.0f, -1.0f, 0.0f) },
+
+            { Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
+            { Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
+            { Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
+            { Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
+
+            { Vector3(1.0f, -1.0f, 1.0f), Vector3(1.0f, 0.0f, 0.0f) },
+            { Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 0.0f, 0.0f) },
+            { Vector3(1.0f, 1.0f, -1.0f), Vector3(1.0f, 0.0f, 0.0f) },
+            { Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 0.0f, 0.0f) },
+
+            { Vector3(-1.0f, -1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
+            { Vector3(1.0f, -1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
+            { Vector3(1.0f, 1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
+            { Vector3(-1.0f, 1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
+
+            { Vector3(-1.0f, -1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
+            { Vector3(1.0f, -1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
+            { Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
+            { Vector3(-1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
         };
         D3D11_BUFFER_DESC bd;
         ZeroMemory(&bd, sizeof(bd));
         bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.ByteWidth = sizeof(SimpleVertex) * 8;
+        bd.ByteWidth = sizeof(SimpleVertex) * 24;
         bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
         bd.CPUAccessFlags = 0;
         D3D11_SUBRESOURCE_DATA InitData;
@@ -443,20 +560,20 @@ namespace alpha
             3, 1, 0,
             2, 1, 3,
 
-            0, 5, 4,
-            1, 5, 0,
-
-            3, 4, 7,
-            0, 4, 3,
-
-            1, 6, 5,
-            2, 6, 1,
-
-            2, 7, 6,
-            3, 7, 2,
-
             6, 4, 5,
             7, 4, 6,
+
+            11, 9, 8,
+            10, 9, 11,
+
+            14, 12, 13,
+            15, 12, 14,
+
+            19, 17, 16,
+            18, 17, 19,
+
+            22, 20, 21,
+            23, 20, 22
         };
         bd.Usage = D3D11_USAGE_DEFAULT;
         bd.ByteWidth = sizeof(WORD) * 36;        // 36 vertices needed for 12 triangles in a triangle list
@@ -484,15 +601,16 @@ namespace alpha
 
         // Initialize the world matrix
         m_World = DirectX::XMMatrixIdentity();
+        */
 
         // Initialize the view matrix
-        DirectX::XMVECTOR Eye = DirectX::XMVectorSet(0.0f, 1.0f, -5.0f, 0.0f);
-        DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        m_View = DirectX::XMMatrixLookAtLH(Eye, At, Up);
+        XMVECTOR Eye = XMVectorSet(0.0f, 4.0f, -20.0f, 0.0f);
+        XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        m_View = XMMatrixLookAtLH(Eye, At, Up);
 
         // Initialize the projection matrix
-        m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, width / (FLOAT)height, 0.01f, 100.0f);
+        m_Projection = XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
 
         return S_OK;
     }
@@ -501,7 +619,18 @@ namespace alpha
     {
         if (m_pImmediateContext) m_pImmediateContext->ClearState();
 
+        /*
+        if (m_pConstantBuffer) m_pConstantBuffer->Release();
         if (m_pVertexBuffer) m_pVertexBuffer->Release();
+        if (m_pIndexBuffer) m_pIndexBuffer->Release();
+        if (m_pVertexLayout) m_pVertexLayout->Release();
+        if (m_pVertexShader) m_pVertexShader->Release();
+        if (m_pPixelShaderSolid) m_pPixelShaderSolid->Release();
+        if (m_pPixelShader) m_pPixelShader->Release();
+        */
+
+        if (m_pDepthStencil) m_pDepthStencil->Release();
+        if (m_pDepthStencilView) m_pDepthStencilView->Release();
         if (m_pRenderTargetView) m_pRenderTargetView->Release();
         if (m_pSwapChain1) m_pSwapChain1->Release();
         if (m_pSwapChain) m_pSwapChain->Release();
@@ -517,5 +646,190 @@ namespace alpha
         m_pSwapChain = nullptr;
         m_pSwapChain1 = nullptr;
         m_pRenderTargetView = nullptr;
+    }
+
+    void GraphicsRenderer::PreRender(std::vector<RenderData *> renderables)
+    {
+        HRESULT hr = S_OK;
+
+        for (RenderData * rd : renderables)
+        {
+            // create vertex shader
+            ID3DBlob* pVSBlob = nullptr;
+            if (rd->m_pVertexShader == nullptr)
+            {
+                rd->m_pVertexShader = this->CreateVertexShaderFromAsset(m_vsDefaultShader, "VS", &pVSBlob);
+            }
+
+            // vertex input layout
+            if (rd->m_pInputLayout == nullptr && pVSBlob != nullptr)
+            {
+                rd->m_pInputLayout = this->CreateInputLayoutFromVSBlob(&pVSBlob);
+                pVSBlob->Release();
+            }
+
+            // pixel shader
+            if (rd->m_pPixelShader == nullptr)
+            {
+                rd->m_pPixelShader = this->CreatePixelShaderFromAsset(m_psDefaultShader, rd->m_psEntryPoint);
+            }
+
+            // vertex buffer
+            if (rd->m_pVertexBuffer == nullptr || rd->m_pIndexBuffer == nullptr || rd->m_pConstantBuffer == nullptr)
+            {
+                D3D11_BUFFER_DESC bd;
+                ZeroMemory(&bd, sizeof(bd));
+                bd.Usage = D3D11_USAGE_DEFAULT;
+                bd.ByteWidth = sizeof(SimpleVertex) * rd->m_vertices.size();
+                bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+                bd.CPUAccessFlags = 0;
+
+                D3D11_SUBRESOURCE_DATA InitData;
+                ZeroMemory(&InitData, sizeof(InitData));
+                InitData.pSysMem = &rd->m_vertices[0];
+
+                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &rd->m_pVertexBuffer);
+                //if (FAILED(hr))
+                //    return hr;
+
+                // index buffer
+                bd.Usage = D3D11_USAGE_DEFAULT;
+                bd.ByteWidth = sizeof(WORD) * rd->m_indices.size();
+                bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+                bd.CPUAccessFlags = 0;
+                InitData.pSysMem = &rd->m_indices[0];
+                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &rd->m_pIndexBuffer);
+                //if (FAILED(hr))
+                //    return hr;
+
+                // constant buffer
+                bd.Usage = D3D11_USAGE_DEFAULT;
+                bd.ByteWidth = sizeof(ConstantBuffer);
+                bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+                bd.CPUAccessFlags = 0;
+                hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &rd->m_pConstantBuffer);
+                //if (FAILED(hr))
+                //    return hr;
+            }
+        }
+    }
+
+    bool GraphicsRenderer::CompileShaderFromAsset(std::shared_ptr<Asset> asset, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
+    {
+        HRESULT hr = S_OK;
+        ID3DBlob* pErrorBlob = nullptr;
+        DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+        std::vector<unsigned char> data = asset->GetData();
+
+#ifdef ALPHA_DEBUG
+        // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
+        // Setting this flag improves the shader debugging experience, but still allows 
+        // the shaders to be optimized and to run exactly the way they will run in 
+        // the release configuration of this program.
+        dwShaderFlags |= D3DCOMPILE_DEBUG;
+
+        // Disable optimizations to further improve shader debugging
+        dwShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+        hr = D3DCompile(&data[0], sizeof(char) * data.size(), nullptr, nullptr, nullptr, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
+        if (FAILED(hr))
+        {
+            if (pErrorBlob)
+            {
+                LOG_ERR("SHADER Failed to compile shader, ", reinterpret_cast<const char*>(pErrorBlob->GetBufferPointer()));
+                pErrorBlob->Release();
+            }
+            return false;
+        }
+
+        if (pErrorBlob)
+        {
+            pErrorBlob->Release();
+        }
+
+        return true;
+    }
+
+    ID3D11VertexShader * GraphicsRenderer::CreateVertexShaderFromAsset(std::shared_ptr<Asset> vsAsset, const std::string & sEntryPoint, ID3DBlob** ppVSBlobOut)
+    {
+        // TODO: store created shader, and retrieve if used again.
+
+        HRESULT hr = S_OK;
+        //ID3DBlob* pVSBlob = nullptr;
+        ID3D11VertexShader * vs = nullptr;
+
+        // compile shader
+        if (!this->CompileShaderFromAsset(vsAsset, sEntryPoint.c_str(), "vs_4_0", ppVSBlobOut))
+        {
+            LOG_WARN("GraphicsRenderer > Failed to compile pixel shader");
+            return nullptr;
+        }
+
+        // Create the vertex shader
+        hr = m_pd3dDevice->CreateVertexShader((*ppVSBlobOut)->GetBufferPointer(), (*ppVSBlobOut)->GetBufferSize(), nullptr, &vs);
+        if (FAILED(hr))
+        {
+            LOG_WARN("GraphicsRenderer > Failed to create pixel shader.");
+            (*ppVSBlobOut)->Release();
+            return nullptr;
+        }
+
+        return vs;
+    }
+
+    ID3D11PixelShader * GraphicsRenderer::CreatePixelShaderFromAsset(std::shared_ptr<Asset> psAsset, const std::string & sEntryPoint)
+    {
+        // TODO: store created shader, and retrieve if used again.
+
+        HRESULT hr = S_OK;
+        ID3DBlob* pPSBlob = nullptr;
+        ID3D11PixelShader * ps = nullptr;
+
+        // Compile the pixel shader
+        pPSBlob = nullptr;
+        if (!this->CompileShaderFromAsset(psAsset, sEntryPoint.c_str(), "ps_4_0", &pPSBlob))
+        {
+            LOG_WARN("GraphicsRenderer > Failed to compile pixel shader");
+            return nullptr;
+        }
+
+        // Create the pixel shader
+        hr = m_pd3dDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &ps);
+        pPSBlob->Release();
+        if (FAILED(hr))
+        {
+            LOG_WARN("GraphicsRenderer > Failed to create pixel shader.");
+            pPSBlob->Release();
+            return nullptr;
+        }
+
+        return ps;
+    }
+
+    ID3D11InputLayout * GraphicsRenderer::CreateInputLayoutFromVSBlob(ID3DBlob ** const pVSBlob)
+    {
+        // TODO: store created vertex shader with layout data, and retrieve if used again.
+
+        HRESULT hr = S_OK;
+        ID3D11InputLayout * vsLayout = nullptr;
+
+        // Define the input layout
+        D3D11_INPUT_ELEMENT_DESC layout[] =
+        {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        };
+        UINT numElements = ARRAYSIZE(layout);
+
+        // Create the input layout
+        hr = m_pd3dDevice->CreateInputLayout(layout, numElements, (*pVSBlob)->GetBufferPointer(), (*pVSBlob)->GetBufferSize(), &vsLayout);
+        //pVSBlob->Release();
+        if (FAILED(hr))
+        {
+            return nullptr;
+        }
+
+        return vsLayout;
     }
 }

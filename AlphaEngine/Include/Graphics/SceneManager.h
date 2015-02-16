@@ -19,12 +19,14 @@ limitations under the License.
 
 #include <map>
 #include <memory>
+#include <vector>
 
 namespace alpha
 {
     class Entity;
     class EntityComponent;
     class SceneNode;
+    class RenderData;
 
     /**
      * \brief The SceneManager manages the logical scene layout.
@@ -33,6 +35,15 @@ namespace alpha
     {
     public:
         virtual ~SceneManager();
+
+        /** Keeps the Render Data structurs up to date, and preped for rendering if needed */
+        bool Update(double currentTime, double elapsedTime);
+
+        /**
+         * \brief Constructs and array of data to be rendered on the next render call.
+         * \param renderables In parameter, render data will be constructed and added to this array.
+         */
+        std::vector<RenderData *> & GetRenderData();
 
         /**
          * \brief Add an entity to the scene.
@@ -56,8 +67,14 @@ namespace alpha
          */
         std::map<unsigned int, std::shared_ptr<SceneNode> > CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components);
 
+        /** Recursively build render data for an entities scene node map */
+        void BuildRenderData(unsigned int entity_id, std::map<unsigned int, std::shared_ptr<SceneNode> > nodes, std::vector<RenderData *> & renderables) const;
+
         /** Map of entity ID to SceneNode maps */
         std::map<unsigned int, std::map<unsigned int, std::shared_ptr<SceneNode> > > m_nodes;
+        
+        /** Store Render Data array for easy retrieval when rendering. */
+        std::vector<RenderData *> m_vRenderData;
     };
 }
 

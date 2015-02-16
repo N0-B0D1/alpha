@@ -28,6 +28,7 @@ namespace alpha
 {
     class GraphicsRenderer;
     class SceneManager;
+    class RenderData;
     class AssetSystem;
     class Asset;
 
@@ -67,6 +68,9 @@ namespace alpha
 
         /** Subscriber for new entity created events */
         std::shared_ptr<EventDataSubscriber<EventData_EntityCreated>> m_subEntityCreated;
+
+        /** Current list of renderable objects to be passed into the renderer on the next render call */
+        std::vector<RenderData *> m_renderables;
     };
 }
 

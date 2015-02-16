@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "Graphics/SceneManager.h"
 #include "Graphics/SceneNode.h"
+#include "Graphics/RenderData.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
 #include "Toolbox/Logger.h"
@@ -23,6 +24,29 @@ limitations under the License.
 namespace alpha
 {
     SceneManager::~SceneManager() { }
+
+    bool SceneManager::Update(double /*currentTime*/, double /*elapsedTime*/)
+    {
+        // clean the list, so it can be rebuilt.
+        while (m_vRenderData.size() > 0)
+        {
+            m_vRenderData.pop_back();
+        }
+
+        // walk the tree, and create render data for renderable scene nodes.
+        for (auto iter : m_nodes)
+        {
+            this->BuildRenderData(iter.first, iter.second, m_vRenderData);
+        }
+
+        return true;
+    }
+
+    std::vector<RenderData *> & SceneManager::GetRenderData()
+    {
+        // get the latest set of render data to be rendered.
+        return m_vRenderData;
+    }
 
     bool SceneManager::Add(const std::shared_ptr<Entity> & entity)
     {
@@ -68,25 +92,36 @@ namespace alpha
             // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
             std::map<unsigned int, std::shared_ptr<SceneNode> > child_nodes = this->CreateNodes(component.second->GetComponents());
 
-            std::shared_ptr<SceneNode> node = nullptr;
-            if (component.second->VIsRenderable())
-            {
-                // make a scene node for this component
-                std::shared_ptr<SceneComponent> scene_component = std::dynamic_pointer_cast<SceneComponent>(component.second);
-                node = std::make_shared<SceneNode>(scene_component, child_nodes);
-            }
-            else
-            {
-                // XXX if this component is not renderable, create a space node for it
-                // For now this is just the easy approach, so that the scene node 
-                // hierarchy mirrors the component hierarchy
-                // We could potentially add debug/editor render data for these nodes later?
-                node = std::make_shared<SceneNode>(nullptr, child_nodes);
-            }
-
-            nodes[component.first] = node;
+            //std::shared_ptr<SceneNode> node = nullptr;
+            std::shared_ptr<SceneComponent> scene_component = std::dynamic_pointer_cast<SceneComponent>(component.second);
+            // at this point we either have nullptr or an actual scene component
+            // either way make a scene node for it, and the nullptr will just
+            // exist as a spacer in the tree, so we don't have to reconstruct the
+            // complex component hierarchy minus none scene components.
+            nodes[component.first] = std::make_shared<SceneNode>(scene_component, child_nodes);
         }
 
         return nodes;
+    }
+
+    void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, std::shared_ptr<SceneNode> > nodes, std::vector<RenderData *> & renderables) const
+    {
+        // XXX not sure if the entity id is neede at this point ... refactor as needed.
+
+        // for each node
+        for (auto iter : nodes)
+        {
+            // check this node
+            if (iter.second->IsRenderable())
+            {
+                // make render data for this node
+                //RenderData * rd = new RenderData();
+                //renderables.push_back(rd);
+                renderables.push_back(iter.second->GetRenderData());
+            }
+
+            // recurse each child 
+            this->BuildRenderData(entity_id, iter.second->GetChildren(), renderables);
+        }
     }
 }

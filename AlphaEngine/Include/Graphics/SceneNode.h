@@ -20,15 +20,27 @@ limitations under the License.
 #include <memory>
 #include <vector>
 #include "Entities/EntityComponent.h"
-#include "Math/Transform.h"
+#include "Math/Matrix.h"
 
 namespace alpha
 {
+    class RenderData;
+
     class SceneNode
     {
     public:
         SceneNode(std::shared_ptr<SceneComponent> component, std::map<unsigned int, std::shared_ptr<SceneNode> > children);
         virtual ~SceneNode();
+
+        /** Check if this node is renderable, or juse a spacer node. */
+        bool IsRenderable() const;
+
+        RenderData * GetRenderData();
+
+        /** Retrieve this nodes child nodes */
+        std::map<unsigned int, std::shared_ptr<SceneNode> > GetChildren() const;
+
+        /** Build and return this  */
 
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */
@@ -38,10 +50,13 @@ namespace alpha
         std::map<unsigned int, std::shared_ptr<SceneNode> > m_children;
 
         /** The transform that represents this scene nodes position, scale, and rotation in the world. */
-        Transform m_transform;
+        Matrix m_world;
 
         /** A handle to the SceneComponent which this SceneNode represents */
         std::shared_ptr<SceneComponent> m_pSceneComponent;
+
+        /** Store render data, and only update/destroy it as needed */
+        RenderData * m_pRenderData;
     };
 }
 

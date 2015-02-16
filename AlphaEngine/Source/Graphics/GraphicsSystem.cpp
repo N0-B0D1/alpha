@@ -17,6 +17,7 @@ limitations under the License.
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/SceneManager.h"
+#include "Graphics/RenderData.h"
 #include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
@@ -33,7 +34,7 @@ namespace alpha
 
     bool GraphicsSystem::VInitialize()
     {
-        // XXX temporary, load some basic shaders to use for everything until proper load pipeline is implemented
+        // load some basic shaders to use for everything until proper load pipeline is implemented
         auto ps_shader = this->LoadShaderFile("Shaders/Basic_PS");
         auto vs_shader = this->LoadShaderFile("Shaders/Basic_VS");
 
@@ -51,11 +52,22 @@ namespace alpha
         // create event subscribers
         m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated> >();
 
+        // XXX test render 2 cubes.
+        m_renderables.push_back(new RenderData());
+        //m_renderables.push_back(new RenderData("PSSolid"));
+
         return true;
     }
 
     bool GraphicsSystem::VShutdown()
     {
+        while (m_renderables.size() > 0)
+        {
+            RenderData * rd = m_renderables.back();
+            m_renderables.pop_back();
+            if (rd) { delete rd; }
+        }
+
         if (m_pRenderer)
         {
             m_pRenderer->Shutdown();
@@ -66,7 +78,13 @@ namespace alpha
 
     void GraphicsSystem::Render()
     {
-        m_pRenderer->Render();
+        
+        std::vector<RenderData *> renderables = m_pSceneManager->GetRenderData();
+        
+        m_pRenderer->Render(renderables);
+        
+
+        //m_pRenderer->Render(m_renderables);
     }
 
     bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)
@@ -75,6 +93,9 @@ namespace alpha
         // update any existing entities in the scene
         // remove and destroyed entities from the scene.
         this->ReadSubscription();
+
+        // udpate scene manager
+        m_pSceneManager->Update(currentTime, elapsedTime);
 
         return m_pRenderer->Update(currentTime, elapsedTime);
     }

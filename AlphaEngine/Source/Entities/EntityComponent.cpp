@@ -20,7 +20,7 @@ limitations under the License.
 #include "Entities/EntityComponent.h"
 
 #include "Scripting/LuaVar.h"
-#include "Math/Transform.h"
+#include "Math/Vector3.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
@@ -59,11 +59,6 @@ namespace alpha
         return string_hash(name);
     }
 
-    bool EntityComponent::VIsRenderable() const
-    {
-        return false;
-    }
-
     SceneComponent::~SceneComponent() { }
 
     void SceneComponent::VInitialize(std::shared_ptr<LuaVar> var)
@@ -85,21 +80,26 @@ namespace alpha
         std::shared_ptr<LuaTable> scale = std::dynamic_pointer_cast<LuaTable>(table->Get("scale"));
 
         // get x, y, z values for each position, scale, and rotation.
-        m_transform.position.x = this->GetAxis(position, "x");
-        m_transform.position.y = this->GetAxis(position, "y");
-        m_transform.position.z = this->GetAxis(position, "z");
+        m_vPosition.x = this->GetAxis(position, "x");
+        m_vPosition.y = this->GetAxis(position, "y");
+        m_vPosition.z = this->GetAxis(position, "z");
 
-        m_transform.scale.x = this->GetAxis(scale, "x");
-        m_transform.scale.y = this->GetAxis(scale, "y");
-        m_transform.scale.z = this->GetAxis(scale, "z");
+        m_vScale.x = this->GetAxis(scale, "x");
+        m_vScale.y = this->GetAxis(scale, "y");
+        m_vScale.z = this->GetAxis(scale, "z");
 
-        LOG(" .... test position = (", this->m_transform.position.x, ", ", this->m_transform.position.y, ", ", this->m_transform.position.z, ")");
-        LOG(" .... test scale = (", this->m_transform.scale.x, ", ", this->m_transform.scale.y, ", ", this->m_transform.scale.z, ")");
+        LOG(" .... test position = (", this->m_vPosition.x, ", ", this->m_vPosition.y, ", ", this->m_vPosition.z, ")");
+        LOG(" .... test scale = (", this->m_vScale.x, ", ", this->m_vScale.y, ", ", this->m_vScale.z, ")");
     }
 
-    bool SceneComponent::VIsRenderable() const
+    const Vector3 & SceneComponent::GetPosition() const
     {
-        return true;
+        return m_vPosition;
+    }
+
+    const Vector3 & SceneComponent::GetScale() const
+    {
+        return m_vScale;
     }
 
     float SceneComponent::GetAxis(std::shared_ptr<LuaTable> table, const std::string axis)
