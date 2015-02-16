@@ -30,12 +30,12 @@ namespace alpha
 
     }
 
-    void SetPosition(const Vector3 & /*pos*/)
+    void RenderData::SetPosition(const Vector3 & /*pos*/)
     {
 
     }
 
-    void SetScale(const Vector3 & /*scale*/)
+    void RenderData::SetScale(const Vector3 & /*scale*/)
     {
 
     }
