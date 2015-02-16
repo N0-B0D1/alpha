@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <memory>
 #include <string>
+#include <vector>
 
 //#include<GL/gl.h>
 #include<GL/glx.h>
@@ -27,6 +28,7 @@ limitations under the License.
 namespace alpha
 {
 	class RenderWindow;
+    class RenderData;
     class Asset;
 
     class GraphicsRenderer
@@ -41,7 +43,7 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render();
+        void Render(std::vector<RenderData *> & renderables);
 
         /** Set basic GLSL shaders for default usage */
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);

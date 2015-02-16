@@ -23,6 +23,7 @@ limitations under the License.
 
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/RenderWindow.h"
+#include "Graphics/RenderData.h"
 
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
@@ -107,7 +108,7 @@ namespace alpha
 		return true;
 	}
 
-    void GraphicsRenderer::Render()
+    void GraphicsRenderer::Render(std::vector<RenderData *> & /*renderables*/)
     {
         auto display = m_pWindow->GetDisplay();
         auto window = m_pWindow->GetWindow();

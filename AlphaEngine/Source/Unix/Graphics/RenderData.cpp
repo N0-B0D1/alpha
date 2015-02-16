@@ -1,6 +1,3 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
-
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -17,23 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Math/Vector3.h"
+#include "Graphics/RenderData.h"
 
 namespace alpha
 {
-    /** \brief Transform describes an rotation, position, and scale.
-     * 
-     */
-    class Matrix
+    RenderData::RenderData(std::string psEntryPoint /*= "PS"*/)
+        : m_psEntryPoint(psEntryPoint)
     {
-    public:
-        Matrix();
-        virtual ~Matrix();
 
-        //Quaternion rotation;
-        //Vector3 position;
-        //Vector3 scale;
-    };
+    }
+
+    RenderData::~RenderData()
+    {
+
+    }
 }
-
-#endif // TRANSFORM_H

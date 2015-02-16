@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Math/Transform.h"
+#include "Math/Matrix.h"
 
 namespace alpha
 {
-    Transform::Transform()
+    Matrix::Matrix()
         : position(0.0f, 0.0f, 0.0f)
         , scale(1.0f, 1.0f, 1.0f)
     { }
-    Transform::~Transform() { }
+    Matrix::~Matrix() { }
 }
