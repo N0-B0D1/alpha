@@ -60,6 +60,9 @@ namespace alpha
         explicit RenderData(std::string psEntryPoint = "PS");
         virtual ~RenderData();
 
+        void SetPosition(const Vector3 & pos);
+        void SetScale(const Vector3 & scale);
+
         /** The pixel shader entry point */
         std::string m_psEntryPoint;
 

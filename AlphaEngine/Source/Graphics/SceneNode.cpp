@@ -46,12 +46,8 @@ namespace alpha
             m_pRenderData = new RenderData();
             
             // set world position
-            XMMATRIX m = XMMatrixTranslationFromVector(XMLoadFloat3(&m_pSceneComponent->GetPosition()));
-            Vector3 scale = m_pSceneComponent->GetScale();
-            XMMATRIX mscale = XMMatrixScaling(scale.x, scale.y, scale.z);
-            m = mscale * m;
-            //XMMatrixPosition
-            XMStoreFloat4x4(&m_pRenderData->m_world, m);
+            m_pRenderData->SetPosition(m_pSceneComponent->GetPosition());
+            m_pRenderData->SetScale(m_pSceneComponent->GetScale());
         }
         return m_pRenderData;
     }
