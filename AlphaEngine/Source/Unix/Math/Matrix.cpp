@@ -19,8 +19,6 @@ limitations under the License.
 namespace alpha
 {
     Matrix::Matrix()
-        : position(0.0f, 0.0f, 0.0f)
-        , scale(1.0f, 1.0f, 1.0f)
     { }
     Matrix::~Matrix() { }
 }

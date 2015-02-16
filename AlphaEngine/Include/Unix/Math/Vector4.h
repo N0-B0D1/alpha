@@ -31,7 +31,6 @@ namespace alpha
         Vector4(const Vector4 &vec);
 
         Vector4 & operator=(const Vector4 & right);
-
     };
 }
 

@@ -24,15 +24,11 @@ namespace alpha
     /** \brief Transform describes an rotation, position, and scale.
      * 
      */
-    class Matrix
+    struct Matrix
     {
     public:
         Matrix();
         virtual ~Matrix();
-
-        //Quaternion rotation;
-        //Vector3 position;
-        //Vector3 scale;
     };
 }
 

@@ -30,7 +30,6 @@ namespace alpha
         Vector3(const Vector3 &vec);
 
         Vector3 & operator=(const Vector3 & right);
-
     };
 }
 

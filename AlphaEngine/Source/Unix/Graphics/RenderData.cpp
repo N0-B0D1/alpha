@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "Graphics/RenderData.h"
+#include "Math/Vector3.h"
 
 namespace alpha
 {
@@ -25,6 +26,16 @@ namespace alpha
     }
 
     RenderData::~RenderData()
+    {
+
+    }
+
+    void SetPosition(const Vector3 & /*pos*/)
+    {
+
+    }
+
+    void SetScale(const Vector3 & /*scale*/)
     {
 
     }
