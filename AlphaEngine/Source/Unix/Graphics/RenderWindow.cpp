@@ -14,7 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "Graphics/RenderWindow.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -23,52 +28,37 @@ namespace alpha
 
     bool RenderWindow::Initialize()
     {
-        // spawn X display
-        m_pDisplay = XOpenDisplay(NULL);
-        if(m_pDisplay == NULL) 
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // opengl 3.3
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+        m_pWindow = glfwCreateWindow(800, 600, "ALPHA Engine", nullptr, nullptr);
+        glfwMakeContextCurrent(m_pWindow);
+        if (m_pWindow == NULL)
         {
+            LOG_ERR("Failed to create GLFW window.");
+            glfwTerminate();
             return false;
         }
-                
-        m_root = DefaultRootWindow(m_pDisplay);
 
-        // create glx visual info
-        m_pVisualInfo = glXChooseVisual(m_pDisplay, 0, m_att);
-        if(m_pVisualInfo == NULL) 
-        {
-            return false;
-        }
-
-        // set color map
-        m_colorMap = XCreateColormap(m_pDisplay, m_root, m_pVisualInfo->visual, AllocNone);
-
-        m_setWindowAttrs.colormap = m_colorMap;
-        m_setWindowAttrs.event_mask = ExposureMask | KeyPressMask;
-
-        // create window attached to display
-        m_window = XCreateWindow(m_pDisplay, m_root, 0, 0, 600, 600, 0, m_pVisualInfo->depth, InputOutput, m_pVisualInfo->visual, CWColormap | CWEventMask, &m_setWindowAttrs);
-
-        XMapWindow(m_pDisplay, m_window);
-        XStoreName(m_pDisplay, m_window, "ALPHA Engine");
+        // register key event
+        glfwSetKeyCallback(m_pWindow, RenderWindow::key_callback);
 
         return true;
     }
 
     bool RenderWindow::Update(double /*currentTime*/, double /*elapsedTime*/)
     {
-        XNextEvent(m_pDisplay, &m_xEvent);
-        
-        if(m_xEvent.type == Expose)
+        // play nicely with X11, or possibly other system being used?
+        if (glfwWindowShouldClose(m_pWindow))
         {
-            // on update just keep updating the window attributes
-            // so that when the renderer requests them for render
-            // they are up to date.
-            XGetWindowAttributes(m_pDisplay, m_window, &m_xWindowAttrs);
-        }
-                
-        else if(m_xEvent.type == KeyPress)
-        {            
             return false;
+        }
+        else
+        {
+            glfwPollEvents();
         }
 
         return true;
@@ -76,34 +66,24 @@ namespace alpha
 
     bool RenderWindow::Shutdown()
     {
-
-        XDestroyWindow(m_pDisplay, m_window);
-        XCloseDisplay(m_pDisplay);
         return true;
     }
 
     void RenderWindow::Render()
     {
-        
+        // XXX remove this? probably not needed
     }
 
-    Display * RenderWindow::GetDisplay() const
+    GLFWwindow * RenderWindow::GetWindow() const
     {
-        return m_pDisplay;
+        return m_pWindow;
     }
 
-    Window RenderWindow::GetWindow() const
+    void RenderWindow::key_callback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mode*/)
     {
-        return m_window;
-    }
-
-    XVisualInfo * RenderWindow::GetVisualInfo() const
-    {
-        return m_pVisualInfo;
-    }
-
-    XWindowAttributes RenderWindow::GetXWindowAttrs() const
-    {
-        return m_xWindowAttrs;
+        // When a user presses the escape key, we set the WindowShouldClose property to true, 
+        // closing the application
+        if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }

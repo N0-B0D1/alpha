@@ -1,7 +1,6 @@
-#version 330
-
-out vec4 frag_colour;
+#version 330 core
+out vec3 color;
 
 void main () {
-    frag_colour = ec4 (0.5, 0.0, 0.5, 1.0);
+    color = vec3(1, 0, 0);
 }

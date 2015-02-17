@@ -26,6 +26,7 @@ limitations under the License.
 #include<GL/gl.h>
 #include<GL/glx.h>
 //#include<GL/glu.h>
+#include <GLFW/glfw3.h>
 
 namespace alpha
 {
@@ -41,21 +42,25 @@ namespace alpha
 
         void Render();
 
-        Display * GetDisplay() const;
-        Window GetWindow() const;
-        XVisualInfo * GetVisualInfo() const;
-        XWindowAttributes GetXWindowAttrs() const;
+        //Display * GetDisplay() const;
+        GLFWwindow * GetWindow() const;
+        //XVisualInfo * GetVisualInfo() const;
+        //XWindowAttributes GetXWindowAttrs() const;
 
-    private: 
-        Display *m_pDisplay;
-        Window m_root;
-        GLint m_att[5] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-        XVisualInfo *m_pVisualInfo;
-        Colormap m_colorMap;
-        XSetWindowAttributes m_setWindowAttrs;
-        Window m_window;
-        XWindowAttributes m_xWindowAttrs;
-        XEvent m_xEvent;
+        // XXX temporary helper to close the window
+        static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+    private:
+        GLFWwindow * m_pWindow;
+        //Display *m_pDisplay;
+        //Window m_root;
+        //GLint m_att[5] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+        //XVisualInfo *m_pVisualInfo;
+        //Colormap m_colorMap;
+        //XSetWindowAttributes m_setWindowAttrs;
+        //Window m_window;
+        //XWindowAttributes m_xWindowAttrs;
+        //XEvent m_xEvent;
 	};
 }
 

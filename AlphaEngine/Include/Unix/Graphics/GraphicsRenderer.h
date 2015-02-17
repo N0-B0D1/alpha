@@ -57,7 +57,7 @@ namespace alpha
         std::shared_ptr<Asset> m_psDefaultShader;
 
         /** OpenGL variables */
-        GLXContext m_glContext;
+        //GLXContext m_glContext;
 
         GLuint m_VertexBuffer;
         GLuint m_VertexAttribute;
@@ -65,6 +65,11 @@ namespace alpha
         
         const GLubyte *m_pRendererInfo; // = glGetString(GL_RENDERER);
         const GLubyte *m_pVersionInfo; // = glGetString(GL_VERSION);
+
+        /** Creates and returns a Vertex Shader from the given asset, also outputs blob data which can be passed into Input Layout creation */
+        GLuint CreateVertexShaderFromAsset(std::shared_ptr<Asset> vsAsset);
+        /** Creates and returns a Pixel/Fragment Shader from the given asset */
+        GLuint CreatePixelShaderFromAsset(std::shared_ptr<Asset> psAsset);
     };
 }
 
