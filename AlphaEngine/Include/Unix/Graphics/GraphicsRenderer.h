@@ -61,6 +61,7 @@ namespace alpha
 
         GLuint m_VertexBuffer;
         GLuint m_VertexAttribute;
+        GLuint m_ElementBuffer;
         GLuint m_ShaderProgram;
         
         const GLubyte *m_pRendererInfo; // = glGetString(GL_RENDERER);

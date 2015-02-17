@@ -49,21 +49,38 @@ namespace alpha
         this->InitializeDevice();
 
         
+        /*
         static const GLfloat vertices[] = {
             -0.5f,  -0.5f, 0.0f,
              0.5f,  -0.5f, 0.0f,
              0.0f,   0.5f, 0.0f
         };
+        */
+        GLfloat vertices[] = {
+             0.5f,  0.5f, 0.0f,  // Top Right
+             0.5f, -0.5f, 0.0f,  // Bottom Right
+            -0.5f, -0.5f, 0.0f,  // Bottom Left
+            -0.5f,  0.5f, 0.0f   // Top Left 
+        };
+        GLuint indices[] = {    // Note that we start from 0!
+            0, 1, 3,            // First Triangle
+            1, 2, 3             // Second Triangle
+        };  
         
         // make vertex buffer object (vbo)
         glGenBuffers(1, &m_VertexBuffer);
         // make vertex array object (vao)
         glGenVertexArrays(1, &m_VertexAttribute);
+        // make element buffer object
+        glGenBuffers(1, &m_ElementBuffer);
 
         glBindVertexArray(m_VertexAttribute);
           // copy vertices into vertex buffer
           glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
           glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+          // set indicies into element buffer
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ElementBuffer);
+          glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
           // set vertex attribute pointers
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
           glEnableVertexAttribArray(0);
@@ -135,7 +152,8 @@ namespace alpha
         glBindVertexArray(m_VertexAttribute);
 
         // draw the triangles
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // unbind array object
         glBindVertexArray(0);
@@ -167,6 +185,9 @@ namespace alpha
          
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
+
+        // wireframe mode!
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         return true;
     }
