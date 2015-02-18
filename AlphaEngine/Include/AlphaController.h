@@ -29,6 +29,7 @@ namespace alpha
     class StateMachine;
     class AState;
     class AGameState;
+    class ThreadSystem;
 
     /**
      * The AlphaController is the main engine controller which handles the lifecycle of the engine.
@@ -62,6 +63,9 @@ namespace alpha
         double m_timeLastFrame = 0.0f;
         double m_timeAccumulator = 0.0f;
         double sk_maxUpdateTime = 1.0f / 60.0f;
+
+        /** Threading pool system */
+        ThreadSystem * m_pThreads;
 
         /** game logic system */
         std::shared_ptr<LogicSystem> m_pLogic;

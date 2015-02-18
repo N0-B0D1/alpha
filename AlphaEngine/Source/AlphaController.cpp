@@ -23,11 +23,13 @@ limitations under the License.
 #include "Toolbox/Logger.h"
 #include "FSA/StateMachine.h"
 #include "FSA/GameState.h"
+#include "Threading/ThreadSystem.h"
 
 namespace alpha
 {
     AlphaController::AlphaController()
-        : m_pLogic(nullptr)
+        : m_pThreads(nullptr)
+        , m_pLogic(nullptr)
         , m_pGraphics(nullptr)
         , m_pAssets(nullptr)
     {
@@ -130,6 +132,15 @@ namespace alpha
             return false;
         }
 
+        // prep threading system last, so tasks can't be processed until
+        // the whole engine is up and running.
+        m_pThreads = new ThreadSystem();
+        if (!m_pThreads->VInitialize())
+        {
+            LOG_ERR("<ThreadSystem> Initialization failed!");
+            return false;
+        }
+
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();
 
@@ -152,6 +163,9 @@ namespace alpha
         // update systems in discrete chunks of time
         while (m_timeAccumulator >= sk_maxUpdateTime)
         {
+            // update thread sub-system, allow threads access to any new tasks.
+            m_pThreads->Update(currentTime, sk_maxUpdateTime);
+
             // update asset system, which should cull least recently used items from memory
             m_pAssets->Update(currentTime, sk_maxUpdateTime);
 
@@ -192,6 +206,15 @@ namespace alpha
         // destroy systems in reverse order
         // shutdown needs to be smart about deleting things that might not exist
         // in case something failed during initialization, and we are only half built
+
+        // dispose of threading system first, so any running threads will be joined
+        // and tasks wont be left in a bad state as the engine shuts down.
+        if (m_pThreads)
+        {
+            m_pThreads->VShutdown();
+            delete m_pThreads;
+            LOG("<ThreadSystem> Disposed.");
+        }
         if (m_pGameStateMachine)
         {
             m_pGameStateMachine->VShutdown();
