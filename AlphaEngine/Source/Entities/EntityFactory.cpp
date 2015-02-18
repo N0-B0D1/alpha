@@ -61,26 +61,17 @@ namespace alpha
         {
             if (var_pair.second->GetVarType() == VT_TABLE)
             {
-                std::shared_ptr<EntityComponent> component = this->CreateComponent(var_pair.second);
-                if (component != nullptr)
-                {
-                    // hash the component variable name, which will become this components unique identifier in the entity.
-                    // this will allow use to reference the variable by its script variable name if needed, and also 
-                    // potentially reference the same component for any entities that are spawned from the same lua script.
-                    auto variable_name_hash = EntityComponent::GetIDFromName(var_pair.first);
-                    LOG("EntityFactory -> Component added to entity: ", var_pair.first);
-                    entity->Add(variable_name_hash, component);
-                }
+                this->CreateComponent(entity, nullptr, var_pair.first, var_pair.second);
             }
         }
 
         return entity;
     }
 
-    std::shared_ptr<EntityComponent> EntityFactory::CreateComponent(std::shared_ptr<LuaVar> var)
+    void EntityFactory::CreateComponent(std::shared_ptr<Entity> entity, std::shared_ptr<EntityComponent> parent_component, const std::string & var_name, std::shared_ptr<LuaVar> var_value)
     {
         // convert var data to a table so we can access its elements
-        auto table = std::dynamic_pointer_cast<LuaTable>(var);
+        auto table = std::dynamic_pointer_cast<LuaTable>(var_value);
 
         // get the type name for this component
         auto type_name = std::dynamic_pointer_cast<LuaStatic<std::string>>(table->Get("type"));
@@ -88,11 +79,12 @@ namespace alpha
         {
             LOG("EntityFactory -> Attempting to create component type: ", type_name->GetValue());
 
-            // convert the type name into a component it
-            unsigned int component_id = EntityComponent::GetIDFromName(type_name->GetValue());
+            // convert the variable name into a component id, and type name into type_id
+            unsigned int type_id = EntityComponent::GetIDFromName(type_name->GetValue());
+            unsigned int component_id = EntityComponent::GetIDFromName(var_name);
 
             // get the creation function for this component type, if it exists
-            auto it = m_componentCreationFunctions.find(component_id);
+            auto it = m_componentCreationFunctions.find(type_id);
             if (it != m_componentCreationFunctions.end())
             {
                 // make the component, and initialize it will the var data
@@ -112,23 +104,28 @@ namespace alpha
                         if (var_pair.second->GetVarType() == VT_TABLE)
                         {
                             //unsigned int child_component_id = EntityComponent::GetIDFromName(var_pair.first);
-                            auto child_component = this->CreateComponent(var_pair.second);
-                            if (child_component != nullptr)
-                            {
-                                auto hash_child_name = EntityComponent::GetIDFromName(var_pair.first);
-                                component->Attach(hash_child_name, child_component);
-                                child_component->SetParent(component);
-                            }
+                            this->CreateComponent(entity, component, var_pair.first, var_pair.second);
                         }
                     }
                 }
 
-                return component;
+                // always add the component directly to the entity, so it can be easily retrieved.
+                entity->Add(component_id, component);
+
+                // then if this is a sub-component in the tree, also add it to the parent component
+                if (parent_component != nullptr)
+                {
+                    parent_component->Attach(component_id, component);
+                }
             }
-
-            LOG_WARN("EntityFactory -> Attempted to add an invalid component type: ", type_name->GetValue());
+            else
+            {
+                LOG_WARN("EntityFactory > Attempted to add an invalid component type: ", type_name->GetValue());
+            }
         }
-
-        return nullptr;
+        else
+        {
+            LOG_WARN("EntityFactory > Attempted to add a component without a valid 'type'.");
+        }
     }
 }

@@ -162,8 +162,6 @@ namespace alpha
 
         for (RenderData * rd : renderables)
         {
-            //XMStoreFloat4x4(&rd->m_world, DirectX::XMMatrixRotationY(t));
-
             // set input layout
             m_pImmediateContext->IASetInputLayout(rd->m_pInputLayout);
 

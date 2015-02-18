@@ -44,11 +44,18 @@ namespace alpha
         if (m_pRenderData == nullptr)
         {
             m_pRenderData = new RenderData();
-            
-            // set world position
+        }
+
+        m_pRenderData->m_world = m_pSceneComponent->GetTransform();
+        /*
+        if (m_pSceneComponent->IsDirty())
+        {
+            // update position
             m_pRenderData->SetPosition(m_pSceneComponent->GetPosition());
             m_pRenderData->SetScale(m_pSceneComponent->GetScale());
         }
+        */
+
         return m_pRenderData;
     }
 

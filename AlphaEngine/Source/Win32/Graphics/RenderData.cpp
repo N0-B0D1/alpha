@@ -111,21 +111,4 @@ namespace alpha
         if (m_pVertexShader) m_pVertexShader->Release();
         if (m_pPixelShader) m_pPixelShader->Release();
     }
-
-    void RenderData::SetPosition(const Vector3 & pos)
-    {
-        //XMMATRIX m = XMMatrixTranslationFromVector(XMLoadFloat3(&m_pSceneComponent->GetPosition()));
-        XMMATRIX translation = XMMatrixTranslationFromVector(XMLoadFloat3(&pos));
-        XMMATRIX world = translation * XMLoadFloat4x4(&this->m_world);
-        XMStoreFloat4x4(&this->m_world, world);
-    }
-
-    void RenderData::SetScale(const Vector3 & scale)
-    {
-        //Vector3 scale = m_pSceneComponent->GetScale();
-        //XMMATRIX mscale = XMMatrixScaling(scale.x, scale.y, scale.z);
-        XMMATRIX scale_transform = XMMatrixScalingFromVector(XMLoadFloat3(&scale));
-        XMMATRIX world = scale_transform * XMLoadFloat4x4(&this->m_world);
-        XMStoreFloat4x4(&this->m_world, world);
-    }
 }

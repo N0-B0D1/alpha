@@ -38,7 +38,7 @@ namespace alpha
 
         //! Component manipulation functions
         void Add(unsigned int component_id, std::shared_ptr<EntityComponent> component);
-        std::shared_ptr<EntityComponent> Get(unsigned int component_id);
+        std::shared_ptr<EntityComponent> Get(const std::string & component_name);
         void Remove(unsigned int component_id);
 
         /**

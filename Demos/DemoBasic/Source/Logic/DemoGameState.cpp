@@ -1,6 +1,12 @@
+#include <math.h>
+
 #include "Logic/DemoGameState.h"
+
 #include "FSA/GameState.h"
 #include "Entities/Entity.h"
+#include "Entities/EntityComponent.h"
+#include "Math/Quaternion.h"
+#include "Math/Vector3.h"
 
 DemoGameState::DemoGameState()
 { }
@@ -19,6 +25,26 @@ bool DemoGameState::VInitialize()
 bool DemoGameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
 {
     // Update the state, move actors, shoot bullets, blah blah
+
+    // get root node and rotate it
+    // I know root is a scene component, so cast it
+    auto root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test->Get("root"));
+
+    // but just in case, check before doing anything
+    if (root != nullptr)
+    {
+        //float t = static_cast<float>(currentTime); // / 100.0f;
+        static int tick = 0;
+        tick += 1;
+
+        float degrees = static_cast<float>(tick / 3);
+        float radians = static_cast<float>(degrees * (3.14 / 180));
+
+        alpha::Quaternion q;
+        q.RotationFromAxisAngle(alpha::Vector3(0, 1, 0), radians);
+        root->SetRotation(q);
+    }
+
     return true;
 }
 

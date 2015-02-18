@@ -54,7 +54,7 @@ namespace alpha
 
     private:
         /** Creates a component using a registered creation function, if it exists. */
-        std::shared_ptr<EntityComponent> CreateComponent(std::shared_ptr<LuaVar> var);
+        void CreateComponent(std::shared_ptr<Entity> entity, std::shared_ptr<EntityComponent> parent_component, const std::string & var_name, std::shared_ptr<LuaVar> var_value);
 
         std::map<unsigned int, std::function<EntityComponent *()> > m_componentCreationFunctions;
 

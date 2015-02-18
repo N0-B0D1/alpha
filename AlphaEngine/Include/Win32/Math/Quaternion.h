@@ -1,5 +1,5 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#ifndef ALPHA_QUATERNION_H
+#define ALPHA_QUATERNION_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -24,24 +24,13 @@ using namespace DirectX;
 namespace alpha
 {
     struct Vector3;
-    struct Quaternion;
-
-    /**
-     * \brief Engine Matrix representation based on DirectX::XMFLOAT4X4
-     * By inheriting XMFLOAT4X4 we gain all of the SSE intrinsic calculations, and can add our own on top as needed.
-     */
-    struct Matrix : public XMFLOAT4X4
+    struct Quaternion : public XMFLOAT4
     {
     public:
-        Matrix();
+        Quaternion();
 
-        void Translate(const Vector3 & position);
-        void Scale(const Vector3 & scale);
-        void Rotate(const Quaternion & rotation);
-
-        static Matrix CreateScale(const Vector3 & scale);
-        static Matrix CreateTranslation(const Vector3 & position);
+        void RotationFromAxisAngle(const Vector3 & axis, float angle);
     };
 }
 
-#endif // TRANSFORM_H
+#endif // ALPHA_QUATERNION_H

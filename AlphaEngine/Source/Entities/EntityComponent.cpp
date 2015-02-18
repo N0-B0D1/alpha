@@ -25,6 +25,9 @@ limitations under the License.
 
 namespace alpha
 {
+    EntityComponent::EntityComponent()
+        : m_dirty(false)
+    { }
     EntityComponent::~EntityComponent() { }
 
     void EntityComponent::SetParent(const std::shared_ptr<EntityComponent> & parent)
@@ -88,8 +91,15 @@ namespace alpha
         m_vScale.y = this->GetAxis(scale, "y");
         m_vScale.z = this->GetAxis(scale, "z");
 
+        this->UpdateTransform();
+
         LOG(" .... test position = (", this->m_vPosition.x, ", ", this->m_vPosition.y, ", ", this->m_vPosition.z, ")");
         LOG(" .... test scale = (", this->m_vScale.x, ", ", this->m_vScale.y, ", ", this->m_vScale.z, ")");
+    }
+
+    bool SceneComponent::IsDirty() const
+    {
+        return m_dirty;
     }
 
     const Vector3 & SceneComponent::GetPosition() const
@@ -102,9 +112,58 @@ namespace alpha
         return m_vScale;
     }
 
+    const Quaternion & SceneComponent::GetRotation() const
+    {
+        return m_qRotation;
+    }
+
+    const Matrix & SceneComponent::GetTransform() const
+    {
+        return m_mTransform;
+    }
+
+    void SceneComponent::SetPosition(const Vector3 & position)
+    {
+        m_vPosition.x = position.x;
+        m_vPosition.y = position.y;
+        m_vPosition.z = position.z;
+
+        //m_dirty = true;
+    }
+    void SceneComponent::SetScale(const Vector3 & scale)
+    {
+        m_vScale.x = scale.x;
+        m_vScale.y = scale.y;
+        m_vScale.z = scale.z;
+
+        //m_dirty = true;
+    }
+
+    void SceneComponent::SetRotation(const Quaternion & rotation)
+    {
+        m_qRotation.x = rotation.x;
+        m_qRotation.y = rotation.y;
+        m_qRotation.z = rotation.z;
+        m_qRotation.w = rotation.w;
+
+        //m_dirty = true;
+        this->UpdateTransform();
+    }
+
     float SceneComponent::GetAxis(std::shared_ptr<LuaTable> table, const std::string axis)
     {
         std::shared_ptr<LuaStatic<double> > var = std::dynamic_pointer_cast<LuaStatic<double>>(table->Get(axis));
         return static_cast<float>(var->GetValue());
+    }
+
+    void SceneComponent::UpdateTransform()
+    {
+        // star with identity matrix
+        this->m_mTransform = Matrix();
+        // then apply vector transforms
+        // always apply R -> S -> T
+        this->m_mTransform.Rotate(this->m_qRotation);
+        this->m_mTransform.Scale(this->m_vScale);
+        this->m_mTransform.Translate(this->m_vPosition);
     }
 }

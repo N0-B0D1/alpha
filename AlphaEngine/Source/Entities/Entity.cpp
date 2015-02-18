@@ -55,8 +55,12 @@ namespace alpha
         }
     }
 
-    std::shared_ptr<EntityComponent> Entity::Get(unsigned int component_id)
+    std::shared_ptr<EntityComponent> Entity::Get(const std::string & component_name)
     {
+        // hash the component name
+        unsigned int component_id = EntityComponent::GetIDFromName(component_name);
+
+        // find the component by its hashed name id
         auto it = m_components.find(component_id);
         if (it != m_components.end())
         {

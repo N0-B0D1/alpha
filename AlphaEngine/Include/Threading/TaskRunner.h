@@ -42,6 +42,8 @@ namespace alpha
         void operator()();
 
     private:
+        TaskRunner & operator=(const TaskRunner &);
+
         const bool * const m_running;
     };
 }

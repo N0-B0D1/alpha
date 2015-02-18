@@ -21,21 +21,25 @@ limitations under the License.
 #include <memory>
 #include <string>
 
-//#include "Math/Transform.h"
+#include "Math/Matrix.h"
 #include "Math/Vector3.h"
+#include "Math/Quaternion.h"
 
 namespace alpha
 {
     class LuaVar;
     class LuaTable;
 
-    /** \brief Abstract base class for all entity components. 
+    /**
+     * \brief Abstract base class for all entity components. 
+     *
      * A component might represet a single piece of logic or renderable instanced for the entity it 
      * is attached to. 
      * */
     class EntityComponent
     {
     public:
+        EntityComponent();
         virtual ~EntityComponent();
 
         /** set the parent component */
@@ -60,14 +64,19 @@ namespace alpha
         static unsigned int GetIDFromName(const std::string & name);
 
     protected:
-        /** Reference to this components parent, null if is top-level component */ 
+        /** Reference to this components parent, null if is top-level component */
         std::shared_ptr<EntityComponent> m_parent;
 
         /** Child components, any component can be a child of another component for the greatest flexibility. */
         std::map<unsigned int, std::shared_ptr<EntityComponent> > m_components;
+
+        /** Has updated flag */
+        bool m_dirty;
     };
 
-    /** \brief A component base class used to represent a geometrical object in the scene.
+    /**
+     * \brief A component base class used to represent a geometrical object in the scene.
+     *
      * A scene component always has a transform which represents its relative position, orientation, 
      * and scale relative to its parent component.  If the parent is null then the transform is relative 
      * to the world. 
@@ -80,17 +89,30 @@ namespace alpha
         /** Base SceneComponent handles initialization of transform data */
         virtual void VInitialize(std::shared_ptr<LuaVar> var);
 
+        bool IsDirty() const;
+
         const Vector3 & GetPosition() const;
         const Vector3 & GetScale() const;
+        const Quaternion & GetRotation() const;
+        const Matrix & GetTransform() const;
+
+        void SetPosition(const Vector3 & position);
+        void SetScale(const Vector3 & scale);
+        void SetRotation(const Quaternion & rotation);
 
     private:
         /** Helper function for retrieving x, y, or z vars from script tables */
         float GetAxis(std::shared_ptr<LuaTable> table, const std::string axis);
 
+        /** Update the transform matrix */
+        void UpdateTransform();
+
         /** This components relative transform */
-        //Transform m_transform;
         Vector3 m_vPosition;
         Vector3 m_vScale;
+        Quaternion m_qRotation;
+
+        Matrix m_mTransform;
     };
 }
 
