@@ -21,14 +21,18 @@ limitations under the License.
 
 namespace alpha
 {
-    /** \brief Transform describes an rotation, position, and scale.
-     * 
-     */
+    struct Vector3;
+    struct Quaternion;
+
     struct Matrix
     {
     public:
         Matrix();
         virtual ~Matrix();
+
+        void Rotate(const Quaternion & rotation);
+        void Translate(const Vector3 & position);
+        void Scale(const Vector3 & scale);
     };
 }
 

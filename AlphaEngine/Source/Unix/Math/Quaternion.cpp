@@ -14,28 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Math/Matrix.h"
 #include "Math/Quaternion.h"
-#include "Math/Vector3.h"
 
 namespace alpha
 {
-    Matrix::Matrix()
+    Quaternion::Quaternion()
+        : x(0), y(0), z(0), w(1.f)
     { }
-    Matrix::~Matrix() { }
 
-    void Matrix::Rotate(const Quaternion & /*rotation*/)
+    void Quaternion::RotationFromAxisAngle(const Vector3 & /*axis*/, float /*radians*/)
     {
-        // XXX fix this
-    }
-
-    void Matrix::Translate(const Vector3 & /*position*/)
-    {
-        // XXX fix this
-    }
-
-    void Matrix::Scale(const Vector3 & /*scale*/)
-    {
-        // XXX fix this
+        // XXX implement this
     }
 }

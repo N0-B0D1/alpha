@@ -1,3 +1,6 @@
+#ifndef ALPHA_QUATERNION_H
+#define ALPHA_QUATERNION_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -14,28 +17,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Math/Matrix.h"
-#include "Math/Quaternion.h"
-#include "Math/Vector3.h"
-
 namespace alpha
 {
-    Matrix::Matrix()
-    { }
-    Matrix::~Matrix() { }
+    struct Vector3;
 
-    void Matrix::Rotate(const Quaternion & /*rotation*/)
+    struct Quaternion
     {
-        // XXX fix this
-    }
+    public:
+        Quaternion();
 
-    void Matrix::Translate(const Vector3 & /*position*/)
-    {
-        // XXX fix this
-    }
+        void RotationFromAxisAngle(const Vector3 & axis, float radians);
 
-    void Matrix::Scale(const Vector3 & /*scale*/)
-    {
-        // XXX fix this
-    }
+        float x;
+        float y;
+        float z;
+        float w;
+    };
 }
+
+#endif // ALPHA_QUATERNION_H
