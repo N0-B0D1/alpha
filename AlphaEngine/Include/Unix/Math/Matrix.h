@@ -34,6 +34,8 @@ namespace alpha
         void Translate(const Vector3 & position);
         void Scale(const Vector3 & scale);
     };
+
+    Matrix operator* (const Matrix& left, const Matrix& right);
 }
 
 #endif // TRANSFORM_H

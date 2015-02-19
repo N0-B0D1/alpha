@@ -38,4 +38,10 @@ namespace alpha
     {
         // XXX fix this
     }
+
+    Matrix operator* (const Matrix& /*left*/, const Matrix& /*right*/)
+    {
+        // XXX implement this
+        return Matrix();
+    }
 }
