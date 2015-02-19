@@ -34,6 +34,10 @@ namespace alpha
     {
         m_parent = parent;
     }
+    std::shared_ptr<EntityComponent> EntityComponent::GetParent() const
+    {
+        return m_parent;
+    }
 
     void EntityComponent::Attach(unsigned int component_id, std::shared_ptr<EntityComponent> component)
     {

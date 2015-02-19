@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <map>
 #include <memory>
+#include <vector>
 
 namespace alpha
 {
@@ -39,7 +40,7 @@ namespace alpha
         //! Component manipulation functions
         void Add(unsigned int component_id, std::shared_ptr<EntityComponent> component);
         std::shared_ptr<EntityComponent> Get(const std::string & component_name);
-        void Remove(unsigned int component_id);
+        //void Remove(unsigned int component_id);
 
         /**
          * \brief Retrieve the map container of all components belonging to this entity instance.
@@ -53,7 +54,9 @@ namespace alpha
         std::shared_ptr<EntityScript> m_script;
 
         /** Map containing every component belonging to this entity. */
-        std::map<unsigned int, std::shared_ptr<EntityComponent> > m_components;
+        std::map<unsigned int, std::shared_ptr<EntityComponent> > m_allComponents;
+        /** Root map container only contains root level components, so it can be treated more like a tree */
+        std::map<unsigned int, std::shared_ptr<EntityComponent> > m_rootComponents;
     };
 }
 

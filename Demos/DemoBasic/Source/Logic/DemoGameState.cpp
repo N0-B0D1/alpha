@@ -41,7 +41,7 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
         float radians = static_cast<float>(degrees * (3.14 / 180));
 
         alpha::Quaternion q;
-        q.RotationFromAxisAngle(alpha::Vector3(0, 1, 0), radians);
+        q.RotationFromAxisAngle(alpha::Vector3(0, 0, 1), radians);
         root->SetRotation(q);
     }
 

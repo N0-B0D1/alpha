@@ -61,23 +61,31 @@ namespace alpha
         return false;
     }
 
-    bool SceneManager::Update(const std::shared_ptr<Entity> & entity)
+    bool SceneManager::Update(const std::shared_ptr<Entity> & /*entity*/)
     {
+        // TODO: Recurse scene node hierarchy, find node and update it
+        /*
         auto search = m_nodes.find(entity->GetId());
         if (search != m_nodes.end())
         {
             return true;
         }
         return false;
+        */
+        return true;
     }
 
-    bool SceneManager::Remove(const std::shared_ptr<Entity> & entity)
+    bool SceneManager::Remove(const std::shared_ptr<Entity> & /*entity*/)
     {
+        // TODO: recurse scene node hierarchy, find node, and remove it.
+        /*
         auto search = m_nodes.find(entity->GetId());
         if (search != m_nodes.end())
         {
             return true;
         }
+        return false;
+        */
         return false;
     }
 

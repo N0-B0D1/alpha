@@ -44,6 +44,8 @@ namespace alpha
 
         /** set the parent component */
         void SetParent(const std::shared_ptr<EntityComponent> & parent);
+        /** Get the parent component for this component */
+        std::shared_ptr<EntityComponent> GetParent() const;
 
         /** Initialize the component from a script variable. */
         virtual void VInitialize(std::shared_ptr<LuaVar> var) = 0;

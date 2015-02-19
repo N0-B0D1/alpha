@@ -44,14 +44,20 @@ namespace alpha
 
     void Entity::Add(unsigned int component_id, std::shared_ptr<EntityComponent> component)
     {
-        auto it = m_components.find(component_id);
-        if (it != m_components.end())
+        auto it = m_allComponents.find(component_id);
+        if (it != m_allComponents.end())
         {
             LOG_WARN("  <Entity> Attempt to add a component type that already exists: <type: ", component->VGetName());
         }
         else 
         {
-            m_components[component_id] = component;
+            m_allComponents[component_id] = component;
+            if (component->GetParent() == nullptr)
+            {
+                // this component is a root level component
+                // so also store it in the vector array
+                m_rootComponents[component_id] = component;
+            }
         }
     }
 
@@ -61,14 +67,15 @@ namespace alpha
         unsigned int component_id = EntityComponent::GetIDFromName(component_name);
 
         // find the component by its hashed name id
-        auto it = m_components.find(component_id);
-        if (it != m_components.end())
+        auto it = m_allComponents.find(component_id);
+        if (it != m_allComponents.end())
         {
             return it->second;
         }
         return nullptr;
     }
 
+    /*
     void Entity::Remove(unsigned int component_id)
     {
         auto it = m_components.find(component_id);
@@ -77,9 +84,10 @@ namespace alpha
             m_components.erase(it);
         }
     }
+    */
 
     const std::map<unsigned int, std::shared_ptr<EntityComponent> > Entity::GetComponents() const
     {
-        return m_components;
+        return m_rootComponents;
     }
 }

@@ -109,14 +109,16 @@ namespace alpha
                     }
                 }
 
-                // always add the component directly to the entity, so it can be easily retrieved.
-                entity->Add(component_id, component);
-
                 // then if this is a sub-component in the tree, also add it to the parent component
+                // have to attach to parent first, so the hierarchy is properly set before adding to the entity directly
                 if (parent_component != nullptr)
                 {
                     parent_component->Attach(component_id, component);
+                    component->SetParent(parent_component);
                 }
+
+                // always add the component directly to the entity, so it can be easily retrieved.
+                entity->Add(component_id, component);
             }
             else
             {
