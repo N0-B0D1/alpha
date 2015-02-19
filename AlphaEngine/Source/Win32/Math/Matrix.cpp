@@ -66,4 +66,15 @@ namespace alpha
         XMStoreFloat4x4(&m, XMMatrixTranslation(position.x, position.y, position.z));
         return m;
     }
+
+    Matrix operator* (const Matrix& left, const Matrix& right)
+    {
+        XMMATRIX mLeft = XMLoadFloat4x4(&left);
+        XMMATRIX mRight = XMLoadFloat4x4(&right);
+        XMMATRIX mResult = XMMatrixMultiply(mLeft, mRight);
+
+        Matrix result;
+        XMStoreFloat4x4(&result, mResult);
+        return result;
+    }
 }

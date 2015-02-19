@@ -65,7 +65,7 @@ namespace alpha
         /**
          * \brief Given an entity component, recuresively add SceneNodes.
          */
-        std::map<unsigned int, std::shared_ptr<SceneNode> > CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components);
+        std::map<unsigned int, std::shared_ptr<SceneNode> > CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components, std::shared_ptr<SceneNode> pParent);
 
         /** Recursively build render data for an entities scene node map */
         void BuildRenderData(unsigned int entity_id, std::map<unsigned int, std::shared_ptr<SceneNode> > nodes, std::vector<RenderData *> & renderables) const;

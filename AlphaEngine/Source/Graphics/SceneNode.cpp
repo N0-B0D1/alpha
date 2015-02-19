@@ -22,15 +22,19 @@ limitations under the License.
 
 namespace alpha
 {
-    SceneNode::SceneNode(std::shared_ptr<SceneComponent> component, std::map<unsigned int, std::shared_ptr<SceneNode> > children)
-        : m_parent(nullptr)
-        , m_children(children)
+    SceneNode::SceneNode(std::shared_ptr<SceneNode> pParent, std::shared_ptr<SceneComponent> component)
+        : m_parent(pParent)
         , m_pSceneComponent(component)
         , m_pRenderData(nullptr)
     { }
     SceneNode::~SceneNode()
     {
         if (m_pRenderData) { delete m_pRenderData; }
+    }
+
+    void SceneNode::SetParent(std::shared_ptr<SceneNode> pParent)
+    {
+        m_parent = pParent;
     }
 
     bool SceneNode::IsRenderable() const
@@ -46,7 +50,7 @@ namespace alpha
             m_pRenderData = new RenderData();
         }
 
-        m_pRenderData->m_world = m_pSceneComponent->GetTransform();
+        m_pRenderData->m_world = this->GetWorldTransform(); //m_pSceneComponent->GetTransform();
         /*
         if (m_pSceneComponent->IsDirty())
         {
@@ -59,8 +63,22 @@ namespace alpha
         return m_pRenderData;
     }
 
+    void SceneNode::SetChildren(std::map<unsigned int, std::shared_ptr<SceneNode> > children)
+    {
+        m_children = children;
+    }
+
     std::map<unsigned int, std::shared_ptr<SceneNode> > SceneNode::GetChildren() const
     {
         return this->m_children;
+    }
+
+    Matrix SceneNode::GetWorldTransform() const
+    {
+        if (m_parent != nullptr)
+        {
+            return m_pSceneComponent->GetTransform() * m_parent->GetWorldTransform();
+        }
+        return m_pSceneComponent->GetTransform();
     }
 }

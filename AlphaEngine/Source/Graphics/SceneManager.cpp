@@ -55,7 +55,7 @@ namespace alpha
         if (search == m_nodes.end())
         {
             auto components = entity->GetComponents();
-            m_nodes[entity_id] = this->CreateNodes(components);
+            m_nodes[entity_id] = this->CreateNodes(components, nullptr);
             return true;
         }
         return false;
@@ -89,7 +89,7 @@ namespace alpha
         return false;
     }
 
-    std::map<unsigned int, std::shared_ptr<SceneNode> > SceneManager::CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components)
+    std::map<unsigned int, std::shared_ptr<SceneNode> > SceneManager::CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components, std::shared_ptr<SceneNode> pParent)
     {
         std::map<unsigned int, std::shared_ptr<SceneNode> > nodes;
 
@@ -97,16 +97,16 @@ namespace alpha
         {
             LOG("SceneManager ", "Creating SceneNode for entity.");
 
-            // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
-            std::map<unsigned int, std::shared_ptr<SceneNode> > child_nodes = this->CreateNodes(component.second->GetComponents());
-
-            //std::shared_ptr<SceneNode> node = nullptr;
+            // creat this node
             std::shared_ptr<SceneComponent> scene_component = std::dynamic_pointer_cast<SceneComponent>(component.second);
-            // at this point we either have nullptr or an actual scene component
-            // either way make a scene node for it, and the nullptr will just
-            // exist as a spacer in the tree, so we don't have to reconstruct the
-            // complex component hierarchy minus none scene components.
-            nodes[component.first] = std::make_shared<SceneNode>(scene_component, child_nodes);
+            auto node = std::make_shared<SceneNode>(pParent, scene_component);
+            //nodes[component.first] = std::make_shared<SceneNode>(pParent, scene_component);
+
+            // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
+            std::map<unsigned int, std::shared_ptr<SceneNode> > child_nodes = this->CreateNodes(component.second->GetComponents(), node);
+            node->SetChildren(child_nodes);
+
+            nodes[component.first] = node;
         }
 
         return nodes;

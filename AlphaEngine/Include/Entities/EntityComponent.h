@@ -96,7 +96,7 @@ namespace alpha
         const Vector3 & GetPosition() const;
         const Vector3 & GetScale() const;
         const Quaternion & GetRotation() const;
-        const Matrix & GetTransform() const;
+        Matrix GetTransform() const;
 
         void SetPosition(const Vector3 & position);
         void SetScale(const Vector3 & scale);

@@ -121,7 +121,7 @@ namespace alpha
         return m_qRotation;
     }
 
-    const Matrix & SceneComponent::GetTransform() const
+    Matrix SceneComponent::GetTransform() const
     {
         return m_mTransform;
     }
@@ -133,6 +133,7 @@ namespace alpha
         m_vPosition.z = position.z;
 
         //m_dirty = true;
+        this->UpdateTransform();
     }
     void SceneComponent::SetScale(const Vector3 & scale)
     {
@@ -141,6 +142,7 @@ namespace alpha
         m_vScale.z = scale.z;
 
         //m_dirty = true;
+        this->UpdateTransform();
     }
 
     void SceneComponent::SetRotation(const Quaternion & rotation)

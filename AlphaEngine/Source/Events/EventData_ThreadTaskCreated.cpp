@@ -14,23 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Events/EventData_EntityCreated.h"
+#include "Events/EventData_ThreadTaskCreated.h"
 
 namespace alpha
 {
-    const std::string EventData_EntityCreated::sk_name = "EventData_EntityCreated";
+    const std::string EventData_ThreadTaskCreated::sk_name = "EventData_ThreadTaskCreated";
 
-    EventData_EntityCreated::EventData_EntityCreated(std::shared_ptr<Entity> entity)
-        : m_entity(entity)
+    EventData_ThreadTaskCreated::EventData_ThreadTaskCreated(std::shared_ptr<Task> task)
+        : m_pTask(task)
     { }
 
-    std::string EventData_EntityCreated::VGetTypeName() const
+    std::string EventData_ThreadTaskCreated::VGetTypeName() const
     {
-        return EventData_EntityCreated::sk_name;
+        return EventData_ThreadTaskCreated::sk_name;
     }
 
-    std::shared_ptr<Entity> EventData_EntityCreated::GetEntity() const
+    std::shared_ptr<Task> EventData_ThreadTaskCreated::GetTask() const
     {
-        return m_entity;
+        return m_pTask;
     }
 }

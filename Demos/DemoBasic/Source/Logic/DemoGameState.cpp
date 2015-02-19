@@ -19,6 +19,20 @@ bool DemoGameState::VInitialize()
     m_test = CreateEntity("Entities/test.lua");
     m_test2 = CreateEntity("Entities/test.lua");
 
+    auto root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test->Get("root"));
+    if (root != nullptr)
+    {
+        // set this entities position to (-5, 0, 0)
+        root->SetPosition(alpha::Vector3(-5, 0, 0));
+    }
+
+    root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test2->Get("root"));
+    if (root != nullptr)
+    {
+        // set this entities position to (5, 0, 0)
+        root->SetPosition(alpha::Vector3(5, 0, 0));
+    }
+
     return true;
 }
 
@@ -29,9 +43,10 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     // get root node and rotate it
     // I know root is a scene component, so cast it
     auto root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test->Get("root"));
+    auto root2 = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test2->Get("root"));
 
     // but just in case, check before doing anything
-    if (root != nullptr)
+    if (root != nullptr && root2 != nullptr)
     {
         //float t = static_cast<float>(currentTime); // / 100.0f;
         static int tick = 0;
@@ -42,7 +57,9 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
 
         alpha::Quaternion q;
         q.RotationFromAxisAngle(alpha::Vector3(0, 0, 1), radians);
+
         root->SetRotation(q);
+        root2->SetRotation(q);
     }
 
     return true;

@@ -1,5 +1,5 @@
-#ifndef EVENT_DATA_ENTITY_CREATED_H
-#define EVENT_DATA_ENTITY_CREATED_H
+#ifndef ALPHA_EVENTDATA_THREAD_TASK_CREATED_H
+#define ALPHA_EVENTDATA_THREAD_TASK_CREATED_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -20,23 +20,23 @@ limitations under the License.
 #include <memory>
 
 #include "Events/EventData.h"
-#include "Entities/Entity.h"
+#include "Threading/Task.h"
 
 namespace alpha
 {
-    class EventData_EntityCreated : public EventData
+    class EventData_ThreadTaskCreated : public EventData
     {
         /** The type name that defines this event type */
         static const std::string sk_name;
 
     public:
-        explicit EventData_EntityCreated(std::shared_ptr<Entity> entity);
+        explicit EventData_ThreadTaskCreated(std::shared_ptr<Task> task);
         virtual std::string VGetTypeName() const;
-        std::shared_ptr<Entity> GetEntity() const;
+        std::shared_ptr<Task> GetTask() const;
 
     private:
-        std::shared_ptr<Entity> m_entity;
+        std::shared_ptr<Task> m_pTask;
     };
 }
 
-#endif // EVENT_DATA_ENTITY_CREATED_H
+#endif // ALPHA_EVENTDATA_THREAD_TASK_CREATED_H

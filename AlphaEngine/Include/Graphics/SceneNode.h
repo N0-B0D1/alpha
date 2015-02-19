@@ -29,18 +29,24 @@ namespace alpha
     class SceneNode
     {
     public:
-        SceneNode(std::shared_ptr<SceneComponent> component, std::map<unsigned int, std::shared_ptr<SceneNode> > children);
+        SceneNode(std::shared_ptr<SceneNode> pParent, std::shared_ptr<SceneComponent> component);
         virtual ~SceneNode();
 
-        /** Check if this node is renderable, or juse a spacer node. */
+        /** Set this nodes parent node */
+        void SetParent(std::shared_ptr<SceneNode> pParent);
+
+        /** Check if this node is renderable, or just a spacer node. */
         bool IsRenderable() const;
 
         RenderData * GetRenderData();
 
+        /** Attach children */
+        void SetChildren(std::map<unsigned int, std::shared_ptr<SceneNode> > children);
         /** Retrieve this nodes child nodes */
         std::map<unsigned int, std::shared_ptr<SceneNode> > GetChildren() const;
 
-        /** Build and return this  */
+        /** Build and return this nodes world transform */
+        Matrix GetWorldTransform() const;
 
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */

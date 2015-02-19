@@ -42,6 +42,8 @@ namespace alpha
         static Matrix CreateScale(const Vector3 & scale);
         static Matrix CreateTranslation(const Vector3 & position);
     };
+
+    Matrix operator* (const Matrix& left, const Matrix& right);
 }
 
 #endif // TRANSFORM_H
