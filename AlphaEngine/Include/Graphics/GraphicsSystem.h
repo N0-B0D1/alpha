@@ -21,8 +21,10 @@ limitations under the License.
 
 #include "AlphaSystem.h"
 
+#include "Events/EventDataPublisher.h"
 #include "Events/EventDataSubscriber.h"
 #include "Events/EventData_EntityCreated.h"
+#include "Events/EventData_ThreadTaskCreated.h"
 
 namespace alpha
 {
@@ -48,9 +50,11 @@ namespace alpha
         /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
         std::shared_ptr<AEventDataSubscriber> GetEntityCreatedSubscriber() const;
 
-        // Helper methods
         /** Helper method for loading shader asset files */
         std::shared_ptr<Asset> LoadShaderFile(const std::string & name);
+
+        /** Allow other systems to subscribe to new threading tasks from this system */
+        void SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
 
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
@@ -71,6 +75,9 @@ namespace alpha
 
         /** Current list of renderable objects to be passed into the renderer on the next render call */
         std::vector<RenderData *> m_renderables;
+
+        /** Publisher for new threading tasks */
+        EventDataPublisher<EventData_ThreadTaskCreated> m_pubThreadTaskCreated;
     };
 }
 

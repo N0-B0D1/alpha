@@ -19,12 +19,15 @@ limitations under the License.
 
 #include "Threading/ThreadPool.h"
 #include "Threading/TaskRunner.h"
+#include "Threading/Task.h"
+#include "Toolbox/ConcurrentQueue.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     ThreadPool::ThreadPool()
-        : m_running(true)
+        : m_pTaskQueue(nullptr)
+        , m_running(true)
     { }
     ThreadPool::~ThreadPool() { }
 
@@ -39,10 +42,13 @@ namespace alpha
         }
         LOG("  ThreadPool > Detected ", m_maxThreads, " max possible hardware threads.");
 
+        // create the task queue
+        m_pTaskQueue = std::make_shared<ConcurrentQueue<std::shared_ptr<Task> > >();
+
         // Create a TaskRunner thread for each hardware thread available.
         for (unsigned i = 0; i < m_maxThreads; ++i)
         {
-            m_threads.push_back(std::thread(TaskRunner(&m_running)));
+            m_threads.push_back(std::thread(TaskRunner(&m_running, m_pTaskQueue)));
         }
 
         return true;
@@ -53,15 +59,13 @@ namespace alpha
         // simply set the shared runnning boolean to false
         // and join on all threads.  Since all TaskRunner's
         // have a reference to this boolean, setting this to
-        // false amounts to telling all threads to stop
-        // execution.
+        // false amounts to telling all threads to stop execution.
         m_running = false;
 
         // join on each thread
         while (m_threads.size() > 0)
         {
             std::thread &t = m_threads.back();
-            //t.detach();
             
             if (t.joinable())
             {
@@ -69,14 +73,18 @@ namespace alpha
             }
             else
             {
-                LOG("Thread no joinable --");
+                LOG_ERR("Thread not joinable!");
             }
 
             // pop last, so we don't destruct the thread before joining
             m_threads.pop_back();
         }
-        LOG("Thread join complete --");
 
         return true;
+    }
+
+    void ThreadPool::QueueTask(std::shared_ptr<Task> pTask)
+    {
+        m_pTaskQueue->Push(pTask);
     }
 }

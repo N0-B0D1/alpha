@@ -87,6 +87,11 @@ namespace alpha
         //m_pRenderer->Render(m_renderables);
     }
 
+    void GraphicsSystem::SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
+    {
+        m_pubThreadTaskCreated.Subscribe(pSubscriber);
+    }
+
     bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)
     {
         // add any new entities to the graphics system

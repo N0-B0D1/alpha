@@ -20,9 +20,12 @@ limitations under the License.
 #include <thread>
 #include <vector>
 
+#include "Toolbox/ConcurrentQueue.h"
+
 namespace alpha
 {
     class TaskRunner;
+    class Task;
 
     /**
      * \brief The ThreadPool maintains a pre-defined number of threads and passes Tasks to them as needed.
@@ -38,6 +41,9 @@ namespace alpha
         /** Join all threads and dispose of them. */
         bool Shutdown();
 
+        /** Queue a task for the threads to execute */
+        void QueueTask(std::shared_ptr<Task> pTask);
+
     private:
         /** Number of supported hardware threads. */
         unsigned m_maxThreads;
@@ -46,6 +52,8 @@ namespace alpha
         std::vector<std::thread> m_threads;
         /** Array of all TaskRunners that are executing in threads. */
         std::vector<TaskRunner> m_runners;
+
+        std::shared_ptr<ConcurrentQueue<std::shared_ptr<Task> > > m_pTaskQueue;
 
         /** Thread running state, setting to false will stop all task runner activity. */
         bool m_running;

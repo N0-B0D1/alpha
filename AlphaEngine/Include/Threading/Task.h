@@ -23,6 +23,7 @@ namespace alpha
     {
     public:
         virtual ~Task();
+        virtual void VExecute() = 0;
     };
 }
 

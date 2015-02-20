@@ -19,6 +19,9 @@ limitations under the License.
 
 #include "AlphaSystem.h"
 
+#include "Events/EventDataSubscriber.h"
+#include "Events/EventData_ThreadTaskCreated.h"
+
 namespace alpha
 {
     class ThreadPool;
@@ -32,11 +35,20 @@ namespace alpha
         virtual bool VInitialize();
         virtual bool VShutdown();
 
+        /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
+        std::shared_ptr<AEventDataSubscriber> GetThreadTaskCreatedSubscriber() const;
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
+        /** Read any new subscriptions, called on update */
+        void ReadSubscriptions();
+
         /** Handle to the thread pool that allocates thread reasources */
         ThreadPool * m_pThreadPool;
+
+        /** Subscriber for new thread task events */
+        std::shared_ptr<EventDataSubscriber<EventData_ThreadTaskCreated>> m_subThreadTaskCreated;
     };
 }
 

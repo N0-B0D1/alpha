@@ -141,6 +141,10 @@ namespace alpha
             return false;
         }
 
+        // subscribe the threading system to any new task publishers
+        auto taskSubscriber = m_pThreads->GetThreadTaskCreatedSubscriber();
+        m_pGraphics->SubscribeToThreadTaskCreated(taskSubscriber);
+
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();
 
