@@ -1,5 +1,5 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#ifndef ALPHA_MATRIX_H
+#define ALPHA_MATRIX_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -26,16 +26,23 @@ namespace alpha
 
     struct Matrix
     {
-    public:
-        Matrix();
-        virtual ~Matrix();
+        float m_11, m_12, m_13, m_14;
+        float m_21, m_22, m_23, m_24;
+        float m_31, m_32, m_33, m_34;
+        float m_41, m_42, m_43, m_44;
 
-        void Rotate(const Quaternion & rotation);
-        void Translate(const Vector3 & position);
-        void Scale(const Vector3 & scale);
+        Matrix();
+        Matrix(float _11, float _12, float _13, float _14,
+               float _21, float _22, float _23, float _24,
+               float _31, float _32, float _33, float _34,
+               float _41, float _42, float _43, float _44);
+
+        static Matrix Rotate(const Quaternion & rotation);
+        static Matrix Translate(const Vector3 & position);
+        static Matrix Scale(const Vector3 & scale);
     };
 
     Matrix operator* (const Matrix& left, const Matrix& right);
 }
 
-#endif // TRANSFORM_H
+#endif // ALPHA_MATRIX_H

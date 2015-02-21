@@ -21,6 +21,7 @@ limitations under the License.
 #include <vector>
 
 #include <d3d11_1.h>
+#include <DirectXMath.h>
 
 #include "Math/Matrix.h"
 #include "Math/Vector3.h"
@@ -38,9 +39,9 @@ namespace alpha
     } SimpleVertex;
     typedef struct ConstantBuffer
     {
-        XMMATRIX mWorld;
-        XMMATRIX mView;
-        XMMATRIX mProjection;
+        DirectX::XMMATRIX mWorld;
+        DirectX::XMMATRIX mView;
+        DirectX::XMMATRIX mProjection;
         Vector4 vLightDir[2];
         Vector4 vLightColor[2];
         Vector4 ambient;
