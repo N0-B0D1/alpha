@@ -23,14 +23,14 @@ bool DemoGameState::VInitialize()
     if (root != nullptr)
     {
         // set this entities position to (-5, 0, 0)
-        root->SetPosition(alpha::Vector3(-5, 0, 0));
+        root->SetPosition(alpha::Vector3(0, 1, -1));
     }
 
     root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test2->Get("root"));
     if (root != nullptr)
     {
         // set this entities position to (5, 0, 0)
-        root->SetPosition(alpha::Vector3(5, 0, 0));
+        root->SetPosition(alpha::Vector3(4345, 0, 0));
     }
 
     return true;
@@ -52,14 +52,16 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
         static int tick = 0;
         tick += 1;
 
-        float degrees = static_cast<float>(tick / 3);
+        float degrees = static_cast<float>(tick / 4);
         float radians = static_cast<float>(degrees * (3.14 / 180));
 
-        alpha::Quaternion q;
-        q.RotationFromAxisAngle(alpha::Vector3(0, 0, 1), radians);
+        alpha::Quaternion q1;
+        q1.RotationFromAxisAngle(alpha::Vector3(0, 0, -1), radians);
+        root->SetRotation(q1);
 
-        root->SetRotation(q);
-        root2->SetRotation(q);
+        alpha::Quaternion q2;
+        q2.RotationFromAxisAngle(alpha::Vector3(1, 0, 0), radians);
+        root2->SetRotation(q2);
     }
 
     return true;

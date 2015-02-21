@@ -46,27 +46,21 @@ namespace alpha
             return false;
         }
 
+        // make task publisher, and shared with sub-systems
+        m_pubThreadTaskCreated = std::make_shared<EventDataPublisher<EventData_ThreadTaskCreated>>();
+
         // Scene renerable manager
-        m_pSceneManager = std::unique_ptr<SceneManager>(new SceneManager());
+        m_pSceneManager = new SceneManager(m_pubThreadTaskCreated);
 
         // create event subscribers
-        m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated> >();
-
-        // XXX test render 2 cubes.
-        m_renderables.push_back(new RenderData());
-        //m_renderables.push_back(new RenderData("PSSolid"));
+        m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated>>();
 
         return true;
     }
 
     bool GraphicsSystem::VShutdown()
     {
-        while (m_renderables.size() > 0)
-        {
-            RenderData * rd = m_renderables.back();
-            m_renderables.pop_back();
-            if (rd) { delete rd; }
-        }
+        if (m_pSceneManager) { delete m_pSceneManager; }
 
         if (m_pRenderer)
         {
@@ -78,18 +72,13 @@ namespace alpha
 
     void GraphicsSystem::Render()
     {
-        
         std::vector<RenderData *> renderables = m_pSceneManager->GetRenderData();
-        
         m_pRenderer->Render(renderables);
-        
-
-        //m_pRenderer->Render(m_renderables);
     }
 
     void GraphicsSystem::SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
     {
-        m_pubThreadTaskCreated.Subscribe(pSubscriber);
+        m_pubThreadTaskCreated->Subscribe(pSubscriber);
     }
 
     bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)

@@ -20,7 +20,7 @@ namespace alpha
 {
     const std::string EventData_ThreadTaskCreated::sk_name = "EventData_ThreadTaskCreated";
 
-    EventData_ThreadTaskCreated::EventData_ThreadTaskCreated(std::shared_ptr<Task> task)
+    EventData_ThreadTaskCreated::EventData_ThreadTaskCreated(Task * task)
         : m_pTask(task)
     { }
 
@@ -29,7 +29,7 @@ namespace alpha
         return EventData_ThreadTaskCreated::sk_name;
     }
 
-    std::shared_ptr<Task> EventData_ThreadTaskCreated::GetTask() const
+    Task * EventData_ThreadTaskCreated::GetTask() const
     {
         return m_pTask;
     }

@@ -48,38 +48,10 @@ namespace alpha
     ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
     ID3D11Texture2D*        m_pDepthStencil = nullptr;
     ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
-    /*
-    ID3D11VertexShader*     m_pVertexShader = nullptr;
-    ID3D11PixelShader*      m_pPixelShader = nullptr;
-    ID3D11PixelShader*      m_pPixelShaderSolid = nullptr;
-    ID3D11InputLayout*      m_pVertexLayout = nullptr;
-    ID3D11Buffer*           m_pVertexBuffer = nullptr;
-    ID3D11Buffer*           m_pIndexBuffer = nullptr;
-    ID3D11Buffer*           m_pConstantBuffer = nullptr;
-    */
+
     DirectX::XMMATRIX       m_World;
     DirectX::XMMATRIX       m_View;
     DirectX::XMMATRIX       m_Projection;
-
-
-    /*
-    struct SimpleVertex
-    {
-        XMFLOAT3 Pos;
-        XMFLOAT3 Normal;
-    };
-
-    struct ConstantBuffer
-    {
-        XMMATRIX mWorld;
-        XMMATRIX mView;
-        XMMATRIX mProjection;
-        XMFLOAT4 vLightDir[2];
-        XMFLOAT4 vLightColor[2];
-        XMFLOAT4 vOutputColor;
-    };
-    */
-
 
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
@@ -464,143 +436,6 @@ namespace alpha
         vp.TopLeftY = 0;
         m_pImmediateContext->RSSetViewports(1, &vp);
 
-
-
-
-
-
-        /*
-
-        // Compile the vertex shader
-        ID3DBlob* pVSBlob = nullptr;
-        // create default vertex shader
-        m_pVertexShader = this->CreateVertexShaderFromAsset(m_vsDefaultShader, "VS", &pVSBlob);
-
-        // Define the input layout
-        D3D11_INPUT_ELEMENT_DESC layout[] =
-        {
-            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            //{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        };
-        UINT numElements = ARRAYSIZE(layout);
-
-        // Create the input layout
-        hr = m_pd3dDevice->CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &m_pVertexLayout);
-        pVSBlob->Release();
-        if (FAILED(hr))
-            return hr;
-
-        // Set the input layout
-        m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
-
-        // create default pixel shader
-        m_pPixelShader = this->CreatePixelShaderFromAsset(m_psDefaultShader, "PS");
-
-        // create solid pixel shader
-        m_pPixelShaderSolid = this->CreatePixelShaderFromAsset(m_psDefaultShader, "PSSolid");
-
-        // Create vertex buffer
-        // Cube
-        SimpleVertex vertices[] =
-        {
-            { Vector3(-1.0f, 1.0f, -1.0f), Vector3(0.0f, 1.0f, 0.0f) },
-            { Vector3(1.0f, 1.0f, -1.0f), Vector3(0.0f, 1.0f, 0.0f) },
-            { Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 1.0f, 0.0f) },
-            { Vector3(-1.0f, 1.0f, 1.0f), Vector3(0.0f, 1.0f, 0.0f) },
-
-            { Vector3(-1.0f, -1.0f, -1.0f), Vector3(0.0f, -1.0f, 0.0f) },
-            { Vector3(1.0f, -1.0f, -1.0f), Vector3(0.0f, -1.0f, 0.0f) },
-            { Vector3(1.0f, -1.0f, 1.0f), Vector3(0.0f, -1.0f, 0.0f) },
-            { Vector3(-1.0f, -1.0f, 1.0f), Vector3(0.0f, -1.0f, 0.0f) },
-
-            { Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
-            { Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
-            { Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
-            { Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, 0.0f, 0.0f) },
-
-            { Vector3(1.0f, -1.0f, 1.0f), Vector3(1.0f, 0.0f, 0.0f) },
-            { Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 0.0f, 0.0f) },
-            { Vector3(1.0f, 1.0f, -1.0f), Vector3(1.0f, 0.0f, 0.0f) },
-            { Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 0.0f, 0.0f) },
-
-            { Vector3(-1.0f, -1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
-            { Vector3(1.0f, -1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
-            { Vector3(1.0f, 1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
-            { Vector3(-1.0f, 1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f) },
-
-            { Vector3(-1.0f, -1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
-            { Vector3(1.0f, -1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
-            { Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
-            { Vector3(-1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f) },
-        };
-        D3D11_BUFFER_DESC bd;
-        ZeroMemory(&bd, sizeof(bd));
-        bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.ByteWidth = sizeof(SimpleVertex) * 24;
-        bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        bd.CPUAccessFlags = 0;
-        D3D11_SUBRESOURCE_DATA InitData;
-        ZeroMemory(&InitData, sizeof(InitData));
-        InitData.pSysMem = vertices;
-        hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &m_pVertexBuffer);
-        if (FAILED(hr))
-            return hr;
-
-        // Set vertex buffer
-        UINT stride = sizeof(SimpleVertex);
-        UINT offset = 0;
-        m_pImmediateContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
-
-        // Create index buffer
-        WORD indices[] =
-        {
-            3, 1, 0,
-            2, 1, 3,
-
-            6, 4, 5,
-            7, 4, 6,
-
-            11, 9, 8,
-            10, 9, 11,
-
-            14, 12, 13,
-            15, 12, 14,
-
-            19, 17, 16,
-            18, 17, 19,
-
-            22, 20, 21,
-            23, 20, 22
-        };
-        bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.ByteWidth = sizeof(WORD) * 36;        // 36 vertices needed for 12 triangles in a triangle list
-        bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        bd.CPUAccessFlags = 0;
-        InitData.pSysMem = indices;
-        hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &m_pIndexBuffer);
-        if (FAILED(hr))
-            return hr;
-
-        // Set index buffer
-        m_pImmediateContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
-        // Set primitive topology
-        m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-        // Create the constant buffer
-        bd.Usage = D3D11_USAGE_DEFAULT;
-        bd.ByteWidth = sizeof(ConstantBuffer);
-        bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        bd.CPUAccessFlags = 0;
-        hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &m_pConstantBuffer);
-        if (FAILED(hr))
-            return hr;
-
-        // Initialize the world matrix
-        m_World = DirectX::XMMatrixIdentity();
-        */
-
         // Initialize the view matrix
         XMVECTOR Eye = XMVectorSet(0.0f, 4.0f, -20.0f, 0.0f);
         XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -617,16 +452,6 @@ namespace alpha
     {
         if (m_pImmediateContext) m_pImmediateContext->ClearState();
 
-        /*
-        if (m_pConstantBuffer) m_pConstantBuffer->Release();
-        if (m_pVertexBuffer) m_pVertexBuffer->Release();
-        if (m_pIndexBuffer) m_pIndexBuffer->Release();
-        if (m_pVertexLayout) m_pVertexLayout->Release();
-        if (m_pVertexShader) m_pVertexShader->Release();
-        if (m_pPixelShaderSolid) m_pPixelShaderSolid->Release();
-        if (m_pPixelShader) m_pPixelShader->Release();
-        */
-
         if (m_pDepthStencil) m_pDepthStencil->Release();
         if (m_pDepthStencilView) m_pDepthStencilView->Release();
         if (m_pRenderTargetView) m_pRenderTargetView->Release();
@@ -637,6 +462,7 @@ namespace alpha
         if (m_pd3dDevice1) m_pd3dDevice1->Release();
         if (m_pd3dDevice) m_pd3dDevice->Release();
 
+        /*
         m_pd3dDevice = nullptr;
         m_pd3dDevice1 = nullptr;
         m_pImmediateContext = nullptr;
@@ -644,6 +470,7 @@ namespace alpha
         m_pSwapChain = nullptr;
         m_pSwapChain1 = nullptr;
         m_pRenderTargetView = nullptr;
+        */
     }
 
     void GraphicsRenderer::PreRender(std::vector<RenderData *> renderables)
@@ -798,7 +625,7 @@ namespace alpha
         if (FAILED(hr))
         {
             LOG_WARN("GraphicsRenderer > Failed to create pixel shader.");
-            pPSBlob->Release();
+            //pPSBlob->Release();
             return nullptr;
         }
 

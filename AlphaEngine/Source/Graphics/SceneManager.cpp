@@ -17,26 +17,48 @@ limitations under the License.
 #include "Graphics/SceneManager.h"
 #include "Graphics/SceneNode.h"
 #include "Graphics/RenderData.h"
+#include "Graphics/RenderDataTask.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
+#include "Events/EventDataPublisher.h"
+#include "Events/EventData_ThreadTaskCreated.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    SceneManager::~SceneManager() { }
+    SceneManager::SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher)
+        : m_pTaskPublisher(pTaskPublisher)
+    { }
+    SceneManager::~SceneManager()
+    {
+        for (auto pair : m_nodes)
+        {
+            // delete all entity scene nodes properly
+            for (auto nodepair : pair.second)
+            {
+                delete nodepair.second;
+            }
+            pair.second.clear();
+        }
+        m_nodes.clear();
+    }
 
     bool SceneManager::Update(double /*currentTime*/, double /*elapsedTime*/)
     {
         // clean the list, so it can be rebuilt.
-        while (m_vRenderData.size() > 0)
-        {
-            m_vRenderData.pop_back();
-        }
+        m_vRenderData.clear();
 
         // walk the tree, and create render data for renderable scene nodes.
-        for (auto iter : m_nodes)
+        // make a task for each entity scene node set, and publish it
+        for (auto pair : m_nodes)
         {
-            this->BuildRenderData(iter.first, iter.second, m_vRenderData);
+            if (auto spPublisher = m_pTaskPublisher.lock())
+            {
+                Task * pTask = new RenderDataTask(pair.second);
+                auto pEvent = std::make_shared<EventData_ThreadTaskCreated>(pTask);
+                spPublisher->Publish(pEvent);
+            }
+            this->BuildRenderData(pair.first, pair.second, m_vRenderData);
         }
 
         return true;
@@ -44,6 +66,14 @@ namespace alpha
 
     std::vector<RenderData *> & SceneManager::GetRenderData()
     {
+        /*
+        m_vRenderData.clear();
+        for (auto pair : m_nodes)
+        {
+            this->BuildRenderData(pair.first, pair.second, m_vRenderData);
+        }
+        */
+
         // get the latest set of render data to be rendered.
         return m_vRenderData;
     }
@@ -63,7 +93,6 @@ namespace alpha
 
     bool SceneManager::Update(const std::shared_ptr<Entity> & /*entity*/)
     {
-        // TODO: Recurse scene node hierarchy, find node and update it
         /*
         auto search = m_nodes.find(entity->GetId());
         if (search != m_nodes.end())
@@ -77,7 +106,6 @@ namespace alpha
 
     bool SceneManager::Remove(const std::shared_ptr<Entity> & /*entity*/)
     {
-        // TODO: recurse scene node hierarchy, find node, and remove it.
         /*
         auto search = m_nodes.find(entity->GetId());
         if (search != m_nodes.end())
@@ -89,9 +117,9 @@ namespace alpha
         return false;
     }
 
-    std::map<unsigned int, std::shared_ptr<SceneNode> > SceneManager::CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components, std::shared_ptr<SceneNode> pParent)
+    std::map<unsigned int, SceneNode *> SceneManager::CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components, SceneNode * pParent)
     {
-        std::map<unsigned int, std::shared_ptr<SceneNode> > nodes;
+        std::map<unsigned int, SceneNode *> nodes;
 
         for (auto component : components)
         {
@@ -99,11 +127,11 @@ namespace alpha
 
             // creat this node
             std::shared_ptr<SceneComponent> scene_component = std::dynamic_pointer_cast<SceneComponent>(component.second);
-            auto node = std::make_shared<SceneNode>(pParent, scene_component);
+            auto node = new SceneNode(pParent, scene_component);
             //nodes[component.first] = std::make_shared<SceneNode>(pParent, scene_component);
 
             // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
-            std::map<unsigned int, std::shared_ptr<SceneNode> > child_nodes = this->CreateNodes(component.second->GetComponents(), node);
+            std::map<unsigned int, SceneNode *> child_nodes = this->CreateNodes(component.second->GetComponents(), node);
             node->SetChildren(child_nodes);
 
             nodes[component.first] = node;
@@ -112,7 +140,7 @@ namespace alpha
         return nodes;
     }
 
-    void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, std::shared_ptr<SceneNode> > nodes, std::vector<RenderData *> & renderables) const
+    void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderData *> & renderables) const
     {
         // XXX not sure if the entity id is neede at this point ... refactor as needed.
 

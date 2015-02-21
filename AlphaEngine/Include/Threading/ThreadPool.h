@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
 #include <thread>
 #include <vector>
 
@@ -42,7 +43,7 @@ namespace alpha
         bool Shutdown();
 
         /** Queue a task for the threads to execute */
-        void QueueTask(std::shared_ptr<Task> pTask);
+        void QueueTask(Task * pTask);
 
     private:
         /** Number of supported hardware threads. */
@@ -53,7 +54,7 @@ namespace alpha
         /** Array of all TaskRunners that are executing in threads. */
         std::vector<TaskRunner> m_runners;
 
-        std::shared_ptr<ConcurrentQueue<std::shared_ptr<Task> > > m_pTaskQueue;
+        std::shared_ptr<ConcurrentQueue<Task *> > m_pTaskQueue;
 
         /** Thread running state, setting to false will stop all task runner activity. */
         bool m_running;

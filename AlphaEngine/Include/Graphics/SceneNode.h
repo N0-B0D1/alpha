@@ -29,11 +29,11 @@ namespace alpha
     class SceneNode
     {
     public:
-        SceneNode(std::shared_ptr<SceneNode> pParent, std::shared_ptr<SceneComponent> component);
+        SceneNode(SceneNode * pParent, std::shared_ptr<SceneComponent> component);
         virtual ~SceneNode();
 
         /** Set this nodes parent node */
-        void SetParent(std::shared_ptr<SceneNode> pParent);
+        void SetParent(SceneNode * pParent);
 
         /** Check if this node is renderable, or just a spacer node. */
         bool IsRenderable() const;
@@ -41,19 +41,19 @@ namespace alpha
         RenderData * GetRenderData();
 
         /** Attach children */
-        void SetChildren(std::map<unsigned int, std::shared_ptr<SceneNode> > children);
+        void SetChildren(std::map<unsigned int, SceneNode *> children);
         /** Retrieve this nodes child nodes */
-        std::map<unsigned int, std::shared_ptr<SceneNode> > GetChildren() const;
+        std::map<unsigned int, SceneNode *> GetChildren() const;
 
         /** Build and return this nodes world transform */
         Matrix GetWorldTransform() const;
 
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */
-        std::shared_ptr<SceneNode> m_parent;
+        SceneNode * m_parent;
 
         /** A list of children nodes that belong to this scene node. */
-        std::map<unsigned int, std::shared_ptr<SceneNode> > m_children;
+        std::map<unsigned int, SceneNode *> m_children;
 
         /** The transform that represents this scene nodes position, scale, and rotation in the world. */
         Matrix m_world;

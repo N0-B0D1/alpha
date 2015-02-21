@@ -71,10 +71,9 @@ namespace alpha
     {
         XMMATRIX mLeft = XMLoadFloat4x4(&left);
         XMMATRIX mRight = XMLoadFloat4x4(&right);
-        XMMATRIX mResult = XMMatrixMultiply(mLeft, mRight);
 
         Matrix result;
-        XMStoreFloat4x4(&result, mResult);
+        XMStoreFloat4x4(&result, mLeft * mRight);
         return result;
     }
 }

@@ -22,17 +22,23 @@ limitations under the License.
 
 namespace alpha
 {
-    SceneNode::SceneNode(std::shared_ptr<SceneNode> pParent, std::shared_ptr<SceneComponent> component)
+    SceneNode::SceneNode(SceneNode * pParent, std::shared_ptr<SceneComponent> component)
         : m_parent(pParent)
         , m_pSceneComponent(component)
         , m_pRenderData(nullptr)
     { }
     SceneNode::~SceneNode()
     {
+        // destroy children
+        for (auto pair : m_children)
+        {
+            delete pair.second;
+        }
+        // destroy render data, so all gpu resources are released
         if (m_pRenderData) { delete m_pRenderData; }
     }
 
-    void SceneNode::SetParent(std::shared_ptr<SceneNode> pParent)
+    void SceneNode::SetParent(SceneNode * pParent)
     {
         m_parent = pParent;
     }
@@ -63,12 +69,12 @@ namespace alpha
         return m_pRenderData;
     }
 
-    void SceneNode::SetChildren(std::map<unsigned int, std::shared_ptr<SceneNode> > children)
+    void SceneNode::SetChildren(std::map<unsigned int, SceneNode *> children)
     {
         m_children = children;
     }
 
-    std::map<unsigned int, std::shared_ptr<SceneNode> > SceneNode::GetChildren() const
+    std::map<unsigned int, SceneNode *> SceneNode::GetChildren() const
     {
         return this->m_children;
     }
@@ -77,6 +83,7 @@ namespace alpha
     {
         if (m_parent != nullptr)
         {
+            // this seems backwards, but makes it work as expected ...
             return m_pSceneComponent->GetTransform() * m_parent->GetWorldTransform();
         }
         return m_pSceneComponent->GetTransform();

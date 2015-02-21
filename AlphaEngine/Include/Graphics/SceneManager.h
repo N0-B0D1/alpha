@@ -21,6 +21,9 @@ limitations under the License.
 #include <memory>
 #include <vector>
 
+#include "Events/EventDataPublisher.h"
+#include "Events/EventData_ThreadTaskCreated.h"
+
 namespace alpha
 {
     class Entity;
@@ -34,6 +37,7 @@ namespace alpha
     class SceneManager
     {
     public:
+        explicit SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher);
         virtual ~SceneManager();
 
         /** Keeps the Render Data structurs up to date, and preped for rendering if needed */
@@ -65,16 +69,18 @@ namespace alpha
         /**
          * \brief Given an entity component, recuresively add SceneNodes.
          */
-        std::map<unsigned int, std::shared_ptr<SceneNode> > CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components, std::shared_ptr<SceneNode> pParent);
+        std::map<unsigned int, SceneNode *> CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components, SceneNode * pParent);
 
         /** Recursively build render data for an entities scene node map */
-        void BuildRenderData(unsigned int entity_id, std::map<unsigned int, std::shared_ptr<SceneNode> > nodes, std::vector<RenderData *> & renderables) const;
+        void BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderData *> & renderables) const;
 
         /** Map of entity ID to SceneNode maps */
-        std::map<unsigned int, std::map<unsigned int, std::shared_ptr<SceneNode> > > m_nodes;
+        std::map<unsigned int, std::map<unsigned int, SceneNode *> > m_nodes;
         
         /** Store Render Data array for easy retrieval when rendering. */
         std::vector<RenderData *> m_vRenderData;
+
+        std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pTaskPublisher;
     };
 }
 

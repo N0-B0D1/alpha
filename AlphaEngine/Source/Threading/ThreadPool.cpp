@@ -43,7 +43,7 @@ namespace alpha
         LOG("  ThreadPool > Detected ", m_maxThreads, " max possible hardware threads.");
 
         // create the task queue
-        m_pTaskQueue = std::make_shared<ConcurrentQueue<std::shared_ptr<Task> > >();
+        m_pTaskQueue = std::make_shared<ConcurrentQueue<Task *> >();
 
         // Create a TaskRunner thread for each hardware thread available.
         for (unsigned i = 0; i < m_maxThreads; ++i)
@@ -83,7 +83,7 @@ namespace alpha
         return true;
     }
 
-    void ThreadPool::QueueTask(std::shared_ptr<Task> pTask)
+    void ThreadPool::QueueTask(Task * pTask)
     {
         m_pTaskQueue->Push(pTask);
     }

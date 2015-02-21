@@ -34,7 +34,7 @@ namespace alpha
     {
         m_parent = parent;
     }
-    std::shared_ptr<EntityComponent> EntityComponent::GetParent() const
+    std::weak_ptr<EntityComponent> EntityComponent::GetParent() const
     {
         return m_parent;
     }

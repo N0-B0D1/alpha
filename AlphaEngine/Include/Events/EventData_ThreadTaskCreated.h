@@ -30,12 +30,12 @@ namespace alpha
         static const std::string sk_name;
 
     public:
-        explicit EventData_ThreadTaskCreated(std::shared_ptr<Task> task);
+        explicit EventData_ThreadTaskCreated(Task * task);
         virtual std::string VGetTypeName() const;
-        std::shared_ptr<Task> GetTask() const;
+        Task * GetTask() const;
 
     private:
-        std::shared_ptr<Task> m_pTask;
+        Task * m_pTask;
     };
 }
 

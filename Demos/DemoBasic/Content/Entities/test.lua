@@ -21,18 +21,26 @@ components = {
         -- Entities transform in the world.
 		type = "primitive",
 		transform = {
-			position = { x = -1.0, y = 0.0, z = 0.0 },
+			position = { x = 0.0, y = 0.0, z = 0.0 },
 			rotation = { x = 0.0, y = 0.0, z = 0.0 },
-			scale = { x = 0.5, y = 1.0, z = 1.0 }
+			scale = { x = 1.0, y = 1.0, z = 1.0 }
 		},
 		components = {
 			-- components can exist inside other components
-			primitive_internal = {
+			primitive_internal1 = {
 				type = "primitive",
 				transform = {
-					position = { x = 1.0, y = 0.0, z = 0.0 },
+					position = { x = 4.0, y = 0.0, z = 0.0 },
 					rotation = { x = 0.0, y = 0.0, z = 0.0 },
-					scale = { x = 1.0, y = 1.0, z = 1.0 }
+					scale = { x = 1.0, y = 1.5, z = 1.0 }
+				},
+			},
+			primitive_internal2 = {
+				type = "primitive",
+				transform = {
+					position = { x = -4.0, y = 0.0, z = 0.0 },
+					rotation = { x = 0.0, y = 0.0, z = 0.0 },
+					scale = { x = 1.0, y = 0.5, z = 1.0 }
 				},
 			}
 		}

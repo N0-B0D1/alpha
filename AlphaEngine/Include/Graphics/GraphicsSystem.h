@@ -68,16 +68,13 @@ namespace alpha
         GraphicsRenderer *m_pRenderer;
 
         /** SceneManager for tracking logic and propagation of renderable objects in the Scene */
-        std::unique_ptr<SceneManager> m_pSceneManager;
+        SceneManager * m_pSceneManager;
 
         /** Subscriber for new entity created events */
         std::shared_ptr<EventDataSubscriber<EventData_EntityCreated>> m_subEntityCreated;
 
-        /** Current list of renderable objects to be passed into the renderer on the next render call */
-        std::vector<RenderData *> m_renderables;
-
         /** Publisher for new threading tasks */
-        EventDataPublisher<EventData_ThreadTaskCreated> m_pubThreadTaskCreated;
+        std::shared_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pubThreadTaskCreated;
     };
 }
 

@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace alpha
 {
-    TaskRunner::TaskRunner(const bool * const running, std::shared_ptr<ConcurrentQueue<std::shared_ptr<Task> > > pTaskQueue)
+    TaskRunner::TaskRunner(const bool * const running, std::shared_ptr<ConcurrentQueue<Task *> > pTaskQueue)
         : m_running(running)
         , m_pTaskQueue(pTaskQueue)
     { }
@@ -36,17 +36,20 @@ namespace alpha
         while ((*m_running) == true)
         {
             // pickup tasks from threading system queue
-            std::shared_ptr<Task> pTask;
+            Task * pTask;
             if (m_pTaskQueue->TryPop(pTask))
             {
-                LOG("Thread got new task to process.");
+                //LOG("Thread got new task to process.");
                 // execute the task, all task logic should be self contained
                 // exiting the execute method ammounts to completing the task.
                 pTask->VExecute();
+
+                // once done, destroy the task
+                if (pTask) { delete pTask; }
             }
             else
             {
-                LOG("Thread waiting ....");
+                //LOG("Thread waiting ....");
                 // when no task is available to process, sleep for 1 second
                 // so that we don't hog all the system resources
                 std::this_thread::sleep_for(std::chrono::seconds(1));

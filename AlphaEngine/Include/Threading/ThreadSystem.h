@@ -48,7 +48,7 @@ namespace alpha
         ThreadPool * m_pThreadPool;
 
         /** Subscriber for new thread task events */
-        std::shared_ptr<EventDataSubscriber<EventData_ThreadTaskCreated>> m_subThreadTaskCreated;
+        std::shared_ptr<EventDataSubscriber<EventData_ThreadTaskCreated> > m_subThreadTaskCreated;
     };
 }
 

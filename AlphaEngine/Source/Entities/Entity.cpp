@@ -52,7 +52,8 @@ namespace alpha
         else 
         {
             m_allComponents[component_id] = component;
-            if (component->GetParent() == nullptr)
+            auto spParent = component->GetParent().lock();
+            if (spParent == nullptr)
             {
                 // this component is a root level component
                 // so also store it in the vector array

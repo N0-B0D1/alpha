@@ -57,6 +57,7 @@ namespace alpha
     bool ThreadSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
         // queue up new tasks for the thread pool
+        this->ReadSubscriptions();
         return true;
     }
 
@@ -65,7 +66,7 @@ namespace alpha
         // read any published EventData_EntityCreated events that may have occured since the last update.
         while(std::shared_ptr<const EventData_ThreadTaskCreated> data = m_subThreadTaskCreated->GetNextEvent())
         {
-            LOG("Threading system received new Task to execute.");
+            //LOG("Threading system received new Task to execute.");
             m_pThreadPool->QueueTask(data->GetTask());
         }
     }

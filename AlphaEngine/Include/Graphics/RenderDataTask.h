@@ -17,18 +17,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <map>
+
 #include "Threading/Task.h"
 
 namespace alpha
 {
+    class SceneNode;
+
     /**
      * \brief RenderDataTask handles updating the logic data for a single RenderData object.
      */
     class RenderDataTask : public Task
     {
     public:
+        explicit RenderDataTask(std::map<unsigned int, SceneNode *> nodes);
+
         /** Handle all logic to completion */
         virtual void VExecute();
+
+    private:
+        void UpdateNodes(std::map<unsigned int, SceneNode *> nodes);
+
+        std::map<unsigned int, SceneNode *> m_nodes;
     };
 }
 
