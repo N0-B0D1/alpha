@@ -166,10 +166,11 @@ namespace alpha
     {
         // star with identity matrix
         this->m_mTransform = Matrix();
+
         // then apply vector transforms
         // always apply R -> S -> T
-        this->m_mTransform.Rotate(this->m_qRotation);
-        this->m_mTransform.Scale(this->m_vScale);
-        this->m_mTransform.Translate(this->m_vPosition);
+        this->m_mTransform = this->m_mTransform * Matrix::Rotate(this->m_qRotation);
+        this->m_mTransform = this->m_mTransform * Matrix::Scale(this->m_vScale);
+        this->m_mTransform = this->m_mTransform * Matrix::Translate(this->m_vPosition);
     }
 }

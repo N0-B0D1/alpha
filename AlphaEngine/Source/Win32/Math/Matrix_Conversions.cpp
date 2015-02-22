@@ -14,22 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <math.h>
-
-#include "Math/Quaternion.h"
-#include "Math/Vector3.h"
+#include "Math/Matrix_Conversions.h"
+#include "Math/Matrix.h"
 
 namespace alpha
 {
-    Quaternion::Quaternion()
-        : x(0), y(0), z(0), w(1.f)
-    { }
-
-    void Quaternion::RotationFromAxisAngle(const Vector3 & axis, float radians)
+    DirectX::XMMATRIX AMLoadMatrix(const Matrix & source)
     {
-        this->x = sin(radians / 2) * axis.x;
-        this->y = sin(radians / 2) * axis.y;
-        this->z = sin(radians / 2) * axis.z;
-        this->w = cos(radians / 2);
+        DirectX::XMMATRIX M;
+        M.r[0] = _mm_loadu_ps(&source.m_11);
+        M.r[1] = _mm_loadu_ps(&source.m_21);
+        M.r[2] = _mm_loadu_ps(&source.m_31);
+        M.r[3] = _mm_loadu_ps(&source.m_41);
+        return M;
     }
 }

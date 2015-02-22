@@ -26,6 +26,8 @@ limitations under the License.
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/GraphicsWindow.h"
 #include "Graphics/RenderData.h"
+#include "Math/Matrix.h"
+#include "Math/Matrix_Conversions.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
 #include "Assets/Asset.h"
@@ -150,7 +152,9 @@ namespace alpha
 
             // update constant buffer
             ConstantBuffer cb;
-            cb.mWorld = DirectX::XMMatrixTranspose(XMLoadFloat4x4(&rd->m_world));
+            XMMATRIX world_matrix = AMLoadMatrix(rd->m_world);
+            //cb.mWorld = DirectX::XMMatrixTranspose(XMLoadFloat4x4(&rd->m_world));
+            cb.mWorld = DirectX::XMMatrixTranspose(world_matrix);
             cb.mView = DirectX::XMMatrixTranspose(m_View);
             cb.mProjection = DirectX::XMMatrixTranspose(m_Projection);
             cb.vLightDir[0] = vLightDirs[0];

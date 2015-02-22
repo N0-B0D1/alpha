@@ -1,3 +1,6 @@
+#ifndef ALPHA_MATRIX_CONVERSTIONS_H
+#define ALPHA_MATRIX_CONVERSTIONS_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -14,22 +17,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <math.h>
+/**
+* Matrix Converstions handles converting out matrix to the DirectX Specific XMMATRIX
+* so that it can easily be used in with DirectX 11.
+*/
 
-#include "Math/Quaternion.h"
-#include "Math/Vector3.h"
+#include <DirectXMath.h>
 
 namespace alpha
 {
-    Quaternion::Quaternion()
-        : x(0), y(0), z(0), w(1.f)
-    { }
-
-    void Quaternion::RotationFromAxisAngle(const Vector3 & axis, float radians)
-    {
-        this->x = sin(radians / 2) * axis.x;
-        this->y = sin(radians / 2) * axis.y;
-        this->z = sin(radians / 2) * axis.z;
-        this->w = cos(radians / 2);
-    }
+    struct Matrix;
+    DirectX::XMMATRIX AMLoadMatrix(const Matrix & source);
 }
+
+#endif // ALPHA_MATRIX_CONVERSTIONS_H
