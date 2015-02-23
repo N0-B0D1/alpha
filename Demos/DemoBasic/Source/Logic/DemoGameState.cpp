@@ -79,7 +79,7 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
         }
         alpha::Quaternion q2slerp = alpha::Quaternion::Slerp(q2start, q2end, slerpTime);
         root2->SetRotation(q2slerp);
-        slerpTime += static_cast<float>(elapsedTime) / 50.f;
+        slerpTime += static_cast<float>(elapsedTime) / 39.8f;
     }
 
     return true;

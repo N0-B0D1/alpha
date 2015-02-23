@@ -66,8 +66,17 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# 4996 - disables warning for unsafe functions such as fopen.
     set(warnings "/W4 /WX /EHsc /wd4996")
     set(ALPHA_CXX_FLAGS "")
+	
+	# add fmod install include directory
+	set(FMOD_LOWLEVELAPI_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/fmod" CACHE PATH "FMOD Lowlevel API Directory")
+	include_directories(${FMOD_LOWLEVELAPI_DIRECTORY}/inc)
+	set(PLATFORM_LIBS ${PLATFORM_LIBS} ${FMOD_LOWLEVELAPI_DIRECTORY}/lib/fmodL_vc.lib)
 
 endif()
+
+# include openal directory
+#set(SDK_OPENAL_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/openal" CACHE PATH "OpenAL SDK Path")
+#include_directories(${SDK_OPENAL_DIRECTORY})
 
 # apply flags to global settings
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")

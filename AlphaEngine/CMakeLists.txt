@@ -57,16 +57,17 @@ function (include_alpha_source sub_dir)
 endfunction ()
 
 
-include_alpha_source("Logic")
-include_alpha_source("Toolbox")
-include_alpha_source("Graphics")
 include_alpha_source("Assets")
-include_alpha_source("Events")
+include_alpha_source("Audio")
 include_alpha_source("Entities")
-include_alpha_source("Scripting")
-include_alpha_source("Math")
+include_alpha_source("Events")
 include_alpha_source("FSA")
+include_alpha_source("Graphics")
+include_alpha_source("Logic")
+include_alpha_source("Math")
+include_alpha_source("Scripting")
 include_alpha_source("Threading")
+include_alpha_source("Toolbox")
 
 
 # make engine project

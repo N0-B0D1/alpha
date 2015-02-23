@@ -22,6 +22,7 @@ limitations under the License.
 
 namespace alpha
 {
+    class AudioSystem;
     class EventManager;
     class LogicSystem;
     class GraphicsSystem;
@@ -78,6 +79,9 @@ namespace alpha
 
         /** The game state machine; manages current state and transition to next game state. */
         std::unique_ptr<StateMachine> m_pGameStateMachine;
+
+        /** Audio management system, manages FMOD lifecycle. */
+        AudioSystem * m_pAudio;
 	};
 }
 

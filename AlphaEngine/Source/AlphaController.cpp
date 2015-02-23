@@ -17,6 +17,7 @@ limitations under the License.
 #include <memory>
 
 #include "AlphaController.h"
+#include "Audio/AudioSystem.h"
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
 #include "Assets/AssetSystem.h"
@@ -32,6 +33,7 @@ namespace alpha
         , m_pLogic(nullptr)
         , m_pGraphics(nullptr)
         , m_pAssets(nullptr)
+        , m_pAudio(nullptr)
     {
         LOG("<AlphaController> Constructed.");
     }
@@ -132,6 +134,14 @@ namespace alpha
             return false;
         }
 
+        // create audio system
+        m_pAudio = new AudioSystem();
+        if (!m_pAudio->VInitialize())
+        {
+            LOG_ERR("AudioSystem > Initialization failed!");
+            return false;
+        }
+
         // prep threading system last, so tasks can't be processed until
         // the whole engine is up and running.
         m_pThreads = new ThreadSystem();
@@ -169,6 +179,9 @@ namespace alpha
         {
             // update thread sub-system, allow threads access to any new tasks.
             m_pThreads->Update(currentTime, sk_maxUpdateTime);
+
+            // update audio sub-system
+            m_pAudio->Update(currentTime, sk_maxUpdateTime);
 
             // update asset system, which should cull least recently used items from memory
             m_pAssets->Update(currentTime, sk_maxUpdateTime);
@@ -218,6 +231,12 @@ namespace alpha
             m_pThreads->VShutdown();
             delete m_pThreads;
             LOG("<ThreadSystem> Disposed.");
+        }
+        if (m_pAudio)
+        {
+            m_pAudio->VShutdown();
+            delete m_pAudio;
+            LOG("<AudioSystem> Disposed.");
         }
         if (m_pGameStateMachine)
         {
