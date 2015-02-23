@@ -58,9 +58,9 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
         alpha::Quaternion q1 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, -1), radians);
         root->SetRotation(q1);
 
-        // slerp back and forth between 10 degrees and 90 degrees
-        static alpha::Quaternion q90 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, 1), 75.f * (3.14f / 180.f));
-        static alpha::Quaternion q00 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, 1), 25.f * (3.14f / 180.f));
+        // slerp back and forth between 45 degrees and 135 degrees
+        static alpha::Quaternion q90 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, 1), 135 * (3.14f / 180.f));
+        static alpha::Quaternion q00 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, 1), 45 * (3.14f / 180.f));
         static alpha::Quaternion q2end = q90;
         static float slerpTime = 0.0f;
 
