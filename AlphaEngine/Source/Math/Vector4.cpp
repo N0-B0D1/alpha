@@ -19,8 +19,8 @@ limitations under the License.
 namespace alpha
 {
     Vector4::Vector4() { }
-    Vector4::Vector4(float fx, float fy, float fz, float fw)
-        : x(fx), y(fy), z(fz), w(fw)
+    Vector4::Vector4(float _x, float _y, float _z, float _w)
+        : x(_x), y(_y), z(_z), w(_w)
     { }
 
     Vector4::Vector4(const Vector4 &vec)

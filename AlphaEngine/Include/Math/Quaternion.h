@@ -23,15 +23,15 @@ namespace alpha
 
     struct Quaternion
     {
-    public:
+        float x, y, z, w;
+
         Quaternion();
+        Quaternion(float _x, float _y, float _z, float _w);
 
-        void RotationFromAxisAngle(const Vector3 & axis, float radians);
+        bool operator == (const Quaternion& q) const;
 
-        float x;
-        float y;
-        float z;
-        float w;
+        static Quaternion RotationFromAxisAngle(const Vector3 & axis, float radians);
+        static Quaternion Slerp(const Quaternion & start, const Quaternion & end, float time);
     };
 }
 

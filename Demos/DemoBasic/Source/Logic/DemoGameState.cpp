@@ -30,13 +30,13 @@ bool DemoGameState::VInitialize()
     if (root != nullptr)
     {
         // set this entities position to (5, 0, 0)
-        root->SetPosition(alpha::Vector3(4345, 0, 0));
+        root->SetPosition(alpha::Vector3(5, 5, 0));
     }
 
     return true;
 }
 
-bool DemoGameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
+bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
 {
     // Update the state, move actors, shoot bullets, blah blah
 
@@ -55,13 +55,31 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
         float degrees = static_cast<float>(tick / 4);
         float radians = static_cast<float>(degrees * (3.14 / 180));
 
-        alpha::Quaternion q1;
-        q1.RotationFromAxisAngle(alpha::Vector3(0, 0, -1), radians);
+        alpha::Quaternion q1 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, -1), radians);
         root->SetRotation(q1);
 
-        alpha::Quaternion q2;
-        q2.RotationFromAxisAngle(alpha::Vector3(1, 0, 0), radians);
-        root2->SetRotation(q2);
+        // slerp back and forth between 10 degrees and 90 degrees
+        static alpha::Quaternion q90 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, 1), 75.f * (3.14f / 180.f));
+        static alpha::Quaternion q00 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 0, 1), 25.f * (3.14f / 180.f));
+        static alpha::Quaternion q2end = q90;
+        static float slerpTime = 0.0f;
+
+        alpha::Quaternion q2start = root2->GetRotation();
+        if (q2start == q00)
+        {
+            // got back to 00
+            q2end = q90;
+            slerpTime = 0.001f;
+        }
+        if (q2start == q90)
+        {
+            // got to 90 degrees
+            q2end = q00;
+            slerpTime = 0.001f;
+        }
+        alpha::Quaternion q2slerp = alpha::Quaternion::Slerp(q2start, q2end, slerpTime);
+        root2->SetRotation(q2slerp);
+        slerpTime += static_cast<float>(elapsedTime) / 50.f;
     }
 
     return true;

@@ -21,13 +21,10 @@ namespace alpha
 {
     struct Vector4
     {
-        float x;
-        float y;
-        float z;
-        float w;
+        float x, y, z, w;
 
         Vector4();
-        Vector4(float fx, float fy, float fz, float fw);
+        Vector4(float _x, float _y, float _z, float _w);
         Vector4(const Vector4 &vec);
 
         Vector4 & operator=(const Vector4 & right);

@@ -17,17 +17,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/**
-* Matrix Converstions handles converting out matrix to the DirectX Specific XMMATRIX
-* so that it can easily be used in with DirectX 11.
-*/
+
 
 #include <DirectXMath.h>
 
 namespace alpha
 {
     struct Matrix;
-    DirectX::XMMATRIX AMLoadMatrix(const Matrix & source);
+
+    /**
+    * Matrix Converstions handles converting out matrix to the DirectX Specific XMMATRIX
+    * so that it can easily be used in with DirectX 11.
+    */
+    DirectX::XMMATRIX MatrixToXMMATRIX(const Matrix & source);
 }
 
 #endif // ALPHA_MATRIX_CONVERSTIONS_H

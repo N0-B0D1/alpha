@@ -152,9 +152,7 @@ namespace alpha
 
             // update constant buffer
             ConstantBuffer cb;
-            XMMATRIX world_matrix = AMLoadMatrix(rd->m_world);
-            //cb.mWorld = DirectX::XMMatrixTranspose(XMLoadFloat4x4(&rd->m_world));
-            cb.mWorld = DirectX::XMMatrixTranspose(world_matrix);
+            cb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(rd->m_world));
             cb.mView = DirectX::XMMatrixTranspose(m_View);
             cb.mProjection = DirectX::XMMatrixTranspose(m_Projection);
             cb.vLightDir[0] = vLightDirs[0];

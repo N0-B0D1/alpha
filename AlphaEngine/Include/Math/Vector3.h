@@ -21,16 +21,33 @@ namespace alpha
 {
     struct Vector3
     {
-        float x;
-        float y;
-        float z;
+        float x, y, z;
 
         Vector3();
         Vector3(float fx, float fy, float fz);
         Vector3(const Vector3 &vec);
 
+        void Normalize();
+        float Length() const;
+
+        float Distance(const Vector3 & right);
+        float Dot(const Vector3 & right);
+        Vector3 Cross(const Vector3 & right);
+
         Vector3 & operator=(const Vector3 & right);
+        Vector3 & operator+=(const Vector3 & right);
+        Vector3 & operator-=(const Vector3 & right);
+        Vector3 & operator*=(const Vector3 & right);
+        Vector3 & operator*=(float right);
+        Vector3 & operator/=(float right);
     };
+
+    Vector3 operator+(const Vector3 & left, const Vector3 & right);
+    Vector3 operator-(const Vector3 & left, const Vector3 & right);
+    Vector3 operator*(const Vector3 & left, const Vector3 & right);
+    Vector3 operator*(const Vector3 & left, float right);
+    Vector3 operator/(const Vector3 & left, const Vector3 & right);
+    Vector3 operator*(float left, const Vector3 & right);
 }
 
 #endif // VECTOR_3_H

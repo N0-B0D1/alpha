@@ -19,7 +19,7 @@ limitations under the License.
 
 namespace alpha
 {
-    DirectX::XMMATRIX AMLoadMatrix(const Matrix & source)
+    DirectX::XMMATRIX MatrixToXMMATRIX(const Matrix & source)
     {
         DirectX::XMMATRIX M;
         M.r[0] = _mm_loadu_ps(&source.m_11);
