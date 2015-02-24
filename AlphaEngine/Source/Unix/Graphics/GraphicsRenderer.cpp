@@ -163,7 +163,7 @@ namespace alpha
             float oneOverDepth = 1 / depth;
             Matrix proj;
             proj.m_22 = 1 / tan(0.5f * fov);
-            proj.m_11 = (-1) * proj.m_22 / aspect;
+            proj.m_11 = (1) * proj.m_22 / aspect;
             proj.m_33 = 100.f * oneOverDepth;
             proj.m_43 = (-100.f * 0.1f) * oneOverDepth;
             proj.m_34 = 1.f;
