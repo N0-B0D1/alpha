@@ -43,7 +43,7 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render(std::vector<RenderData *> & renderables);
+        void Render(std::vector<RenderData *> renderables);
 
         /** Set basic GLSL shaders for default usage */
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
@@ -64,8 +64,8 @@ namespace alpha
         GLuint m_ElementBuffer;
         GLuint m_ShaderProgram;
         
-        const GLubyte *m_pRendererInfo; // = glGetString(GL_RENDERER);
-        const GLubyte *m_pVersionInfo; // = glGetString(GL_VERSION);
+        const GLubyte *m_pRendererInfo;
+        const GLubyte *m_pVersionInfo;
 
         /** Creates and returns a Vertex Shader from the given asset, also outputs blob data which can be passed into Input Layout creation */
         GLuint CreateVertexShaderFromAsset(std::shared_ptr<Asset> vsAsset);
