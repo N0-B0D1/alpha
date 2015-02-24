@@ -63,14 +63,15 @@ namespace alpha
         }
 
         // XXX create a test sound, need to switch this to use the asset system ...
-        auto drumpath = OSJoinPath(OSGetBaseDirectory(), "Content\\Media\\drumloop.wav");
+        /*
+        auto drumpath = OSJoinPath(OSGetBaseDirectory(), "Content\\Media\\drumloop.ogg");
         result = m_pSystem->createSound(drumpath, FMOD_DEFAULT, 0, &m_pSound);
         free(drumpath);
         if (result == FMOD_OK)
         {
             result = m_pSystem->playSound(m_pSound, 0, false, &m_pChannel);
         }
-
+        */
 
         return true;
     }
