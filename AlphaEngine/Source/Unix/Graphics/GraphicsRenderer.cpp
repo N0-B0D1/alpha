@@ -112,6 +112,7 @@ namespace alpha
         // now that we've built the shader program, dispose of the shaders
         glDeleteShader(ps);
         glDeleteShader(vs);
+        
 
 		return true;
 	}
@@ -136,6 +137,8 @@ namespace alpha
 
     void GraphicsRenderer::Render(std::vector<RenderData *> renderables)
     {
+        //this->PreRender(renderables);
+
         auto window = m_pWindow->GetWindow();
 
         // prep viewport for rendering
@@ -179,7 +182,6 @@ namespace alpha
 
             // draw the triangles
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            //glDrawArrays(GL_TRIANGLES, 0, 3);
 
             // unbind array object
             glBindVertexArray(0);
@@ -219,6 +221,61 @@ namespace alpha
         return true;
     }
 
+    void GraphicsRenderer::PreRender(std::vector<RenderData *> renderables)
+    {
+        for (auto rd : renderables)
+        {
+            // make vertex buffer object (vbo)
+            glGenBuffers(1, &rd->m_vertexBuffer);
+            // make vertex array object (vao)
+            glGenVertexArrays(1, &rd->m_vertexAttribute);
+            // make element buffer object
+            glGenBuffers(1, &rd->m_elementBuffer);
+
+            glBindVertexArray(rd->m_vertexAttribute);
+            
+                // copy vertices into vertex buffer
+                glBindBuffer(GL_ARRAY_BUFFER, rd->m_vertexBuffer);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(&rd->m_vertices[0]), &rd->m_vertices[0], GL_STATIC_DRAW);
+                // set indicies into element buffer
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rd->m_elementBuffer);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(&rd->m_indices[0]), &rd->m_indices[0], GL_STATIC_DRAW);
+                // set vertex attribute pointers
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+                glEnableVertexAttribArray(0);
+            
+            glBindVertexArray(0);
+
+            if (!rd->m_shaderProgram)
+            {
+                // create vertex shader
+                GLuint vs = this->CreateVertexShaderFromAsset(m_vsDefaultShader);
+                
+                // create pixel/fragment shader
+                GLuint ps = this->CreatePixelShaderFromAsset(m_psDefaultShader);
+
+                // make shader program, to render with
+                rd->m_shaderProgram = glCreateProgram();
+                glAttachShader(rd->m_shaderProgram, ps);
+                glAttachShader(rd->m_shaderProgram, vs);
+                glLinkProgram(rd->m_shaderProgram);
+
+                GLint result = GL_FALSE;
+                int info_log_length = 0;
+
+                glGetProgramiv(rd->m_shaderProgram, GL_LINK_STATUS, &result);
+                glGetProgramiv(rd->m_shaderProgram, GL_INFO_LOG_LENGTH, &info_log_length);
+                std::vector<char> ProgramErrorMessage( int(1) > info_log_length ? int(1) : info_log_length );
+                glGetProgramInfoLog(rd->m_shaderProgram, info_log_length, NULL, &ProgramErrorMessage[0]);
+                //LOG("GraphicsRenderer > Shader program results: ", &ProgramErrorMessage[0]);
+
+                // now that we've built the shader program, dispose of the shaders
+                glDeleteShader(ps);
+                glDeleteShader(vs);
+            }
+        }
+    }
+
     GLuint GraphicsRenderer::CreateVertexShaderFromAsset(std::shared_ptr<Asset> vsAsset)
     {
         GLuint vs;
@@ -238,7 +295,7 @@ namespace alpha
         glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &info_log_length);
         std::vector<char> VertexShaderErrorMessage(info_log_length);
         glGetShaderInfoLog(vs, info_log_length, NULL, &VertexShaderErrorMessage[0]);
-        LOG("GraphicsRenderer > Vertex Shader compilation result: ", &VertexShaderErrorMessage[0]);
+        //LOG("GraphicsRenderer > Vertex Shader compilation result: ", &VertexShaderErrorMessage[0]);
 
         return vs;
     }
@@ -262,7 +319,7 @@ namespace alpha
         glGetShaderiv(ps, GL_INFO_LOG_LENGTH, &info_log_length);
         std::vector<char> VertexShaderErrorMessage(info_log_length);
         glGetShaderInfoLog(ps, info_log_length, NULL, &VertexShaderErrorMessage[0]);
-        LOG("GraphicsRenderer > Pixel Shader compilation result: ", &VertexShaderErrorMessage[0]);
+        //LOG("GraphicsRenderer > Pixel Shader compilation result: ", &VertexShaderErrorMessage[0]);
 
         return ps;
     }

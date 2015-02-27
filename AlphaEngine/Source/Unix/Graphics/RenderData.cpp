@@ -22,7 +22,17 @@ namespace alpha
     RenderData::RenderData(std::string psEntryPoint /*= "PS"*/)
         : m_psEntryPoint(psEntryPoint)
     {
-
+        // default to s square for now
+        m_vertices = {
+             0.5f,  0.5f, 0.0f,  // Top Right
+             0.5f, -0.5f, 0.0f,  // Bottom Right
+            -0.5f, -0.5f, 0.0f,  // Bottom Left
+            -0.5f,  0.5f, 0.0f   // Top Left 
+        };
+        m_indices = {    // Note that we start from 0!
+            0, 1, 3,            // First Triangle
+            1, 2, 3             // Second Triangle
+        };  
     }
 
     RenderData::~RenderData()

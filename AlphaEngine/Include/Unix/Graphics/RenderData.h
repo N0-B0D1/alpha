@@ -20,6 +20,8 @@ limitations under the License.
 #include <memory>
 #include <vector>
 
+#include <GL/gl.h>
+
 #include "Math/Matrix.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
@@ -51,6 +53,15 @@ namespace alpha
         //
         /** objects world transform matrix */
         Matrix m_world;
+
+        // opengl variables
+        std::vector<GLfloat> m_vertices;
+        std::vector<GLfloat> m_indices;
+
+        GLuint m_vertexBuffer;
+        GLuint m_vertexAttribute;
+        GLuint m_elementBuffer;
+        GLuint m_shaderProgram;
     };
 }
 

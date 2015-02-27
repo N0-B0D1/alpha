@@ -49,15 +49,16 @@ namespace alpha
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
 
     private:
+        /** Initializes the OpenGL device with GLFW */
         bool InitializeDevice();
+
+        /** PreRender takes a list of data that will be rendered, and preps it rendering. */
+        void PreRender(std::vector<RenderData *> renderables);
 
         RenderWindow *m_pWindow;
 
         std::shared_ptr<Asset> m_vsDefaultShader;
         std::shared_ptr<Asset> m_psDefaultShader;
-
-        /** OpenGL variables */
-        //GLXContext m_glContext;
 
         GLuint m_VertexBuffer;
         GLuint m_VertexAttribute;
