@@ -81,7 +81,7 @@ namespace alpha
         std::unique_ptr<StateMachine> m_pGameStateMachine;
 
         /** Audio management system, manages FMOD lifecycle. */
-        AudioSystem * m_pAudio;
+        std::shared_ptr<AudioSystem> m_pAudio;
 	};
 }
 

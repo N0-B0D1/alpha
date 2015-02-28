@@ -7,6 +7,7 @@
 #include "Entities/EntityComponent.h"
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
+#include "Audio/Sound.h"
 
 DemoGameState::DemoGameState()
 { }
@@ -31,6 +32,14 @@ bool DemoGameState::VInitialize()
     {
         // set this entities position to (5, 0, 0)
         root->SetPosition(alpha::Vector3(5, 5, 0));
+    }
+
+    // create a test sound to play
+    m_pTestSound = this->CreateSound("media/hit.mp3");
+    if (auto pSound = m_pTestSound.lock())
+    {
+        // hit sound is fairly loud, so set the channel low on play
+        pSound->SetVolume(0.2f);
     }
 
     return true;
@@ -70,16 +79,30 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
             // got back to 00
             q2end = q90;
             slerpTime = 0.001f;
+
+            // whenever we reach a target reversal point, play the test sound
+            if (auto pSound = m_pTestSound.lock())
+            {
+                pSound->Stop();
+                pSound->Play();
+            }
         }
         if (q2start == q90)
         {
             // got to 90 degrees
             q2end = q00;
             slerpTime = 0.001f;
+
+            // whenever we reach a target reversal point, play the test sound
+            if (auto pSound = m_pTestSound.lock())
+            {
+                pSound->Stop();
+                pSound->Play();
+            }
         }
         alpha::Quaternion q2slerp = alpha::Quaternion::Slerp(q2start, q2end, slerpTime);
         root2->SetRotation(q2slerp);
-        slerpTime += static_cast<float>(elapsedTime) / 39.8f;
+        slerpTime += static_cast<float>(elapsedTime) / 45.f;
     }
 
     return true;

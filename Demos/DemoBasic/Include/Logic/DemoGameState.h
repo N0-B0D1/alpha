@@ -19,6 +19,12 @@ limitations under the License.
 
 #include "FSA/GameState.h"
 
+namespace alpha
+{
+    class Entity;
+    class Sound;
+}
+
 class DemoGameState : public alpha::AGameState
 {
 public:
@@ -33,6 +39,8 @@ public:
 private:
     std::shared_ptr<alpha::Entity> m_test;
     std::shared_ptr<alpha::Entity> m_test2;
+
+    std::weak_ptr<alpha::Sound> m_pTestSound;
 };
 
 #endif // DEMO_GAME_STATE_H

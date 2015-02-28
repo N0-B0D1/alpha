@@ -15,6 +15,8 @@ limitations under the License.
 */
 
 #include "Audio/AudioSystem.h"
+#include "Audio/Sound.h"
+#include "Assets/Asset.h"
 #include "Toolbox/FileSystem.h"
 #include "Toolbox/Logger.h"
 
@@ -23,8 +25,6 @@ namespace alpha
     AudioSystem::AudioSystem()
         : AlphaSystem(60)
         , m_pSystem(nullptr)
-        , m_pSound(nullptr)
-        , m_pChannel(0)
     { }
     AudioSystem::~AudioSystem() { }
 
@@ -62,17 +62,6 @@ namespace alpha
             return false;
         }
 
-        // XXX create a test sound, need to switch this to use the asset system ...
-        /*
-        auto drumpath = OSJoinPath(OSGetBaseDirectory(), "Content\\Media\\drumloop.ogg");
-        result = m_pSystem->createSound(drumpath, FMOD_DEFAULT, 0, &m_pSound);
-        free(drumpath);
-        if (result == FMOD_OK)
-        {
-            result = m_pSystem->playSound(m_pSound, 0, false, &m_pChannel);
-        }
-        */
-
         return true;
     }
 
@@ -80,10 +69,10 @@ namespace alpha
     {
         unsigned int result;
 
-        if (m_pSound)
-        {
-            m_pSound->release();
-        }
+        // release handles to all sound objects
+        // forces destructor to be called for each
+        // and all sounds get properly released.
+        m_sounds.clear();
 
         if (m_pSystem)
         {
@@ -102,8 +91,21 @@ namespace alpha
         return true;
     }
 
+    std::weak_ptr<Sound> AudioSystem::CreateSound(std::shared_ptr<Asset> pAsset)
+    {
+        auto sound = std::make_shared<Sound>(m_pSystem, pAsset);
+        m_sounds.push_back(sound);
+        return sound;
+    }
+
     bool AudioSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
+        FMOD_RESULT result = m_pSystem->update();
+        if (result != FMOD_OK)
+        {
+            // XXX for now log the error, however we may need to do something more drastic ...
+            LOG_ERR("AudioSystem > FMOD system failed to update.");
+        }
         return true;
     }
 }

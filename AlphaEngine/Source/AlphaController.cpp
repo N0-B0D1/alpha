@@ -108,7 +108,15 @@ namespace alpha
             return false;
         }
 
-        // create input device manager
+        // create audio system
+        m_pAudio = std::make_shared<AudioSystem>();
+        if (!m_pAudio->VInitialize())
+        {
+            LOG_ERR("AudioSystem > Initialization failed!");
+            return false;
+        }
+        // attach audio system to logic layer
+        m_pLogic->SetAudioSystem(m_pAudio);
 
         // initialize the game logic
         m_pLogic->SetAssetSystem(m_pAssets);
@@ -121,6 +129,7 @@ namespace alpha
         // wire up pub-sub relations
         m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
 
+
         // initialize the specified game state
         // if no state has been specified, then fail to startup
         if (m_pGameStateMachine == nullptr)
@@ -131,14 +140,6 @@ namespace alpha
         if (!m_pGameStateMachine->VInitialize())
         {
             LOG_ERR("<AlphaController> Game State failed to initialize.");
-            return false;
-        }
-
-        // create audio system
-        m_pAudio = new AudioSystem();
-        if (!m_pAudio->VInitialize())
-        {
-            LOG_ERR("AudioSystem > Initialization failed!");
             return false;
         }
 
@@ -232,12 +233,6 @@ namespace alpha
             delete m_pThreads;
             LOG("<ThreadSystem> Disposed.");
         }
-        if (m_pAudio)
-        {
-            m_pAudio->VShutdown();
-            delete m_pAudio;
-            LOG("<AudioSystem> Disposed.");
-        }
         if (m_pGameStateMachine)
         {
             m_pGameStateMachine->VShutdown();
@@ -247,6 +242,11 @@ namespace alpha
         {
             m_pLogic->VShutdown();
             LOG("<LogicSystem> Disposed.");
+        }
+        if (m_pAudio)
+        {
+            m_pAudio->VShutdown();
+            LOG("<AudioSystem> Disposed.");
         }
         if (m_pGraphics)
         {

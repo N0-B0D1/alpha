@@ -17,12 +17,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "fmod.hpp"
+#include <memory>
+#include <vector>
+
+#include <fmod.hpp>
 
 #include "AlphaSystem.h"
 
 namespace alpha
 {
+    class Asset;
+    class Sound;
+
     class AudioSystem : public AlphaSystem
     {
     public:
@@ -32,12 +38,17 @@ namespace alpha
         virtual bool VInitialize();
         virtual bool VShutdown();
 
+        /** Create a sound from a given data asset */
+        std::weak_ptr<Sound> CreateSound(std::shared_ptr<Asset> pAsset);
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
+        /** Manage a list of sounds, so they can be properly updated and disposed of. */
+        std::vector<std::shared_ptr<Sound>> m_sounds;
+
+        /** FMOD system instance, shared with all sound and sound group objects */
         FMOD::System * m_pSystem;
-        FMOD::Sound * m_pSound;
-        FMOD::Channel * m_pChannel;
     };
 }
 

@@ -19,6 +19,7 @@ limitations under the License.
 #include "FSA/GameState.h"
 #include "Logic/LogicSystem.h"
 #include "Entities/Entity.h"
+#include "Audio/Sound.h"
 
 namespace alpha
 {
@@ -41,6 +42,11 @@ namespace alpha
     void AGameState::DestroyEntity(const unsigned long entityId)
     {
         m_pLogic->DestroyEntity(entityId);
+    }
+
+    std::weak_ptr<Sound> AGameState::CreateSound(const char * resource)
+    {
+        return m_pLogic->CreateSound(resource);
     }
 
     void AGameState::SetLogic(std::shared_ptr<LogicSystem> pLogic)
