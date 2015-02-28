@@ -17,6 +17,7 @@ limitations under the License.
 #include <memory>
 
 #include "AlphaController.h"
+#include "Audio/AudioSystem.h"
 #include "Logic/LogicSystem.h"
 #include "Graphics/GraphicsSystem.h"
 #include "Assets/AssetSystem.h"
@@ -32,6 +33,7 @@ namespace alpha
         , m_pLogic(nullptr)
         , m_pGraphics(nullptr)
         , m_pAssets(nullptr)
+        , m_pAudio(nullptr)
     {
         LOG("<AlphaController> Constructed.");
     }
@@ -106,7 +108,15 @@ namespace alpha
             return false;
         }
 
-        // create input device manager
+        // create audio system
+        m_pAudio = std::make_shared<AudioSystem>();
+        if (!m_pAudio->VInitialize())
+        {
+            LOG_ERR("AudioSystem > Initialization failed!");
+            return false;
+        }
+        // attach audio system to logic layer
+        m_pLogic->SetAudioSystem(m_pAudio);
 
         // initialize the game logic
         m_pLogic->SetAssetSystem(m_pAssets);
@@ -118,6 +128,7 @@ namespace alpha
 
         // wire up pub-sub relations
         m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
+
 
         // initialize the specified game state
         // if no state has been specified, then fail to startup
@@ -169,6 +180,9 @@ namespace alpha
         {
             // update thread sub-system, allow threads access to any new tasks.
             m_pThreads->Update(currentTime, sk_maxUpdateTime);
+
+            // update audio sub-system
+            m_pAudio->Update(currentTime, sk_maxUpdateTime);
 
             // update asset system, which should cull least recently used items from memory
             m_pAssets->Update(currentTime, sk_maxUpdateTime);
@@ -228,6 +242,11 @@ namespace alpha
         {
             m_pLogic->VShutdown();
             LOG("<LogicSystem> Disposed.");
+        }
+        if (m_pAudio)
+        {
+            m_pAudio->VShutdown();
+            LOG("<AudioSystem> Disposed.");
         }
         if (m_pGraphics)
         {

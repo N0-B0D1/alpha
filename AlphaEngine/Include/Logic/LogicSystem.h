@@ -28,9 +28,11 @@ limitations under the License.
 namespace alpha
 {
     class AssetSystem;
+    class AudioSystem;
     class EntityFactory;
     class Entity;
     class StateMachine;
+    class Sound;
 
     class LogicSystem : public AlphaSystem
     {
@@ -45,11 +47,16 @@ namespace alpha
          * This must be set before any entities can be created.
          */
         void SetAssetSystem(std::shared_ptr<AssetSystem> pAssets);
+        /** Allow controller to attach audio system to logic layer. */
+        void SetAudioSystem(std::weak_ptr<AudioSystem> pAudio);
 
         /** Entity life-cycle methods */
         std::shared_ptr<Entity> GetEntity(const unsigned long entityId);
         std::shared_ptr<Entity> CreateEntity(const char * resource);
         void DestroyEntity(const unsigned long entityId);
+
+        /** Audio life-cycle methods */
+        std::weak_ptr<Sound> CreateSound(const char * resource);
 
         /** event subscriptions */
         void SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
@@ -62,6 +69,9 @@ namespace alpha
 
         /** Asset management system handle. */
         std::shared_ptr<AssetSystem> m_pAssets;
+
+        /** Handle to the audio system, allows logic to create and manage sounds in a game */
+        std::weak_ptr<AudioSystem> m_pAudio;
 
         /** Publisher for new entities created */
         EventDataPublisher<EventData_EntityCreated> m_pubEntityCreated;

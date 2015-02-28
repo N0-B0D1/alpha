@@ -21,6 +21,8 @@ limitations under the License.
 #include "Assets/AssetSystem.h"
 #include "Events/EventData_EntityCreated.h"
 #include "FSA/StateMachine.h"
+#include "Audio/AudioSystem.h"
+#include "Audio/Sound.h"
 
 namespace alpha
 {
@@ -63,6 +65,11 @@ namespace alpha
         m_pAssets = pAssets;
     }
 
+    void LogicSystem::SetAudioSystem(std::weak_ptr<AudioSystem> pAudio)
+    {
+        m_pAudio = pAudio;
+    }
+
     std::shared_ptr<Entity> LogicSystem::GetEntity(const unsigned long entityId)
     {
         auto it = m_entities.find(entityId);
@@ -96,6 +103,22 @@ namespace alpha
     void LogicSystem::DestroyEntity(const unsigned long entityId)
     {
         m_entities.erase(m_entities.find(entityId));
+    }
+
+    std::weak_ptr<Sound> LogicSystem::CreateSound(const char * resource)
+    {
+        std::weak_ptr<Sound> new_sound = std::weak_ptr<Sound>();
+
+        auto asset = m_pAssets->GetAsset(resource);
+        if (asset != nullptr)
+        {
+            if (auto pAudio = m_pAudio.lock())
+            {
+                new_sound = pAudio->CreateSound(asset);
+            }
+        }
+
+        return new_sound;
     }
 
     void LogicSystem::SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)

@@ -26,6 +26,7 @@ namespace alpha
     class AlphaController;
     class LogicSystem;
     class Entity;
+    class Sound;
 
     /**
      * class GameState
@@ -50,6 +51,9 @@ namespace alpha
         std::shared_ptr<Entity> GetEntity(const unsigned long entityId);
         std::shared_ptr<Entity> CreateEntity(const char * resource);
         void DestroyEntity(const unsigned long entityId);
+
+        /** Audio system pass through methods */
+        std::weak_ptr<Sound> CreateSound(const char * resource);
 
     private:
         void SetLogic(std::shared_ptr<LogicSystem> pLogic);
