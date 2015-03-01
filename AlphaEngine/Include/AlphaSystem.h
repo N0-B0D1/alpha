@@ -33,9 +33,9 @@ namespace alpha
         AlphaSystem(uint8_t hertz);
         virtual ~AlphaSystem();
 
-        virtual bool VInitialize();
+        virtual bool VInitialize() = 0;
         bool Update(double currentTime, double elapsedTime);
-        virtual bool VShutdown();
+        virtual bool VShutdown() = 0;
 
     private:
         // non-copyable

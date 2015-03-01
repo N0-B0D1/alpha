@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_WINDOW_H
-#define GRAPHICS_WINDOW_H
+#ifndef ALPHA_HID_WINDOW_LISTENER_H
+#define ALPHA_HID_WINDOW_LISTENER_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -21,30 +21,21 @@ limitations under the License.
 
 namespace alpha
 {
-    class GraphicsWindow
+    /**
+     * HIDWindowListener is a platform specific implementation that reads user input on the window.
+     */
+    class HIDWindowListener
     {
     public:
-        GraphicsWindow();
-        virtual ~GraphicsWindow();
+        HIDWindowListener();
+        virtual ~HIDWindowListener();
 
-        bool Initialize();
-        bool Update(double currentTime, double elapsedTime);
-        bool Shutdown();
-
-        HWND GetHWND() const;
+        /** Windows message loop handler for human input. */
+        LRESULT CALLBACK InputWndProc(HWND, UINT, WPARAM, LPARAM);
 
     private:
-        static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-        HINSTANCE m_hInstance;
-        //HWND m_hWnd;
+        WNDPROC m_origWndProc;
     };
-
-    /**
-     * Global handle for the game window handle.
-     * XXX If possible find a way to make this now global easily...
-     */
-    extern HWND g_hWnd;
 }
 
-#endif // GRAPHICS_WINDOW_H
+#endif // ALPHA_HID_WINDOW_LISTENER_H

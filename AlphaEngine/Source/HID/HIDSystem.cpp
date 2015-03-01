@@ -14,25 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
+#include "HID/HIDSystem.h"
+#include "HID/HIDWindowListener.h"
 
 namespace alpha
 {
-    AlphaSystem::AlphaSystem(uint8_t hertz) : m_hertz(hertz)
-    {
-        m_updateFrequency = 1.0f / m_hertz;
-    }
-    AlphaSystem::~AlphaSystem() { }
+    HIDSystem::HIDSystem()
+        : AlphaSystem(60)
+        , m_pWindowListener(nullptr)
+    { }
+    HIDSystem::~HIDSystem() { }
 
-    bool AlphaSystem::Update(double currentTime, double elapsedTime)
+    bool HIDSystem::VInitialize()
     {
-        bool success = true;
-        m_elapsedTime += elapsedTime;
-        if (m_elapsedTime > m_updateFrequency)
+        m_pWindowListener = new HIDWindowListener();
+        return true;
+    }
+
+    bool HIDSystem::VShutdown()
+    {
+        if (m_pWindowListener != nullptr)
         {
-            success = this->VUpdate(currentTime, m_updateFrequency);
-            m_elapsedTime = m_elapsedTime - m_updateFrequency;
+            delete m_pWindowListener;
         }
-        return success;
+        return true;
+    }
+
+    bool HIDSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
+    {
+        return true;
     }
 }

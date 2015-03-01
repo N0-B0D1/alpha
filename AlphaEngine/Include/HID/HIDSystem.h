@@ -1,3 +1,6 @@
+#ifndef ALPHA_HID_SYSTEM_H
+#define ALPHA_HID_SYSTEM_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -18,21 +21,23 @@ limitations under the License.
 
 namespace alpha
 {
-    AlphaSystem::AlphaSystem(uint8_t hertz) : m_hertz(hertz)
-    {
-        m_updateFrequency = 1.0f / m_hertz;
-    }
-    AlphaSystem::~AlphaSystem() { }
+    class HIDWindowListener;
 
-    bool AlphaSystem::Update(double currentTime, double elapsedTime)
+    class HIDSystem : public AlphaSystem
     {
-        bool success = true;
-        m_elapsedTime += elapsedTime;
-        if (m_elapsedTime > m_updateFrequency)
-        {
-            success = this->VUpdate(currentTime, m_updateFrequency);
-            m_elapsedTime = m_elapsedTime - m_updateFrequency;
-        }
-        return success;
-    }
+    public:
+        HIDSystem();
+        virtual ~HIDSystem();
+
+        virtual bool VInitialize();
+        virtual bool VShutdown();
+
+    private:
+        virtual bool VUpdate(double currentTime, double elapsedTime);
+
+        /** Pointer to the platform specific window listener, that will forward user input on the game window to this class */
+        HIDWindowListener * m_pWindowListener;
+    };
 }
+
+#endif // ALPHA_HID_SYSTEM_H
