@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string.h>
+
 #include "Audio/Sound.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"

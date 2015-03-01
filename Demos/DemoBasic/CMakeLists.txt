@@ -77,6 +77,10 @@ else ()
     # copy Media files
     file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.wav")
     file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Media/")
+    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.ogg")
+    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Media/")
+    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.mp3")
+    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Media/")
 
     # copy shader content files for GLSL
     file(GLOB CONTENT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/*.glsl")
