@@ -34,7 +34,14 @@ namespace alpha
         LRESULT CALLBACK InputWndProc(HWND, UINT, WPARAM, LPARAM);
 
     private:
+        /** Register raw input devices, so we can query their state in our WndProc */
+        void RegisterRawHIDs();
+
+        /** Handle to original WndProc, allowing it to run, and be restored when this instance destructs */
         WNDPROC m_origWndProc;
+
+        /** Track mouse inside/outside of window */
+        bool m_mouseTracking;
     };
 }
 
