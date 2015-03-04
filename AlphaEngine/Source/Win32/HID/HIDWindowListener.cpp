@@ -49,6 +49,7 @@ namespace alpha
     {
         // un-hi-jack WndProc
         SetWindowLongPtr(g_hWnd, GWL_WNDPROC, (LONG)m_origWndProc);
+        g_pWindowListener = nullptr;
     }
 
     LRESULT CALLBACK HIDWindowListener::InputWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

@@ -23,6 +23,9 @@ limitations under the License.
 
 namespace alpha
 {
+    /** Initialize global window to nullptr */
+    GLFWwindow * g_pWindow = nullptr;
+
     RenderWindow::RenderWindow() { }
     RenderWindow::~RenderWindow() { }
 
@@ -34,25 +37,22 @@ namespace alpha
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-        m_pWindow = glfwCreateWindow(800, 600, "ALPHA Engine", nullptr, nullptr);
-        glfwMakeContextCurrent(m_pWindow);
-        if (m_pWindow == NULL)
+        g_pWindow = glfwCreateWindow(800, 600, "ALPHA Engine", nullptr, nullptr);
+        glfwMakeContextCurrent(g_pWindow);
+        if (g_pWindow == NULL)
         {
             LOG_ERR("Failed to create GLFW window.");
             glfwTerminate();
             return false;
         }
 
-        // register key event
-        glfwSetKeyCallback(m_pWindow, RenderWindow::key_callback);
-
         return true;
     }
 
     bool RenderWindow::Update(double /*currentTime*/, double /*elapsedTime*/)
     {
-        // play nicely with X11, or possibly other system being used?
-        if (glfwWindowShouldClose(m_pWindow))
+        // play nicely with existing window system (X11)
+        if (glfwWindowShouldClose(g_pWindow))
         {
             return false;
         }
@@ -76,14 +76,6 @@ namespace alpha
 
     GLFWwindow * RenderWindow::GetWindow() const
     {
-        return m_pWindow;
-    }
-
-    void RenderWindow::key_callback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mode*/)
-    {
-        // When a user presses the escape key, we set the WindowShouldClose property to true, 
-        // closing the application
-        if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, GL_TRUE);
+        return g_pWindow;
     }
 }

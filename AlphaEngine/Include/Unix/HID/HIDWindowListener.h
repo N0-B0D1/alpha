@@ -1,5 +1,5 @@
-#ifndef RENDER_WINDOW_H
-#define RENDER_WINDOW_H
+#ifndef ALPHA_HID_WINDOW_LISTENER_H
+#define ALPHA_HID_WINDOW_LISTENER_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,37 +17,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include<stdio.h>
-#include<stdlib.h>
-
-//#include<X11/X.h>
-//#include<X11/Xlib.h>
-
-#include<GL/gl.h>
-#include<GL/glx.h>
 #include <GLFW/glfw3.h>
 
 namespace alpha
 {
-	class RenderWindow
-	{
-	public:
-		RenderWindow();
-		virtual ~RenderWindow();
-
-        bool Initialize();
-        bool Update(double currentTime, double elapsedTime);
-        bool Shutdown();
-
-        void Render();
-
-        GLFWwindow * GetWindow() const;
-	};
-
     /**
-     * Global window handle allows input system to hook into window events as needed.
+     * HIDWindowListener is a platform specific implementation that reads user input on the window.
      */
-    extern GLFWwindow * g_pWindow;
+    class HIDWindowListener
+    {
+    public:
+        HIDWindowListener();
+        virtual ~HIDWindowListener();
+
+        void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+    };
 }
 
-#endif // RENDER_WINDOW_H
+#endif // ALPHA_HID_WINDOW_LISTENER_H
