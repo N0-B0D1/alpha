@@ -51,16 +51,13 @@ namespace alpha
 
     bool RenderWindow::Update(double /*currentTime*/, double /*elapsedTime*/)
     {
-        // play nicely with existing window system (X11)
+        // play nicely with the existing window system (X11)
         if (glfwWindowShouldClose(g_pWindow))
         {
             return false;
         }
-        else
-        {
-            glfwPollEvents();
-        }
-
+        
+        glfwPollEvents();
         return true;
     }
 
