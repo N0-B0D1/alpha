@@ -56,7 +56,7 @@ namespace alpha
 
         // opengl variables
         std::vector<GLfloat> m_vertices;
-        std::vector<GLfloat> m_indices;
+        std::vector<GLuint> m_indices;
 
         GLuint m_vertexBuffer;
         GLuint m_vertexAttribute;
