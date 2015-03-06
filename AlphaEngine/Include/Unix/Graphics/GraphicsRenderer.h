@@ -60,10 +60,10 @@ namespace alpha
         std::shared_ptr<Asset> m_vsDefaultShader;
         std::shared_ptr<Asset> m_psDefaultShader;
 
-        GLuint m_VertexBuffer;
-        GLuint m_VertexAttribute;
-        GLuint m_ElementBuffer;
-        GLuint m_ShaderProgram;
+        //GLuint m_VertexBuffer;
+        //GLuint m_VertexAttribute;
+        //GLuint m_ElementBuffer;
+        //GLuint m_ShaderProgram;
         
         const GLubyte *m_pRendererInfo;
         const GLubyte *m_pVersionInfo;
