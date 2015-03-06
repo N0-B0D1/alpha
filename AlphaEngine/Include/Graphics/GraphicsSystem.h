@@ -31,6 +31,7 @@ namespace alpha
     class GraphicsRenderer;
     class SceneManager;
     class RenderData;
+    class Camera;
     class AssetSystem;
     class Asset;
 
@@ -75,6 +76,9 @@ namespace alpha
 
         /** Publisher for new threading tasks */
         std::shared_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pubThreadTaskCreated;
+
+        /** Track the current camera that is viewing the scene */
+        std::shared_ptr<Camera> m_pCamera;
     };
 }
 

@@ -18,6 +18,7 @@ limitations under the License.
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/SceneManager.h"
 #include "Graphics/RenderData.h"
+#include "Graphics/Camera.h"
 #include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
@@ -29,6 +30,7 @@ namespace alpha
         , m_pAssets(nullptr)
         , m_pRenderer(nullptr)
         , m_pSceneManager(nullptr)
+        , m_pCamera(nullptr)
     { }
     GraphicsSystem::~GraphicsSystem() { }
 
@@ -55,6 +57,9 @@ namespace alpha
         // create event subscribers
         m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated>>();
 
+        // XXX set up a basic camera as the default, untill one is set explicitely.
+        m_pCamera = std::make_shared<Camera>(Vector3(0.f, 0.f, 20.f));
+
         return true;
     }
 
@@ -73,7 +78,7 @@ namespace alpha
     void GraphicsSystem::Render()
     {
         std::vector<RenderData *> renderables = m_pSceneManager->GetRenderData();
-        m_pRenderer->Render(renderables);
+        m_pRenderer->Render(m_pCamera, renderables);
     }
 
     void GraphicsSystem::SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)

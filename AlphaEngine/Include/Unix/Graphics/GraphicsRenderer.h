@@ -29,6 +29,7 @@ namespace alpha
 {
 	class RenderWindow;
     class RenderData;
+    class Camera;
     class Asset;
 
     class GraphicsRenderer
@@ -43,7 +44,7 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render(std::vector<RenderData *> renderables);
+        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderData *> renderables);
 
         /** Set basic GLSL shaders for default usage */
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
@@ -59,11 +60,6 @@ namespace alpha
 
         std::shared_ptr<Asset> m_vsDefaultShader;
         std::shared_ptr<Asset> m_psDefaultShader;
-
-        //GLuint m_VertexBuffer;
-        //GLuint m_VertexAttribute;
-        //GLuint m_ElementBuffer;
-        //GLuint m_ShaderProgram;
         
         const GLubyte *m_pRendererInfo;
         const GLubyte *m_pVersionInfo;
