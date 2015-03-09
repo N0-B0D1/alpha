@@ -19,29 +19,54 @@ limitations under the License.
 
 #include <Windows.h>
 
+#include "Events/EventDataPublisher.h"
+#include "Events/EventData_HIDKeyAction.h"
+
 namespace alpha
 {
+    class HIDPlatformTranslator;
+    struct MousePosition;
+
     /**
      * HIDWindowListener is a platform specific implementation that reads user input on the window.
      */
     class HIDWindowListener
     {
     public:
-        HIDWindowListener();
+        explicit HIDWindowListener(EventDataPublisher<EventData_HIDKeyAction> & pubHIDKeyAction);
         virtual ~HIDWindowListener();
+
+        void Update();
 
         /** Windows message loop handler for human input. */
         LRESULT CALLBACK InputWndProc(HWND, UINT, WPARAM, LPARAM);
 
     private:
+        // non-copyable
+        HIDWindowListener(const HIDWindowListener&);
+        HIDWindowListener & operator=(const HIDWindowListener&);
+
+        void WMInputHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
         /** Register raw input devices, so we can query their state in our WndProc */
         void RegisterRawHIDs();
+        /** Helper for dispatching HID Action key up/down events */
+        void DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed);
+        /** Helper for dispatching HID Action axis range events */
+        void DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute);
 
         /** Handle to original WndProc, allowing it to run, and be restored when this instance destructs */
         WNDPROC m_origWndProc;
-
         /** Track mouse inside/outside of window */
         bool m_mouseTracking;
+        /** Track the current mouse absolute and relative position */
+        MousePosition m_mousePosition;
+        /** Track the position of the mouse, since the last update, campare against current to determine if event should be published */
+        MousePosition m_lastMousePosition;
+        /** Platform translator handles translation from platform code to engine code */
+        HIDPlatformTranslator * m_pPlatformTranslator;
+        /** Handle to the HID Key Action publisher */
+        EventDataPublisher<EventData_HIDKeyAction> & m_pubHIDKeyAction;
     };
 }
 

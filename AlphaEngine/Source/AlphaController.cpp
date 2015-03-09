@@ -138,7 +138,7 @@ namespace alpha
 
         // wire up pub-sub relations
         m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
-
+        m_pInput->SubscribeToHIDKeyAction(m_pLogic->GetHIDKeyActionSubscriber());
 
         // initialize the specified game state
         // if no state has been specified, then fail to startup

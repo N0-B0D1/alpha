@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "HID/HIDSystem.h"
 #include "HID/HIDWindowListener.h"
+#include "HID/HIDContextManager.h"
 
 namespace alpha
 {
@@ -27,7 +28,8 @@ namespace alpha
 
     bool HIDSystem::VInitialize()
     {
-        m_pWindowListener = new HIDWindowListener();
+        m_pWindowListener = new HIDWindowListener(m_pubHIDKeyAction);
+
         return true;
     }
 
@@ -40,8 +42,14 @@ namespace alpha
         return true;
     }
 
+    void HIDSystem::SubscribeToHIDKeyAction(std::shared_ptr<AEventDataSubscriber> pSubscriber)
+    {
+        m_pubHIDKeyAction.Subscribe(pSubscriber);
+    }
+
     bool HIDSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
+        m_pWindowListener->Update();
         return true;
     }
 }

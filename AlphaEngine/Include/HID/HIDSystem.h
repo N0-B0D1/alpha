@@ -18,10 +18,14 @@ limitations under the License.
 */
 
 #include "AlphaSystem.h"
+#include "Events/EventDataSubscriber.h"
+#include "Events/EventDataPublisher.h"
+#include "Events/EventData_HIDKeyAction.h"
 
 namespace alpha
 {
     class HIDWindowListener;
+    class HIDContextManager;
 
     class HIDSystem : public AlphaSystem
     {
@@ -32,11 +36,17 @@ namespace alpha
         virtual bool VInitialize();
         virtual bool VShutdown();
 
+        /** Allow subscribing to HIDKeyAction events */
+        void SubscribeToHIDKeyAction(std::shared_ptr<AEventDataSubscriber> pSubscriber);
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
         /** Pointer to the platform specific window listener, that will forward user input on the game window to this class */
         HIDWindowListener * m_pWindowListener;
+
+        /** Publisher for HID Key Action events */
+        EventDataPublisher<EventData_HIDKeyAction> m_pubHIDKeyAction;
     };
 }
 
