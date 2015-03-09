@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "HID/HIDWindowListener.h"
+#include "HID/HIDPlatformTranslator.h"
 #include "Graphics/RenderWindow.h"
 
 namespace alpha
@@ -28,26 +29,56 @@ namespace alpha
         }
     }
 
-    HIDWindowListener::HIDWindowListener()
+    HIDWindowListener::HIDWindowListener(EventDataPublisher<EventData_HIDKeyAction> & pubHIDKeyAction)
+        : m_pPlatformTranslator(nullptr)
+        , m_pubHIDKeyAction(pubHIDKeyAction)
     {
         g_pWindowListener = this;
 
         // hook up key listener to glfw callback
         glfwSetKeyCallback(g_pWindow, StaticGLFWKeyCallback);
+
+        // set platform context, to translate to engine input codes
+        m_pPlatformTranslator = new HIDPlatformTranslator();
+
+        m_lastMousePosition = m_mousePosition;
     }
     HIDWindowListener::~HIDWindowListener()
     {
         g_pWindowListener = nullptr;
     }
 
+    void HIDWindowListener::Update()
+    {
+        // publish mouse movement
+    }
+
     void HIDWindowListener::GLFWKeyCallback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mode*/)
     {
         // do cool stuff with key presses!
+        auto pAction = m_pPlatformTranslator->TranslateKeyboardCode(key);
+        if (pAction)
+        {
+            LOG("action = ", pAction->name);
+        }
 
         // When a user presses the escape key, we set the WindowShouldClose property to true, 
         if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         {
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
+    }
+
+    void HIDWindowListener::DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed)
+    {
+        std::shared_ptr<EventData_HIDKeyAction> event = std::make_shared<EventData_HIDKeyAction>(device, action, pressed);
+        m_pubHIDKeyAction.Publish(event);
+
+    }
+
+    void HIDWindowListener::DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute)
+    {
+        std::shared_ptr<EventData_HIDKeyAction> event = std::make_shared<EventData_HIDKeyAction>(device, action, false, relative, absolute);
+        m_pubHIDKeyAction.Publish(event);
     }
 }
