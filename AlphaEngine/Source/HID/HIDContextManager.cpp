@@ -81,7 +81,7 @@ namespace alpha
             if (state)
             {
                 // dispatch state pressed
-                auto it = m_stateDelegates.find(action->name);
+                auto it = m_stateDelegates.find(state->name);
                 if (it != m_stateDelegates.end())
                 {
                     for (auto func : it->second)

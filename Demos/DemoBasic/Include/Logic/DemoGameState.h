@@ -47,6 +47,8 @@ private:
     std::weak_ptr<alpha::Sound> m_pTestSound;
 
     DemoContext * m_pInputContext;
+
+    bool m_strafingLeft;
 };
 
 #endif // DEMO_GAME_STATE_H

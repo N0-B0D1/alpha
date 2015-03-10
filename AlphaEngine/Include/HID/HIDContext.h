@@ -49,9 +49,9 @@ namespace alpha
         void MapRange(const std::string & action, std::vector<std::string> mappings);
 
     private:
-        std::map<std::string, HIDContextAction> m_actions;
-        std::map<std::string, HIDContextAction> m_states;
-        std::map<std::string, HIDContextAction> m_ranges;
+        std::map<std::string, HIDContextAction *> m_actions;
+        std::map<std::string, HIDContextAction *> m_states;
+        std::map<std::string, HIDContextAction *> m_ranges;
     };
 }
 

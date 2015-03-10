@@ -20,4 +20,7 @@ DemoContext::DemoContext()
 {
     // make context mappings for demo
     MapState("STRAFE_LEFT", { "KB_A", "KB_LEFT" });
+    MapState("STRAFE_RIGHT", { "KB_D", "KB_RIGHT" });
+    MapState("FORWARD", { "KB_W", "KB_UP" });
+    MapState("BACKWARDS", { "KB_S", "KB_DOWN" });
 }

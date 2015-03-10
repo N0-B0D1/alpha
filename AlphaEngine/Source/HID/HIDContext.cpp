@@ -20,58 +20,76 @@ limitations under the License.
 
 namespace alpha
 {
-    //HIDActionState::HIDActionState(std::string actionName, bool actionPressed /*= false*/)
-    //    : HIDAction(actionName)
-    //    , pressed(actionPressed)
-    //{ }
-    //HIDActionRange::HIDActionRange(std::string actionName, float actionRange /*= 0.f*/)
-    //    : HIDAction(actionName)
-    //    , range(actionRange)
-    //{ }
-
     HIDContext::HIDContext() { }
     HIDContext::~HIDContext()
     {
-        /*
-        for (auto pair : m_actions)
+        for (auto action : m_actions)
         {
-            delete pair.second;
+            if (action.second)
+            {
+                delete action.second;
+            }
         }
-        for (auto pair : m_states)
+        m_actions.clear();
+
+        for (auto action : m_states)
         {
-            delete pair.second;
+            if (action.second)
+            {
+                delete action.second;
+            }
         }
-        for (auto pair : m_ranges)
+        m_states.clear();
+
+        for (auto action : m_ranges)
         {
-            delete pair.second;
+            if (action.second)
+            {
+                delete action.second;
+            }
         }
-        */
+        m_ranges.clear();
     }
 
-    HIDContextAction * HIDContext::TranslateAction(const HIDAction * /*action*/) const
+    HIDContextAction * HIDContext::TranslateAction(const HIDAction * action) const
     {
+        auto it = m_actions.find(action->name);
+        if (it != m_actions.end())
+        {
+            return it->second;
+        }
         return nullptr;
     }
 
-    HIDContextAction * HIDContext::TranslateState(const HIDAction * /*action*/) const
+    HIDContextAction * HIDContext::TranslateState(const HIDAction * action) const
     {
+        auto it = m_states.find(action->name);
+        if (it != m_states.end())
+        {
+            return it->second;
+        }
         return nullptr;
     }
 
-    HIDContextAction * HIDContext::TranslateRange(const HIDAction * /*action*/) const
+    HIDContextAction * HIDContext::TranslateRange(const HIDAction * action) const
     {
+        auto it = m_ranges.find(action->name);
+        if (it != m_ranges.end())
+        {
+            return it->second;
+        }
         return nullptr;
     }
 
     void HIDContext::MapAction(const std::string & action, std::vector<std::string> mappings)
     {
-        HIDContextAction contextualAction;
-        contextualAction.name = action;
-
         for (auto actionMap : mappings)
         {
+            HIDContextAction * contextualAction = new HIDContextAction();
+            contextualAction->name = action;
+
             auto it = m_actions.find(actionMap);
-            if (it != m_actions.end())
+            if (it == m_actions.end())
             {
                 // map action
                 m_actions[actionMap] = contextualAction;
@@ -86,13 +104,13 @@ namespace alpha
 
     void HIDContext::MapState(const std::string & action, std::vector<std::string> mappings)
     {
-        HIDContextAction contextualAction;
-        contextualAction.name = action;
-
         for (auto actionMap : mappings)
         {
+            HIDContextAction * contextualAction = new HIDContextAction();
+            contextualAction->name = action;
+
             auto it = m_states.find(actionMap);
-            if (it != m_states.end())
+            if (it == m_states.end())
             {
                 // map action
                 m_states[actionMap] = contextualAction;
@@ -107,14 +125,13 @@ namespace alpha
 
     void HIDContext::MapRange(const std::string & action, std::vector<std::string> mappings)
     {
-
-        HIDContextAction contextualAction;
-        contextualAction.name = action;
-
         for (auto actionMap : mappings)
         {
+            HIDContextAction * contextualAction = new HIDContextAction();
+            contextualAction->name = action;
+
             auto it = m_ranges.find(actionMap);
-            if (it != m_ranges.end())
+            if (it == m_ranges.end())
             {
                 // map action
                 m_ranges[actionMap] = contextualAction;
@@ -126,38 +143,4 @@ namespace alpha
             }
         }
     }
-
-    /*
-    HIDAction * HIDContext::TranslateKeyboardAction(const unsigned short & code)
-    {
-        auto it = m_actions.find(code);
-        if (it != m_actions.end())
-        {
-            return it->second;
-        }
-        return nullptr;
-    }
-
-    HIDActionState * HIDContext::TranslateKeyboardState(const unsigned short & code)
-    {
-        auto it = m_states.find(code);
-        if (it != m_states.end())
-        {
-            return it->second;
-        }
-        return nullptr;
-    }
-
-    HIDAction * HIDContext::TranslateMouseAction(const unsigned short & code)
-    {
-        // XXX not implemented
-        return nullptr;
-    }
-
-    HIDActionState * HIDContext::TranslateMouseState(const unsigned short & code)
-    {
-        // XXX not implemented
-        return nullptr;
-    }
-    */
 }

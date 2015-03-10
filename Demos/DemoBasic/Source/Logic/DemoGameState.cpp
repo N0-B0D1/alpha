@@ -10,6 +10,7 @@
 #include "Math/Vector3.h"
 #include "Audio/Sound.h"
 #include "HID/DemoContext.h"
+#include "Toolbox/Logger.h"
 
 DemoGameState::DemoGameState()
     : m_pInputContext(nullptr)
@@ -47,8 +48,7 @@ bool DemoGameState::VInitialize()
 
     m_pInputContext = new DemoContext();
     this->SetActiveInputContext(m_pInputContext);
-    auto fp = std::bind(&OnStrafeLeft, this, std::placeholders::_1);
-    this->BindState("STRAFE_LEFT", fp);
+    this->BindState("STRAFE_LEFT", [this](bool pressed) { this->OnStrafeLeft(pressed); });
 
     return true;
 }
@@ -135,4 +135,16 @@ std::shared_ptr<alpha::AState> DemoGameState::VShutdown()
 
     // return the next game state, or nullptr for end of state machine
     return nullptr;
+}
+
+void DemoGameState::OnStrafeLeft(bool pressed)
+{
+    if (pressed)
+    {
+        m_strafingLeft = true;
+    }
+    else
+    {
+        m_strafingLeft = false;
+    }
 }
