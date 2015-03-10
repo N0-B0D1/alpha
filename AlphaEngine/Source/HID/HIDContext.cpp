@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "HID/HIDContext.h"
 #include "HID/HIDTypes.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -31,11 +32,11 @@ namespace alpha
     HIDContext::HIDContext() { }
     HIDContext::~HIDContext()
     {
+        /*
         for (auto pair : m_actions)
         {
             delete pair.second;
         }
-        /*
         for (auto pair : m_states)
         {
             delete pair.second;
@@ -47,6 +48,86 @@ namespace alpha
         */
     }
 
+    HIDContextAction * HIDContext::TranslateAction(const HIDAction * /*action*/) const
+    {
+        return nullptr;
+    }
+
+    HIDContextAction * HIDContext::TranslateState(const HIDAction * /*action*/) const
+    {
+        return nullptr;
+    }
+
+    HIDContextAction * HIDContext::TranslateRange(const HIDAction * /*action*/) const
+    {
+        return nullptr;
+    }
+
+    void HIDContext::MapAction(const std::string & action, std::vector<std::string> mappings)
+    {
+        HIDContextAction contextualAction;
+        contextualAction.name = action;
+
+        for (auto actionMap : mappings)
+        {
+            auto it = m_actions.find(actionMap);
+            if (it != m_actions.end())
+            {
+                // map action
+                m_actions[actionMap] = contextualAction;
+            }
+            else
+            {
+                // log warning and don't remap
+                LOG_WARN("Attempt to re-map ACTION [", actionMap, "] to [", action, "]");
+            }
+        }
+    }
+
+    void HIDContext::MapState(const std::string & action, std::vector<std::string> mappings)
+    {
+        HIDContextAction contextualAction;
+        contextualAction.name = action;
+
+        for (auto actionMap : mappings)
+        {
+            auto it = m_states.find(actionMap);
+            if (it != m_states.end())
+            {
+                // map action
+                m_states[actionMap] = contextualAction;
+            }
+            else
+            {
+                // log warning and don't remap
+                LOG_WARN("Attempt to re-map STATE [", actionMap, "] to [", action, "]");
+            }
+        }
+    }
+
+    void HIDContext::MapRange(const std::string & action, std::vector<std::string> mappings)
+    {
+
+        HIDContextAction contextualAction;
+        contextualAction.name = action;
+
+        for (auto actionMap : mappings)
+        {
+            auto it = m_ranges.find(actionMap);
+            if (it != m_ranges.end())
+            {
+                // map action
+                m_ranges[actionMap] = contextualAction;
+            }
+            else
+            {
+                // log warning and don't remap
+                LOG_WARN("Attempt to re-map RANGE [", actionMap, "] to [", action, "]");
+            }
+        }
+    }
+
+    /*
     HIDAction * HIDContext::TranslateKeyboardAction(const unsigned short & code)
     {
         auto it = m_actions.find(code);
@@ -57,7 +138,6 @@ namespace alpha
         return nullptr;
     }
 
-    /*
     HIDActionState * HIDContext::TranslateKeyboardState(const unsigned short & code)
     {
         auto it = m_states.find(code);
@@ -67,15 +147,13 @@ namespace alpha
         }
         return nullptr;
     }
-    */
 
-    HIDAction * HIDContext::TranslateMouseAction(const unsigned short & /*code*/)
+    HIDAction * HIDContext::TranslateMouseAction(const unsigned short & code)
     {
         // XXX not implemented
         return nullptr;
     }
 
-    /*
     HIDActionState * HIDContext::TranslateMouseState(const unsigned short & code)
     {
         // XXX not implemented

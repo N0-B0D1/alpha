@@ -18,7 +18,9 @@ limitations under the License.
 */
 
 #include <functional>
+#include <map>
 #include <string>
+#include <vector>
 
 #include "HID/HIDTypes.h"
 
@@ -31,6 +33,9 @@ namespace alpha
     public:
         HIDContextManager();
         virtual ~HIDContextManager();
+
+        /** Set (or replace) the active context to translate actions with. */
+        void SetActiveContext(HIDContext * context);
 
         void KeyboardButtonUp(const HIDAction * const action);
         void KeyboardButtonDown(const HIDAction * const action);
@@ -48,6 +53,10 @@ namespace alpha
 
     private:
         HIDContext * m_pActiveContext;
+
+        std::map<std::string, std::vector<std::function<void()>>> m_actionDelegates;
+        std::map<std::string, std::vector<std::function<void(bool)>>> m_stateDelegates;
+        std::map<std::string, std::vector<std::function<void(long, float)>>> m_rangeDelegates;
     };
 }
 

@@ -25,6 +25,8 @@ namespace alpha
     class Sound;
 }
 
+class DemoContext;
+
 class DemoGameState : public alpha::AGameState
 {
 public:
@@ -36,11 +38,15 @@ public:
     virtual void VTransition(std::shared_ptr<AState> nextState);
     virtual std::shared_ptr<AState> VShutdown();
 
+    void OnStrafeLeft(bool pressed);
+
 private:
     std::shared_ptr<alpha::Entity> m_test;
     std::shared_ptr<alpha::Entity> m_test2;
 
     std::weak_ptr<alpha::Sound> m_pTestSound;
+
+    DemoContext * m_pInputContext;
 };
 
 #endif // DEMO_GAME_STATE_H

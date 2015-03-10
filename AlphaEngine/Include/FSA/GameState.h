@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <functional>
 #include <string>
 
 #include "FSA/State.h"
@@ -27,6 +28,7 @@ namespace alpha
     class LogicSystem;
     class Entity;
     class Sound;
+    class HIDContext;
 
     /**
      * class GameState
@@ -54,6 +56,15 @@ namespace alpha
 
         /** Audio system pass through methods */
         std::weak_ptr<Sound> CreateSound(const char * resource);
+
+        /** Set the active context in the input context manager */
+        void SetActiveInputContext(HIDContext * context);
+        /** Bind function delegates to input action */
+        void BindAction(std::string action, std::function<void()> delegate);
+        /** Bind function delegate to input action state */
+        void BindState(std::string state, std::function<void(bool)> delegate);
+        /** Bind function delegate to input action axis range */
+        void BindRange(std::string range, std::function<void(long, float)> delegate);
 
     private:
         void SetLogic(std::shared_ptr<LogicSystem> pLogic);

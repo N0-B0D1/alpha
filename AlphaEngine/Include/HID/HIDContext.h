@@ -19,34 +19,16 @@ limitations under the License.
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace alpha
 {
     struct HIDAction;
 
-    /**
-     * Defines an action state
-     * e.g.: strafe_left released
-     */
-    /*
-    struct HIDActionState : public HIDAction
+    struct HIDContextAction
     {
-        HIDActionState(std::string actionName, bool actionPressed = false);
-        bool pressed;
+        std::string name;
     };
-    */
-
-    /**
-     * Defines an action and its range (0.f - 1.f)
-     * e.g.: strafe_left @ 0.5f
-     */
-    /*
-    struct HIDActionRange : public HIDAction
-    {
-        HIDActionRange(std::string actionName, float actionRange = 0.f);
-        float range;
-    };
-    */
 
     /**
      * HIDContext abstract base class for translating hardware input into an input state or range.
@@ -57,17 +39,19 @@ namespace alpha
         HIDContext();
         virtual ~HIDContext();
 
-        HIDAction * TranslateKeyboardAction(const unsigned short & code);
-        //HIDActionState * TranslateKeyboardState(const unsigned short & code);
-
-        HIDAction * TranslateMouseAction(const unsigned short & code);
-        //HIDActionState * TranslateMouseState(const unsigned short & code);
-        //HIDActionRange TranslateMouseRange();
+        HIDContextAction * TranslateAction(const HIDAction * action) const;
+        HIDContextAction * TranslateState(const HIDAction * action) const;
+        HIDContextAction * TranslateRange(const HIDAction * action) const;
 
     protected:
-        std::map<unsigned short, HIDAction *> m_actions;
-        //std::map<unsigned short, HIDActionState *> m_states;
-        //std::map<unsigned short, HIDActionRange *> m_ranges;
+        void MapAction(const std::string & action, std::vector<std::string> mappings);
+        void MapState(const std::string & action, std::vector<std::string> mappings);
+        void MapRange(const std::string & action, std::vector<std::string> mappings);
+
+    private:
+        std::map<std::string, HIDContextAction> m_actions;
+        std::map<std::string, HIDContextAction> m_states;
+        std::map<std::string, HIDContextAction> m_ranges;
     };
 }
 

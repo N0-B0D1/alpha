@@ -1,3 +1,4 @@
+#include <functional>
 #include <math.h>
 
 #include "Logic/DemoGameState.h"
@@ -8,8 +9,10 @@
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
 #include "Audio/Sound.h"
+#include "HID/DemoContext.h"
 
 DemoGameState::DemoGameState()
+    : m_pInputContext(nullptr)
 { }
 DemoGameState::~DemoGameState() { }
 
@@ -41,6 +44,11 @@ bool DemoGameState::VInitialize()
         // hit sound is fairly loud, so set the channel low on play
         pSound->SetVolume(0.2f);
     }
+
+    m_pInputContext = new DemoContext();
+    this->SetActiveInputContext(m_pInputContext);
+    auto fp = std::bind(&OnStrafeLeft, this, std::placeholders::_1);
+    this->BindState("STRAFE_LEFT", fp);
 
     return true;
 }
@@ -116,6 +124,11 @@ void DemoGameState::VTransition(std::shared_ptr<AState> nextState)
 
 std::shared_ptr<alpha::AState> DemoGameState::VShutdown()
 {
+    if (m_pInputContext)
+    {
+        delete m_pInputContext;
+    }
+
     // Remove any actors that are no longer needed
     DestroyEntity(m_test->GetId());
     DestroyEntity(m_test2->GetId());

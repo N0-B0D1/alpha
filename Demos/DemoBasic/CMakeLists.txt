@@ -17,16 +17,52 @@ PROJECT(DemoBasic)
 # define header files for the library
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.h")
 source_group(Header FILES ${HEADER_FILES})
-file(GLOB LOGIC_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Logic/*.h")
-source_group(Header\\Logic FILES ${LOGIC_HEADER_FILES})
-#list(APPEND HEADER_FILES ${LOGIC_HEADER_FILES})
 
 # define source files for the library
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 source_group(Source FILES ${SOURCE_FILES})
-file(GLOB LOGIC_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Logic/*.cpp")
-source_group(Source\\Logic FILES ${LOGIC_SOURCE_FILES})
+
+function (include_demo_source sub_dir)
+
+    # better than nothing for now
+    # XXX should figure out how to replace '/' with '\\', in windows
+    # and if that will even work for source_group's
+    set(SUB_GROUP ${sub_dir})
+    string(REGEX REPLACE "/" "_" SUB_GROUP ${SUB_GROUP})
+    
+    # add header files
+    file(GLOB SUB_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/${sub_dir}/*.h")
+    #file(GLOB SUB_PLAT_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR}/${sub_dir}/*.h")
+    #list(APPEND SUB_HEADER_FILES ${SUB_PLAT_HEADER_FILES})
+    source_group(Header\\${SUB_GROUP} FILES ${SUB_HEADER_FILES})
+    
+    # add sub group to final list of header files for building
+    set(HEADER_FILES ${HEADER_FILES} ${SUB_HEADER_FILES} PARENT_SCOPE)
+
+    # add source files
+    file(GLOB SUB_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/${sub_dir}/*.cpp")
+    #file(GLOB SUB_PLAT_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/${ALPHA_BUILD_TARGET_DIR}/${sub_dir}/*.cpp")
+    #list(APPEND SUB_SOURCE_FILES ${SUB_PLAT_SOURCE_FILES})
+    source_group(Source\\${SUB_GROUP} FILES ${SUB_SOURCE_FILES})
+    
+    # add sub group source files to final list of source files for building
+    set(SOURCE_FILES ${SOURCE_FILES} ${SUB_SOURCE_FILES} PARENT_SCOPE)
+    
+    # install any header files for exporting the final SDK
+    #install(FILES ${SUB_HEADER_FILES} DESTINATION include/AlphaEngine/${sub_dir})
+    
+endfunction ()
+
+#file(GLOB LOGIC_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Logic/*.h")
+#source_group(Header\\Logic FILES ${LOGIC_HEADER_FILES})
+#list(APPEND HEADER_FILES ${LOGIC_HEADER_FILES})
+
+#file(GLOB LOGIC_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Logic/*.cpp")
+#source_group(Source\\Logic FILES ${LOGIC_SOURCE_FILES})
 #list(APPEND SOURCE_FILES ${LOGIC_SOURCE_FILES})
+
+include_demo_source("HID")
+include_demo_source("Logic")
 
 # make basic demo project
 include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include)
@@ -36,9 +72,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 add_executable(
     DemoBasic WIN32 
     ${HEADER_FILES}
-    ${LOGIC_HEADER_FILES}
     ${SOURCE_FILES}
-    ${LOGIC_SOURCE_FILES}
 )
 target_link_libraries(DemoBasic ${ALPHA_LIBRARIES})
 

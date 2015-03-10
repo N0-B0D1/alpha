@@ -38,6 +38,8 @@ namespace alpha
 
     class LogicSystem : public AlphaSystem
     {
+        friend class AGameState;
+
     public:
         LogicSystem();
         virtual ~LogicSystem();
@@ -59,9 +61,6 @@ namespace alpha
 
         /** Audio life-cycle methods */
         std::weak_ptr<Sound> CreateSound(const char * resource);
-
-        /** HID Bindings */
-
 
         /** event subscriptions */
         void SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
@@ -90,7 +89,7 @@ namespace alpha
         /** Subscriber for HIDKeyAction events */
         std::shared_ptr<EventDataSubscriber<EventData_HIDKeyAction>> m_subHIDKeyAction;
 
-        /** HID Context Manager */
+        /** HID Context Manager, handles translation of engine input code events, to contextual actions */
         HIDContextManager * m_pHIDContextManager;
     };
 }

@@ -46,6 +46,7 @@ namespace alpha
         HIDWindowListener(const HIDWindowListener&);
         HIDWindowListener & operator=(const HIDWindowListener&);
 
+        /** Helper function to handle WM_INPUT message. */
         void WMInputHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
         /** Register raw input devices, so we can query their state in our WndProc */
