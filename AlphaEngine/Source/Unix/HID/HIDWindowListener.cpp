@@ -28,6 +28,20 @@ namespace alpha
             g_pWindowListener->GLFWKeyCallback(window, key, scancode, action, mode);
         }
     }
+    static void StaticGLFWMouseKeyCallback(GLFWwindow * window, int button, int action, int mods)
+    {
+        if (g_pWindowListener != nullptr)
+        {
+            g_pWindowListener->GLFWMouseKeyCallback(window, button, action, mods);
+        }
+    }
+    static void StaticGLFWMousePositionCallback(GLFWwindow * window, double xpos, double ypos)
+    {
+        if (g_pWindowListener != nullptr)
+        {
+            g_pWindowListener->GLFWMousePositionCallback(window, xpos, ypos);
+        }
+    }
 
     HIDWindowListener::HIDWindowListener(EventDataPublisher<EventData_HIDKeyAction> & pubHIDKeyAction)
         : m_pPlatformTranslator(nullptr)
@@ -35,8 +49,10 @@ namespace alpha
     {
         g_pWindowListener = this;
 
-        // hook up key listener to glfw callback
+        // hook up GLFW listeners callbacks
         glfwSetKeyCallback(g_pWindow, StaticGLFWKeyCallback);
+        glfwSetMouseButtonCallback(g_pWindow, StaticGLFWMouseKeyCallback);
+        glfwSetCursorPosCallback(g_pWindow, StaticGLFWMousePositionCallback);
 
         // set platform context, to translate to engine input codes
         m_pPlatformTranslator = new HIDPlatformTranslator();
@@ -51,6 +67,21 @@ namespace alpha
     void HIDWindowListener::Update()
     {
         // publish mouse movement
+        if (m_lastMousePosition.xAbsolutePos != m_mousePosition.xAbsolutePos)
+        {
+            m_mousePosition.xRelativePos = m_lastMousePosition.xAbsolutePos - m_mousePosition.xAbsolutePos;
+            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MC_XAXIS);
+            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
+        }
+        if (m_lastMousePosition.yAbsolutePos != m_mousePosition.yAbsolutePos)
+        {
+            m_mousePosition.yRelativePos = m_lastMousePosition.yAbsolutePos - m_mousePosition.yAbsolutePos;
+            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MC_YAXIS);
+            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
+        }
+
+        // store last position
+        m_lastMousePosition = m_mousePosition;
     }
 
     void HIDWindowListener::GLFWKeyCallback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mode*/)
@@ -67,6 +98,17 @@ namespace alpha
         {
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
+    }
+    
+    void HIDWindowListener::GLFWMouseKeyCallback(GLFWwindow * /*window*/, int button, int action, int mods)
+    {
+        LOG("Mouse Key Input: ", button, action, mods);
+    }
+
+    void HIDWindowListener::GLFWMousePositionCallback(GLFWwindow * /*window*/, double xpos, double ypos)
+    {
+        m_mousePosition.xAbsolutePos = xpos;
+        m_mousePosition.yAbsolutePos = ypos;
     }
 
     void HIDWindowListener::DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed)

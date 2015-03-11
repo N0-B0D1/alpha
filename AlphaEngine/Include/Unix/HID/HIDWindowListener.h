@@ -39,6 +39,8 @@ namespace alpha
         void Update();
 
         void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+        void GLFWMouseKeyCallback(GLFWwindow * window, int button, int action, int mods);
+        void GLFWMousePositionCallback(GLFWwindow * window, double xpos, double ypos);
 
     private:
         // non-copyable
