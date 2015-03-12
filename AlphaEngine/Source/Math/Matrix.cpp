@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <math.h>
+
 #include "Math/Matrix.h"
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
@@ -81,6 +83,22 @@ namespace alpha
                       0.f, scale.y, 0.f, 0.f,
                       0.f, 0.f, scale.z, 0.f,
                       0.f, 0.f, 0.f, 1.f);
+    }
+
+    Matrix Matrix::Projection(float fov, float aspect, float near, float far)
+    {
+        float depth = far - near;
+        float oneOverDepth = 1 / depth;
+        Matrix projection;
+
+        projection.m_22 = 1 / tan(0.5f * fov);
+        projection.m_11 = (1) * projection.m_22 / aspect;
+        projection.m_33 = far * oneOverDepth;
+        projection.m_43 = (-far * near) * oneOverDepth;
+        projection.m_34 = 1.f;
+        projection.m_44 = 0.f;
+
+        return projection;
     }
 
     Matrix operator* (const Matrix& left, const Matrix& right)

@@ -26,17 +26,7 @@ namespace alpha
         m_view = Matrix::Translate(position);
 
         // set projection matrix
-        float fov = 45.f;
-        float aspect = 800.f / 600.f;
-        float depth = 100.f - 0.1f;
-        float oneOverDepth = 1 / depth;
-
-        m_projection.m_22 = 1 / tan(0.5f * fov);
-        m_projection.m_11 = (1) * m_projection.m_22 / aspect;
-        m_projection.m_33 = 100.f * oneOverDepth;
-        m_projection.m_43 = (-100.f * 0.1f) * oneOverDepth;
-        m_projection.m_34 = 1.f;
-        m_projection.m_44 = 0.f;
+        m_projection = Matrix::Projection(45.f, 800.f / 600.f, 0.1f, 100.f);
     }
     Camera::~Camera() { }
 
