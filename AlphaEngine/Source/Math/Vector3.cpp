@@ -66,6 +66,11 @@ namespace alpha
         return Vector3(x, y, z);
     }
 
+    bool Vector3::operator==(const Vector3& right) const
+    {
+        return (this->x == right.x && this->y == right.y && this->z == right.z);
+    }
+
     Vector3 & Vector3::operator=(const Vector3 & right)
     {
         this->x = right.x;

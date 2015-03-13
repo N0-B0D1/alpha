@@ -138,6 +138,11 @@ namespace alpha
         m_pubEntityCreated.Subscribe(pSubscriber);
     }
 
+    void LogicSystem::SubscribeToSetActiveCamera(std::shared_ptr<AEventDataSubscriber> pSubscriber)
+    {
+        m_pubSetActiveCamera.Subscribe(pSubscriber);
+    }
+
     std::shared_ptr<AEventDataSubscriber> LogicSystem::GetHIDKeyActionSubscriber() const
     {
         return m_subHIDKeyAction;

@@ -52,6 +52,21 @@ namespace alpha
         return CameraComponent::sk_name;
     }
 
+    float CameraComponent::GetFov() const
+    {
+        return m_fov;
+    }
+
+    float CameraComponent::GetNear() const
+    {
+        return m_near;
+    }
+
+    float CameraComponent::GetFar() const
+    {
+        return m_far;
+    }
+
     float CameraComponent::ParseFloatVar(std::shared_ptr<LuaVar> var, float defaultValue)
     {
         if (var != nullptr)

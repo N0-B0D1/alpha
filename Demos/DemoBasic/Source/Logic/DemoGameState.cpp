@@ -6,6 +6,7 @@
 #include "FSA/GameState.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
+#include "Entities/CameraComponent.h"
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
 #include "Audio/Sound.h"
@@ -23,6 +24,16 @@ bool DemoGameState::VInitialize()
 
     m_test = CreateEntity("Entities/test.lua");
     m_test2 = CreateEntity("Entities/test.lua");
+    m_pCamera = CreateEntity("Entities/camera.lua");
+
+    // set our camera as the active camera for the scene
+    auto pCameraComponent = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
+    if (pCameraComponent)
+    {
+        // set start position for the camera
+        pCameraComponent->SetPosition(alpha::Vector3(0, 0, 20));
+        SetActiveCamera(pCameraComponent);
+    }
 
     auto root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test->Get("root"));
     if (root != nullptr)
@@ -47,6 +58,7 @@ bool DemoGameState::VInitialize()
     m_pInputContext = new DemoContext();
     this->SetActiveInputContext(m_pInputContext);
     this->BindState("STRAFE_LEFT", [this](bool pressed) { this->OnStrafeLeft(pressed); });
+    this->BindState("STRAFE_RIGHT", [this](bool pressed) { this->OnStrafeRight(pressed); });
 
     return true;
 }
@@ -111,6 +123,32 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
         slerpTime += static_cast<float>(elapsedTime) / 45.f;
     }
 
+    // update camera position based on user input
+    auto camera = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
+    if (camera)
+    {
+        alpha::Vector3 direction;
+
+        if (m_strafeLeft)
+        {
+            // move in negative x direction
+            direction.x -= 1;
+        }
+
+        if (m_strafeRight)
+        {
+            // move in positive x direction
+            direction.x += 1;
+        }
+
+        // combine left and right
+        // if both are set then they should zero out,
+        // and no movement is made
+        //
+        // distance = speed x time
+        //float speed = 100.f;
+    }
+
     return true;
 }
 
@@ -137,12 +175,10 @@ std::shared_ptr<alpha::AState> DemoGameState::VShutdown()
 
 void DemoGameState::OnStrafeLeft(bool pressed)
 {
-    if (pressed)
-    {
-        m_strafingLeft = true;
-    }
-    else
-    {
-        m_strafingLeft = false;
-    }
+    m_strafeLeft = pressed;
+}
+
+void DemoGameState::OnStrafeRight(bool pressed)
+{
+    m_strafeRight = pressed;
 }

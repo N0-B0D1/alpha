@@ -34,6 +34,8 @@ namespace alpha
         float Dot(const Vector3 & right);
         Vector3 Cross(const Vector3 & right);
 
+        bool operator == (const Vector3& right) const;
+
         Vector3 & operator=(const Vector3 & right);
         Vector3 & operator+=(const Vector3 & right);
         Vector3 & operator-=(const Vector3 & right);

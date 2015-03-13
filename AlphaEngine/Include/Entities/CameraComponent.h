@@ -39,6 +39,10 @@ namespace alpha
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
         virtual std::string VGetName() const;
 
+        float GetFov() const;
+        float GetNear() const;
+        float GetFar() const;
+
     private:
         /** Init helper methods */
         float ParseFloatVar(std::shared_ptr<LuaVar> var, float defaultValue);
