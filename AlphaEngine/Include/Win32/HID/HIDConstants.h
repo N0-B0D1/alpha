@@ -142,16 +142,26 @@ namespace alpha
     /** Mouse Actions, includes each axis as a separate action, and up to 5 buttons. */
     typedef enum
     {
-        MA_X_AXIS,
-        MA_Y_AXIS,
-        MA_1,
-        MA_2,
-        MA_3,
-        MA_4,
-        MA_5,
+        MA_1 = 1,
+        MA_2 = 2,
+        MA_3 = 3,
+        MA_4 = 4,
+        MA_5 = 5,
+        MA_6 = 6,
+        MA_7 = 7,
+        MA_8 = 8,
+
         MA_LEFT = MA_1,
         MA_MIDDLE = MA_2,
         MA_RIGHT = MA_3,
+
+        MA_WHEEL_FORWARD = 15,
+        MA_WHEEL_BACK = 16,
+        MA_WHEEL_LEFT = 17,
+        MA_WHEEL_RIGHT = 18,
+
+        MA_X_AXIS = 20,
+        MA_Y_AXIS = 21,
     } MouseAction;
 }
 

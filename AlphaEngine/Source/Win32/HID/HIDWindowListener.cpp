@@ -157,10 +157,8 @@ namespace alpha
             // for now only read left, middle, and right buttons
             unsigned short btnIndex = MA_1; // skip x-axis and y-axis codes
             unsigned int rawIndex = RI_MOUSE_BUTTON_1_DOWN;
-            while (rawIndex <= RI_MOUSE_BUTTON_5_UP)
+            while (rawIndex <= RI_MOUSE_WHEEL) // 0x0400 will also hit 0x0800
             {
-                HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(btnIndex);
-
                 // check for button pushed
                 unsigned long btnCode = (raw->data.mouse.ulButtons & rawIndex);
                 bool btnState = (btnCode == 0 ? false : true);
@@ -168,7 +166,26 @@ namespace alpha
                 {
                     // button was pushed
                     //m_pContextManager->MouseButtonDown(static_cast<MouseButtonCode>(btnIndex));
-                    DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, true);
+                    if (rawIndex == RI_MOUSE_WHEEL)
+                    {
+                        // dispatch axis for mouse wheel
+                        short delta = raw->data.mouse.usButtonData;
+                        unsigned short code = static_cast<unsigned short>(delta > 0 ? MA_WHEEL_FORWARD : MA_WHEEL_BACK);
+                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(code);
+                        if (pAction)
+                        {
+                            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, delta / 120, delta);
+                        }
+                    }
+                    else
+                    {
+                        // dispatch mouse button click
+                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(btnIndex);
+                        if (pAction)
+                        {
+                            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, true);
+                        }
+                    }
                 }
 
                 // increment to next raw button id
@@ -181,13 +198,37 @@ namespace alpha
                 {
                     // this button was released
                     //m_pContextManager->MouseButtonUp(static_cast<MouseButtonCode>(btnIndex));
-                    DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, false);
+                    if (rawIndex == 0x0800) // mouse wheel left/right
+                    {
+                        // dispatch mouse wheel left or right
+                        // left is usButtonData = -120, right is usButtonData = 120
+                        short delta = raw->data.mouse.usButtonData;
+                        LOG(raw->data.mouse.usButtonData, " ", raw->data.mouse.usButtonFlags, " ", raw->data.mouse.usFlags);
+                        unsigned short code = static_cast<unsigned short>(delta > 0 ? MA_WHEEL_RIGHT : MA_WHEEL_LEFT);
+                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(code);
+                        if (pAction)
+                        {
+                            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, delta > 0);
+                        }
+                    }
+                    else
+                    {
+                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(btnIndex);
+                        if (pAction)
+                        {
+                            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, false);
+                        }
+                    }
                 }
 
                 // increment to next raw button id
                 rawIndex = rawIndex << 1;
                 ++btnIndex;
             }
+
+            // rawIndex should now be 0x0400
+            // check for mouse wheel data
+
         }
 
         // always store the mouse's most recent relative position

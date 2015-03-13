@@ -147,6 +147,13 @@ namespace alpha
         CreateHIDAction(HID_MOUSE, MA_3, "MA_3"); // MA_RIGHT
         CreateHIDAction(HID_MOUSE, MA_4, "MA_4");
         CreateHIDAction(HID_MOUSE, MA_5, "MA_5");
+        CreateHIDAction(HID_MOUSE, MA_6, "MA_6");
+        CreateHIDAction(HID_MOUSE, MA_7, "MA_7");
+        CreateHIDAction(HID_MOUSE, MA_8, "MA_8");
+        CreateHIDAction(HID_MOUSE, MA_WHEEL_FORWARD, "MA_WHEEL_FORWARD");
+        CreateHIDAction(HID_MOUSE, MA_WHEEL_BACK, "MA_WHEEL_BACK");
+        CreateHIDAction(HID_MOUSE, MA_WHEEL_LEFT, "MA_WHEEL_LEFT");
+        CreateHIDAction(HID_MOUSE, MA_WHEEL_RIGHT, "MA_WHEEL_RIGHT");
     }
 
     HIDPlatformTranslator::~HIDPlatformTranslator()
