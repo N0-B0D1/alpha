@@ -20,6 +20,8 @@ limitations under the License.
 #include "Logic/LogicSystem.h"
 #include "Entities/Entity.h"
 #include "Audio/Sound.h"
+#include "HID/HIDContextManager.h"
+#include "HID/HIDContext.h"
 
 namespace alpha
 {
@@ -52,5 +54,25 @@ namespace alpha
     void AGameState::SetLogic(std::shared_ptr<LogicSystem> pLogic)
     {
         m_pLogic = pLogic;
+    }
+
+    void AGameState::SetActiveInputContext(HIDContext * context)
+    {
+        m_pLogic->m_pHIDContextManager->SetActiveContext(context);
+    }
+
+    void AGameState::BindAction(std::string action, std::function<void()> delegate)
+    {
+        m_pLogic->m_pHIDContextManager->BindAction(action, delegate);
+    }
+
+    void AGameState::BindState(std::string state, std::function<void(bool)> delegate)
+    {
+        m_pLogic->m_pHIDContextManager->BindState(state, delegate);
+    }
+
+    void AGameState::BindRange(std::string range, std::function<void(long, float)> delegate)
+    {
+        m_pLogic->m_pHIDContextManager->BindRange(range, delegate);
     }
 }

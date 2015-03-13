@@ -18,14 +18,17 @@ limitations under the License.
 
 namespace alpha
 {
+    HWND g_hWnd = nullptr;
+
     GraphicsWindow::GraphicsWindow()
         : m_hInstance(nullptr)
-        , m_hWnd(nullptr)
     { }
     GraphicsWindow::~GraphicsWindow() { }
 
     bool GraphicsWindow::Initialize()
     {
+        m_hInstance = GetModuleHandle(NULL);
+
         // Register class
         WNDCLASSEX wcex = {};
         wcex.cbSize = sizeof(WNDCLASSEX);
@@ -51,13 +54,13 @@ namespace alpha
         // Create window
         RECT rc = { 0, 0, 800, 600 };
         AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-        m_hWnd = CreateWindow("ALPHAClass", "ALPHA Engine", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, m_hInstance, nullptr);
-        if (!m_hWnd)
+        g_hWnd = CreateWindow("ALPHAClass", "ALPHA Engine", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, m_hInstance, nullptr);
+        if (!g_hWnd)
         {
             return false;
         }
 
-        ShowWindow(m_hWnd, 10); // nCmdShow);
+        ShowWindow(g_hWnd, 10); // nCmdShow);
 
         return true;
     }
@@ -81,13 +84,13 @@ namespace alpha
 
     bool GraphicsWindow::Shutdown()
     {
-        CloseWindow(m_hWnd);
+        CloseWindow(g_hWnd);
         return true;
     }
 
     HWND GraphicsWindow::GetHWND() const
     {
-        return m_hWnd;
+        return g_hWnd;
     }
 
     LRESULT CALLBACK GraphicsWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

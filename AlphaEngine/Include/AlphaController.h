@@ -31,6 +31,7 @@ namespace alpha
     class AState;
     class AGameState;
     class ThreadSystem;
+    class HIDSystem;
 
     /**
      * The AlphaController is the main engine controller which handles the lifecycle of the engine.
@@ -82,6 +83,9 @@ namespace alpha
 
         /** Audio management system, manages FMOD lifecycle. */
         std::shared_ptr<AudioSystem> m_pAudio;
+
+        /** Human input management system. */
+        HIDSystem * m_pInput;
 	};
 }
 

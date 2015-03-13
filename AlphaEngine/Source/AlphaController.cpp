@@ -25,6 +25,7 @@ limitations under the License.
 #include "FSA/StateMachine.h"
 #include "FSA/GameState.h"
 #include "Threading/ThreadSystem.h"
+#include "HID/HIDSystem.h"
 
 namespace alpha
 {
@@ -34,6 +35,7 @@ namespace alpha
         , m_pGraphics(nullptr)
         , m_pAssets(nullptr)
         , m_pAudio(nullptr)
+        , m_pInput(nullptr)
     {
         LOG("<AlphaController> Constructed.");
     }
@@ -108,6 +110,14 @@ namespace alpha
             return false;
         }
 
+        // create human input device system
+        m_pInput = new HIDSystem();
+        if (!m_pInput->VInitialize())
+        {
+            LOG_ERR("<HIDSystem> Initialization failed!");
+            return false;
+        }
+
         // create audio system
         m_pAudio = std::make_shared<AudioSystem>();
         if (!m_pAudio->VInitialize())
@@ -128,7 +138,7 @@ namespace alpha
 
         // wire up pub-sub relations
         m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
-
+        m_pInput->SubscribeToHIDKeyAction(m_pLogic->GetHIDKeyActionSubscriber());
 
         // initialize the specified game state
         // if no state has been specified, then fail to startup
@@ -186,6 +196,9 @@ namespace alpha
 
             // update asset system, which should cull least recently used items from memory
             m_pAssets->Update(currentTime, sk_maxUpdateTime);
+
+            // update human input, so the latest input state can be passed to the logic system
+            m_pInput->Update(currentTime, sk_maxUpdateTime);
 
             // update logic which will udpate entities
             m_pLogic->Update(currentTime, sk_maxUpdateTime);
@@ -247,6 +260,12 @@ namespace alpha
         {
             m_pAudio->VShutdown();
             LOG("<AudioSystem> Disposed.");
+        }
+        if (m_pInput)
+        {
+            m_pInput->VShutdown();
+            delete m_pInput;
+            LOG("<HIDSystem> Disposed.");
         }
         if (m_pGraphics)
         {

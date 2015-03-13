@@ -20,12 +20,11 @@ limitations under the License.
 #include<stdio.h>
 #include<stdlib.h>
 
-#include<X11/X.h>
-#include<X11/Xlib.h>
+//#include<X11/X.h>
+//#include<X11/Xlib.h>
 
 #include<GL/gl.h>
 #include<GL/glx.h>
-//#include<GL/glu.h>
 #include <GLFW/glfw3.h>
 
 namespace alpha
@@ -42,26 +41,13 @@ namespace alpha
 
         void Render();
 
-        //Display * GetDisplay() const;
         GLFWwindow * GetWindow() const;
-        //XVisualInfo * GetVisualInfo() const;
-        //XWindowAttributes GetXWindowAttrs() const;
-
-        // XXX temporary helper to close the window
-        static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-
-    private:
-        GLFWwindow * m_pWindow;
-        //Display *m_pDisplay;
-        //Window m_root;
-        //GLint m_att[5] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-        //XVisualInfo *m_pVisualInfo;
-        //Colormap m_colorMap;
-        //XSetWindowAttributes m_setWindowAttrs;
-        //Window m_window;
-        //XWindowAttributes m_xWindowAttrs;
-        //XEvent m_xEvent;
 	};
+
+    /**
+     * Global window handle allows input system to hook into window events as needed.
+     */
+    extern GLFWwindow * g_pWindow;
 }
 
 #endif // RENDER_WINDOW_H

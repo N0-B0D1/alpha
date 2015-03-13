@@ -24,6 +24,7 @@ limitations under the License.
 #include "Events/EventDataSubscriber.h"
 #include "Events/EventDataPublisher.h"
 #include "Events/EventData_EntityCreated.h"
+#include "Events/EventData_HIDKeyAction.h"
 
 namespace alpha
 {
@@ -31,11 +32,14 @@ namespace alpha
     class AudioSystem;
     class EntityFactory;
     class Entity;
+    class HIDContextManager;
     class StateMachine;
     class Sound;
 
     class LogicSystem : public AlphaSystem
     {
+        friend class AGameState;
+
     public:
         LogicSystem();
         virtual ~LogicSystem();
@@ -61,8 +65,14 @@ namespace alpha
         /** event subscriptions */
         void SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
 
+        /** Retrieve the HIDKeyAction subscriber so it can be 'subscribed' to the publisher */
+        std::shared_ptr<AEventDataSubscriber> GetHIDKeyActionSubscriber() const;
+
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
+
+        /** Handle HID Key Action events from subscription */
+        void ReadHIDKeyActionSubscription();
         
         EntityFactory *m_pEntityFactory;
         std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
@@ -75,6 +85,12 @@ namespace alpha
 
         /** Publisher for new entities created */
         EventDataPublisher<EventData_EntityCreated> m_pubEntityCreated;
+
+        /** Subscriber for HIDKeyAction events */
+        std::shared_ptr<EventDataSubscriber<EventData_HIDKeyAction>> m_subHIDKeyAction;
+
+        /** HID Context Manager, handles translation of engine input code events, to contextual actions */
+        HIDContextManager * m_pHIDContextManager;
     };
 }
 

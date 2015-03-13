@@ -20,7 +20,10 @@ limitations under the License.
 #include "Toolbox/Logger.h"
 #include "Assets/AssetSystem.h"
 #include "Events/EventData_EntityCreated.h"
+#include "Events/EventData_HIDKeyAction.h"
 #include "FSA/StateMachine.h"
+#include "HID/HIDContextManager.h"
+#include "HID/HIDConstants.h"
 #include "Audio/AudioSystem.h"
 #include "Audio/Sound.h"
 
@@ -30,6 +33,7 @@ namespace alpha
         : AlphaSystem(60)
         , m_pEntityFactory(nullptr)
         , m_pAssets(nullptr)
+        , m_pHIDContextManager(nullptr)
     { }
     LogicSystem::~LogicSystem() { }
 
@@ -41,6 +45,13 @@ namespace alpha
             LOG_ERR("LogicSystem: Failed to create EntityManager");
             return false;
         }
+
+        // create input subscriber
+        m_subHIDKeyAction = std::make_shared<EventDataSubscriber<EventData_HIDKeyAction>>();
+
+        // setup context manager
+        m_pHIDContextManager = new HIDContextManager();
+
         return true;
     }
 
@@ -57,6 +68,7 @@ namespace alpha
 
     bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
+        ReadHIDKeyActionSubscription();
         return true;
     }
 
@@ -124,5 +136,56 @@ namespace alpha
     void LogicSystem::SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
     {
         m_pubEntityCreated.Subscribe(pSubscriber);
+    }
+
+    std::shared_ptr<AEventDataSubscriber> LogicSystem::GetHIDKeyActionSubscriber() const
+    {
+        return m_subHIDKeyAction;
+    }
+
+    void LogicSystem::ReadHIDKeyActionSubscription()
+    {
+        // read any published EventData_HIDKeyAction events that may have occured since the last update.
+        while (std::shared_ptr<const EventData_HIDKeyAction> data = m_subHIDKeyAction->GetNextEvent())
+        {
+            bool pressed = data->GetPressed();
+            HIDAction action = data->GetAction();
+            HID device = data->GetDevice();
+
+            switch (device)
+            {
+            case HID_KEYBOARD:
+                if (pressed)
+                {
+                    m_pHIDContextManager->KeyboardButtonDown(&action);
+                }
+                else
+                {
+                    m_pHIDContextManager->KeyboardButtonUp(&action);
+                }
+
+                break;
+            case HID_MOUSE:
+                switch (action.raw)
+                {
+                case MA_X_AXIS:
+                case MA_Y_AXIS:
+                    m_pHIDContextManager->MouseMoved(&action, data->GetRelative(), data->GetAbsolute());
+                    break;
+                default:
+                    if (pressed)
+                    {
+                        m_pHIDContextManager->MouseButtonDown(&action);
+                    }
+                    else
+                    {
+                        m_pHIDContextManager->MouseButtonUp(&action);
+                    }
+                    break;
+                }
+
+                break;
+            }
+        }
     }
 }

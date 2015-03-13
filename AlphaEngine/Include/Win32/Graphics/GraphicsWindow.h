@@ -37,8 +37,14 @@ namespace alpha
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
         HINSTANCE m_hInstance;
-        HWND m_hWnd;
+        //HWND m_hWnd;
     };
+
+    /**
+     * Global handle for the game window handle.
+     * XXX If possible find a way to make this now global easily...
+     */
+    extern HWND g_hWnd;
 }
 
 #endif // GRAPHICS_WINDOW_H

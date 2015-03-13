@@ -1,3 +1,6 @@
+#ifndef DEMO_CONTEXT_H
+#define DEMO_CONTEXT_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -14,25 +17,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
+#include "HID/HIDContext.h"
 
-namespace alpha
+class DemoContext : public alpha::HIDContext
 {
-    AlphaSystem::AlphaSystem(uint8_t hertz) : m_hertz(hertz)
-    {
-        m_updateFrequency = 1.0f / m_hertz;
-    }
-    AlphaSystem::~AlphaSystem() { }
+public:
+    DemoContext();
+};
 
-    bool AlphaSystem::Update(double currentTime, double elapsedTime)
-    {
-        bool success = true;
-        m_elapsedTime += elapsedTime;
-        if (m_elapsedTime > m_updateFrequency)
-        {
-            success = this->VUpdate(currentTime, m_updateFrequency);
-            m_elapsedTime = m_elapsedTime - m_updateFrequency;
-        }
-        return success;
-    }
-}
+#endif // DEMO_CONTEXT_H

@@ -1,3 +1,4 @@
+#include <functional>
 #include <math.h>
 
 #include "Logic/DemoGameState.h"
@@ -8,8 +9,11 @@
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
 #include "Audio/Sound.h"
+#include "HID/DemoContext.h"
+#include "Toolbox/Logger.h"
 
 DemoGameState::DemoGameState()
+    : m_pInputContext(nullptr)
 { }
 DemoGameState::~DemoGameState() { }
 
@@ -23,14 +27,12 @@ bool DemoGameState::VInitialize()
     auto root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test->Get("root"));
     if (root != nullptr)
     {
-        // set this entities position to (-5, 0, 0)
         root->SetPosition(alpha::Vector3(0, 1, -1));
     }
 
     root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test2->Get("root"));
     if (root != nullptr)
     {
-        // set this entities position to (5, 0, 0)
         root->SetPosition(alpha::Vector3(5, 5, 0));
     }
 
@@ -41,6 +43,10 @@ bool DemoGameState::VInitialize()
         // hit sound is fairly loud, so set the channel low on play
         pSound->SetVolume(0.2f);
     }
+
+    m_pInputContext = new DemoContext();
+    this->SetActiveInputContext(m_pInputContext);
+    this->BindState("STRAFE_LEFT", [this](bool pressed) { this->OnStrafeLeft(pressed); });
 
     return true;
 }
@@ -116,10 +122,27 @@ void DemoGameState::VTransition(std::shared_ptr<AState> nextState)
 
 std::shared_ptr<alpha::AState> DemoGameState::VShutdown()
 {
+    if (m_pInputContext)
+    {
+        delete m_pInputContext;
+    }
+
     // Remove any actors that are no longer needed
     DestroyEntity(m_test->GetId());
     DestroyEntity(m_test2->GetId());
 
     // return the next game state, or nullptr for end of state machine
     return nullptr;
+}
+
+void DemoGameState::OnStrafeLeft(bool pressed)
+{
+    if (pressed)
+    {
+        m_strafingLeft = true;
+    }
+    else
+    {
+        m_strafingLeft = false;
+    }
 }

@@ -14,25 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
+#include "HID/HIDTypes.h"
 
 namespace alpha
 {
-    AlphaSystem::AlphaSystem(uint8_t hertz) : m_hertz(hertz)
-    {
-        m_updateFrequency = 1.0f / m_hertz;
-    }
-    AlphaSystem::~AlphaSystem() { }
+    HIDAction::HIDAction(unsigned short actionRaw, std::string actionName)
+        : raw(actionRaw)
+        , name(actionName)
+    { }
 
-    bool AlphaSystem::Update(double currentTime, double elapsedTime)
-    {
-        bool success = true;
-        m_elapsedTime += elapsedTime;
-        if (m_elapsedTime > m_updateFrequency)
-        {
-            success = this->VUpdate(currentTime, m_updateFrequency);
-            m_elapsedTime = m_elapsedTime - m_updateFrequency;
-        }
-        return success;
-    }
+    MousePosition::MousePosition()
+        : xRelativePos(0)
+        , yRelativePos(0)
+        , xAbsolutePos(0.f)
+        , yAbsolutePos(0.f)
+    { }
 }

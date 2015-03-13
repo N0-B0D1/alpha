@@ -14,25 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "AlphaSystem.h"
+#include "HID/DemoContext.h"
 
-namespace alpha
+DemoContext::DemoContext()
 {
-    AlphaSystem::AlphaSystem(uint8_t hertz) : m_hertz(hertz)
-    {
-        m_updateFrequency = 1.0f / m_hertz;
-    }
-    AlphaSystem::~AlphaSystem() { }
-
-    bool AlphaSystem::Update(double currentTime, double elapsedTime)
-    {
-        bool success = true;
-        m_elapsedTime += elapsedTime;
-        if (m_elapsedTime > m_updateFrequency)
-        {
-            success = this->VUpdate(currentTime, m_updateFrequency);
-            m_elapsedTime = m_elapsedTime - m_updateFrequency;
-        }
-        return success;
-    }
+    // make context mappings for demo
+    MapState("STRAFE_LEFT", { "KB_A", "KB_LEFT" });
+    MapState("STRAFE_RIGHT", { "KB_D", "KB_RIGHT" });
+    MapState("FORWARD", { "KB_W", "KB_UP" });
+    MapState("BACKWARDS", { "KB_S", "KB_DOWN" });
 }
