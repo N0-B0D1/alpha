@@ -30,7 +30,7 @@ namespace alpha
         KA_ENTER = GLFW_KEY_ENTER,
         KA_LEFT_SHIFT = GLFW_KEY_LEFT_SHIFT,
         KA_LEFT_CTRL = GLFW_KEY_LEFT_CONTROL,
-        KA_LEFT_ALT = =GLFW_KEY_LEFT_ALT,
+        KA_LEFT_ALT = GLFW_KEY_LEFT_ALT,
 
         KA_CAPS_LOCK = GLFW_KEY_CAPS_LOCK,
 
@@ -142,16 +142,21 @@ namespace alpha
     /** Mouse Actions, includes each axis as a separate action, and up to 5 buttons. */
     typedef enum
     {
-        MA_X_AXIS,
-        MA_Y_AXIS,
-        MA_1,
-        MA_2,
-        MA_3,
-        MA_4,
-        MA_5,
+        MA_1 = GLFW_MOUSE_BUTTON_1,
+        MA_2 = GLFW_MOUSE_BUTTON_2,
+        MA_3 = GLFW_MOUSE_BUTTON_3,
+        MA_4 = GLFW_MOUSE_BUTTON_4,
+        MA_5 = GLFW_MOUSE_BUTTON_5,
+        MA_6 = GLFW_MOUSE_BUTTON_6,
+        MA_7 = GLFW_MOUSE_BUTTON_7,
+        MA_8 = GLFW_MOUSE_BUTTON_8,
+
         MA_LEFT = MA_1,
         MA_MIDDLE = MA_2,
         MA_RIGHT = MA_3,
+
+        MA_X_AXIS = 10,
+        MA_Y_AXIS = 11,
     } MouseAction;
 }
 

@@ -70,13 +70,13 @@ namespace alpha
         if (m_lastMousePosition.xAbsolutePos != m_mousePosition.xAbsolutePos)
         {
             m_mousePosition.xRelativePos = m_lastMousePosition.xAbsolutePos - m_mousePosition.xAbsolutePos;
-            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MC_XAXIS);
+            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_X_AXIS);
             DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
         }
         if (m_lastMousePosition.yAbsolutePos != m_mousePosition.yAbsolutePos)
         {
             m_mousePosition.yRelativePos = m_lastMousePosition.yAbsolutePos - m_mousePosition.yAbsolutePos;
-            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MC_YAXIS);
+            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_Y_AXIS);
             DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
         }
 
@@ -84,25 +84,32 @@ namespace alpha
         m_lastMousePosition = m_mousePosition;
     }
 
-    void HIDWindowListener::GLFWKeyCallback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mode*/)
+    void HIDWindowListener::GLFWKeyCallback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/)
     {
-        // do cool stuff with key presses!
-        auto pAction = m_pPlatformTranslator->TranslateKeyboardCode(key);
-        if (pAction)
+        if (action != GLFW_REPEAT)
         {
-            LOG("action = ", pAction->name);
-        }
+            // do cool stuff with key presses!
+            auto pAction = m_pPlatformTranslator->TranslateKeyboardCode(key);
+            if (pAction)
+            {
+                this->DispatchHIDActionKeyEvent(HID_KEYBOARD, *pAction, action == GLFW_PRESS);
+            }
 
-        // When a user presses the escape key, we set the WindowShouldClose property to true, 
-        if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(window, GL_TRUE);
+            // When a user presses the escape key, we set the WindowShouldClose property to true, 
+            if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            {
+                glfwSetWindowShouldClose(window, GL_TRUE);
+            }
         }
     }
     
-    void HIDWindowListener::GLFWMouseKeyCallback(GLFWwindow * /*window*/, int button, int action, int mods)
+    void HIDWindowListener::GLFWMouseKeyCallback(GLFWwindow * /*window*/, int button, int action, int /*mods*/)
     {
-        LOG("Mouse Key Input: ", button, action, mods);
+        auto pAction = m_pPlatformTranslator->TranslateMouseCode(button);
+        if (pAction)
+        {
+            this->DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, action == GLFW_PRESS);
+        }
     }
 
     void HIDWindowListener::GLFWMousePositionCallback(GLFWwindow * /*window*/, double xpos, double ypos)
