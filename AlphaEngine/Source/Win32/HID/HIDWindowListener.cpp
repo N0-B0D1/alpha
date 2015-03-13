@@ -225,10 +225,6 @@ namespace alpha
                 rawIndex = rawIndex << 1;
                 ++btnIndex;
             }
-
-            // rawIndex should now be 0x0400
-            // check for mouse wheel data
-
         }
 
         // always store the mouse's most recent relative position
