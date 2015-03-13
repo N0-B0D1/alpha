@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "HID/HIDWindowListener.h"
 #include "HID/HIDPlatformTranslator.h"
+#include "HID/HIDConstants.h"
 #include "Graphics/GraphicsWindow.h"
 #include "Toolbox/Logger.h"
 
@@ -66,13 +67,13 @@ namespace alpha
         if (m_lastMousePosition.xRelativePos != m_mousePosition.xRelativePos || m_lastMousePosition.xAbsolutePos != m_mousePosition.xAbsolutePos)
         {
             // send x-axis action event
-            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MC_XAXIS);
+            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_X_AXIS);
             DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
         }
         if (m_lastMousePosition.yRelativePos != m_mousePosition.yRelativePos || m_lastMousePosition.yAbsolutePos != m_mousePosition.yAbsolutePos)
         {
             // send y-axis action event
-            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MC_YAXIS);
+            HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_Y_AXIS);
             DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
         }
 
@@ -138,7 +139,7 @@ namespace alpha
         {
             // read keyboard input
             bool keyUp = raw->data.keyboard.Flags & RI_KEY_BREAK;
-            unsigned short keyCode = raw->data.keyboard.VKey;
+            unsigned short keyCode = this->ConvertKeyCode(raw->data.keyboard);
             HIDAction * pAction = m_pPlatformTranslator->TranslateKeyboardCode(keyCode);
 
             if (pAction != nullptr)
@@ -154,7 +155,7 @@ namespace alpha
         {
             // read mouse button input
             // for now only read left, middle, and right buttons
-            unsigned short btnIndex = MC_LEFT; // skip x-axis and y-axis codes
+            unsigned short btnIndex = MA_1; // skip x-axis and y-axis codes
             unsigned int rawIndex = RI_MOUSE_BUTTON_1_DOWN;
             while (rawIndex <= RI_MOUSE_BUTTON_5_UP)
             {
@@ -192,6 +193,128 @@ namespace alpha
         // always store the mouse's most recent relative position
         m_mousePosition.xRelativePos = raw->data.mouse.lLastX;
         m_mousePosition.yRelativePos = raw->data.mouse.lLastY;
+    }
+
+    unsigned short HIDWindowListener::ConvertKeyCode(RAWKEYBOARD kbRaw)
+    {
+        UINT vKey = kbRaw.VKey;
+        UINT sCode = kbRaw.MakeCode;
+        UINT flags = kbRaw.Flags;
+
+        if (vKey != 255) // ignore 'fake' keys
+        {
+            if (vKey == VK_SHIFT)
+            {
+                vKey = MapVirtualKey(sCode, MAPVK_VSC_TO_VK_EX);
+            }
+            else if (vKey == VK_NUMLOCK)
+            {
+                sCode = (MapVirtualKey(vKey, MAPVK_VK_TO_VSC) | 0x100);
+            }
+
+            const bool isE0 = ((flags & RI_KEY_E0) != 0);
+            const bool isE1 = ((flags & RI_KEY_E1) != 0);
+
+            if (isE1)
+            {
+                if (vKey == VK_PAUSE)
+                {
+                    sCode = 0x45;
+                }
+                else
+                {
+                    sCode = MapVirtualKey(vKey, MAPVK_VK_TO_VSC);
+                }
+            }
+
+            switch (vKey)
+            {
+                // right-hand CONTROL and ALT have their e0 bit set
+            case VK_CONTROL:
+                if (isE0)
+                    vKey = KA_RIGHT_CTRL; // Keys::RIGHT_CONTROL;
+                else
+                    vKey = KA_LEFT_CTRL; // Keys::LEFT_CONTROL;
+                break;
+
+            case VK_MENU:
+                if (isE0)
+                    vKey = KA_RIGHT_ALT; // Keys::RIGHT_ALT;
+                else
+                    vKey = KA_LEFT_ALT; // Keys::LEFT_ALT;
+                break;
+
+                // NUMPAD ENTER has its e0 bit set
+            case VK_RETURN:
+                if (isE0)
+                    vKey = KA_NUM_ENTER; // Keys::NUMPAD_ENTER;
+                break;
+
+                // the standard INSERT, DELETE, HOME, END, PRIOR and NEXT keys will always have their e0 bit set, but the
+                // corresponding keys on the NUMPAD will not.
+            case VK_INSERT:
+                if (!isE0)
+                    vKey = KA_NUM_0; // Keys::NUMPAD_0;
+                break;
+
+            case VK_DELETE:
+                if (!isE0)
+                    vKey = KA_NUM_DECIMAL; // Keys::NUMPAD_DECIMAL;
+                break;
+
+            case VK_HOME:
+                if (!isE0)
+                    vKey = KA_NUM_7; // Keys::NUMPAD_7;
+                break;
+
+            case VK_END:
+                if (!isE0)
+                    vKey = KA_NUM_1; // Keys::NUMPAD_1;
+                break;
+
+            case VK_PRIOR:
+                if (!isE0)
+                    vKey = KA_NUM_9; // Keys::NUMPAD_9;
+                break;
+
+            case VK_NEXT:
+                if (!isE0)
+                    vKey = KA_NUM_3; // Keys::NUMPAD_3;
+                break;
+
+                // the standard arrow keys will always have their e0 bit set, but the
+                // corresponding keys on the NUMPAD will not.
+            case VK_LEFT:
+                if (!isE0)
+                    vKey = KA_NUM_4; // Keys::NUMPAD_4;
+                break;
+
+            case VK_RIGHT:
+                if (!isE0)
+                    vKey = KA_NUM_6; // Keys::NUMPAD_6;
+                break;
+
+            case VK_UP:
+                if (!isE0)
+                    vKey = KA_NUM_8; // Keys::NUMPAD_8;
+                break;
+
+            case VK_DOWN:
+                if (!isE0)
+                    vKey = KA_NUM_2; // Keys::NUMPAD_2;
+                break;
+
+                // NUMPAD 5 doesn't have its e0 bit set
+            case VK_CLEAR:
+                if (!isE0)
+                    vKey = KA_NUM_5; // Keys::NUMPAD_5;
+                break;
+            }
+
+            return (unsigned short)vKey;
+        }
+
+        return 0;
     }
 
     void HIDWindowListener::RegisterRawHIDs()

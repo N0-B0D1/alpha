@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <Windows.h>
-
 #include "HID/HIDPlatformTranslator.h"
 #include "HID/HIDTypes.h"
 
@@ -26,125 +24,129 @@ namespace alpha
         // add some default states, ranges, and actions
 
         // control keys
-        MapRawToCode(HID_KEYBOARD, 8, "KB_BACKSPACE");
-        MapRawToCode(HID_KEYBOARD, 9, "KB_TAB");
-        MapRawToCode(HID_KEYBOARD, 13, "KB_ENTER");
-        MapRawToCode(HID_KEYBOARD, 16, "KB_SHIFT");
-        MapRawToCode(HID_KEYBOARD, 17, "KB_CTRL");
-        MapRawToCode(HID_KEYBOARD, 18, "KB_ALT");
-        MapRawToCode(HID_KEYBOARD, 20, "KB_CAPLOCK");
+        CreateHIDAction(HID_KEYBOARD, KA_BACKSPACE, "KA_BACKSPACE");
+        CreateHIDAction(HID_KEYBOARD, KA_TAB, "KA_TAB");
+        CreateHIDAction(HID_KEYBOARD, KA_ENTER, "KA_ENTER");
+        CreateHIDAction(HID_KEYBOARD, KA_LEFT_SHIFT, "KA_LEFT_SHIFT");
+        CreateHIDAction(HID_KEYBOARD, KA_LEFT_CTRL, "KA_LEFT_CTRL");
+        CreateHIDAction(HID_KEYBOARD, KA_LEFT_ALT, "KA_LEFT_ALT");
+        CreateHIDAction(HID_KEYBOARD, KA_RIGHT_SHIFT, "KA_RIGHT_SHIFT");
+        CreateHIDAction(HID_KEYBOARD, KA_RIGHT_CTRL, "KA_RIGHT_CTRL");
+        CreateHIDAction(HID_KEYBOARD, KA_RIGHT_ALT, "KA_RIGHT_ALT");
+        CreateHIDAction(HID_KEYBOARD, KA_CAPS_LOCK, "KA_CAPS_LOCK");
+        CreateHIDAction(HID_KEYBOARD, KA_LEFT_SUPER, "KA_LEFT_SUPER"); // windows key
 
         // escape
-        MapRawToCode(HID_KEYBOARD, 27, "KB_ESCAPE");
+        CreateHIDAction(HID_KEYBOARD, KA_ESCAPE, "KA_ESCAPE");
 
         // arrow keys
-        MapRawToCode(HID_KEYBOARD, 37, "KB_LEFT");
-        MapRawToCode(HID_KEYBOARD, 38, "KB_UP");
-        MapRawToCode(HID_KEYBOARD, 39, "KB_RIGHT");
-        MapRawToCode(HID_KEYBOARD, 40, "KB_DOWN");
+        CreateHIDAction(HID_KEYBOARD, KA_LEFT, "KA_LEFT");
+        CreateHIDAction(HID_KEYBOARD, KA_UP, "KA_UP");
+        CreateHIDAction(HID_KEYBOARD, KA_RIGHT, "KA_RIGHT");
+        CreateHIDAction(HID_KEYBOARD, KA_DOWN, "KA_DOWN");
 
         // word processor modifiers
-        MapRawToCode(HID_KEYBOARD, 32, "KB_SPACE");
-        MapRawToCode(HID_KEYBOARD, 33, "KB_PAGEUP");
-        MapRawToCode(HID_KEYBOARD, 34, "KB_PAGEDOWN");
-        MapRawToCode(HID_KEYBOARD, 35, "KB_END");
-        MapRawToCode(HID_KEYBOARD, 36, "KB_HOME");
-        MapRawToCode(HID_KEYBOARD, 45, "KB_INSERT");
-        MapRawToCode(HID_KEYBOARD, 46, "KB_DELETE");
+        CreateHIDAction(HID_KEYBOARD, KA_SPACE, "KA_SPACE");
+        CreateHIDAction(HID_KEYBOARD, KA_INSERT, "KA_INSERT");
+        CreateHIDAction(HID_KEYBOARD, KA_DELETE, "KA_DELETE");
+        CreateHIDAction(HID_KEYBOARD, KA_HOME, "KA_HOME");
+        CreateHIDAction(HID_KEYBOARD, KA_END, "KA_END");
+        CreateHIDAction(HID_KEYBOARD, KA_PAGE_UP, "KA_PAGE_UP");
+        CreateHIDAction(HID_KEYBOARD, KA_PAGE_DOWN, "KA_PAGE_DOWN");
 
         // number row
-        MapRawToCode(HID_KEYBOARD, 48, "KB_0");
-        MapRawToCode(HID_KEYBOARD, 49, "KB_1");
-        MapRawToCode(HID_KEYBOARD, 50, "KB_2");
-        MapRawToCode(HID_KEYBOARD, 51, "KB_3");
-        MapRawToCode(HID_KEYBOARD, 52, "KB_4");
-        MapRawToCode(HID_KEYBOARD, 53, "KB_5");
-        MapRawToCode(HID_KEYBOARD, 54, "KB_6");
-        MapRawToCode(HID_KEYBOARD, 55, "KB_7");
-        MapRawToCode(HID_KEYBOARD, 56, "KB_8");
-        MapRawToCode(HID_KEYBOARD, 57, "KB_9");
+        CreateHIDAction(HID_KEYBOARD, KA_0, "KA_0");
+        CreateHIDAction(HID_KEYBOARD, KA_1, "KA_1");
+        CreateHIDAction(HID_KEYBOARD, KA_2, "KA_2");
+        CreateHIDAction(HID_KEYBOARD, KA_3, "KA_3");
+        CreateHIDAction(HID_KEYBOARD, KA_4, "KA_4");
+        CreateHIDAction(HID_KEYBOARD, KA_5, "KA_5");
+        CreateHIDAction(HID_KEYBOARD, KA_6, "KA_6");
+        CreateHIDAction(HID_KEYBOARD, KA_7, "KA_7");
+        CreateHIDAction(HID_KEYBOARD, KA_8, "KA_8");
+        CreateHIDAction(HID_KEYBOARD, KA_9, "KA_9");
 
         // alphabet keys
-        MapRawToCode(HID_KEYBOARD, 65, "KB_A");
-        MapRawToCode(HID_KEYBOARD, 66, "KB_B");
-        MapRawToCode(HID_KEYBOARD, 67, "KB_C");
-        MapRawToCode(HID_KEYBOARD, 68, "KB_D");
-        MapRawToCode(HID_KEYBOARD, 69, "KB_E");
-        MapRawToCode(HID_KEYBOARD, 70, "KB_F");
-        MapRawToCode(HID_KEYBOARD, 71, "KB_G");
-        MapRawToCode(HID_KEYBOARD, 72, "KB_H");
-        MapRawToCode(HID_KEYBOARD, 73, "KB_I");
-        MapRawToCode(HID_KEYBOARD, 74, "KB_J");
-        MapRawToCode(HID_KEYBOARD, 75, "KB_K");
-        MapRawToCode(HID_KEYBOARD, 76, "KB_L");
-        MapRawToCode(HID_KEYBOARD, 77, "KB_M");
-        MapRawToCode(HID_KEYBOARD, 78, "KB_N");
-        MapRawToCode(HID_KEYBOARD, 79, "KB_O");
-        MapRawToCode(HID_KEYBOARD, 80, "KB_P");
-        MapRawToCode(HID_KEYBOARD, 81, "KB_Q");
-        MapRawToCode(HID_KEYBOARD, 82, "KB_R");
-        MapRawToCode(HID_KEYBOARD, 83, "KB_S");
-        MapRawToCode(HID_KEYBOARD, 84, "KB_T");
-        MapRawToCode(HID_KEYBOARD, 85, "KB_U");
-        MapRawToCode(HID_KEYBOARD, 86, "KB_V");
-        MapRawToCode(HID_KEYBOARD, 87, "KB_W");
-        MapRawToCode(HID_KEYBOARD, 88, "KB_X");
-        MapRawToCode(HID_KEYBOARD, 89, "KB_Y");
-        MapRawToCode(HID_KEYBOARD, 90, "KB_Z");
+        CreateHIDAction(HID_KEYBOARD, KA_A, "KA_A");
+        CreateHIDAction(HID_KEYBOARD, KA_B, "KA_B");
+        CreateHIDAction(HID_KEYBOARD, KA_C, "KA_C");
+        CreateHIDAction(HID_KEYBOARD, KA_D, "KA_D");
+        CreateHIDAction(HID_KEYBOARD, KA_E, "KA_E");
+        CreateHIDAction(HID_KEYBOARD, KA_F, "KA_F");
+        CreateHIDAction(HID_KEYBOARD, KA_G, "KA_G");
+        CreateHIDAction(HID_KEYBOARD, KA_H, "KA_H");
+        CreateHIDAction(HID_KEYBOARD, KA_I, "KA_I");
+        CreateHIDAction(HID_KEYBOARD, KA_J, "KA_J");
+        CreateHIDAction(HID_KEYBOARD, KA_K, "KA_K");
+        CreateHIDAction(HID_KEYBOARD, KA_L, "KA_L");
+        CreateHIDAction(HID_KEYBOARD, KA_M, "KA_M");
+        CreateHIDAction(HID_KEYBOARD, KA_N, "KA_N");
+        CreateHIDAction(HID_KEYBOARD, KA_O, "KA_O");
+        CreateHIDAction(HID_KEYBOARD, KA_P, "KA_P");
+        CreateHIDAction(HID_KEYBOARD, KA_Q, "KA_Q");
+        CreateHIDAction(HID_KEYBOARD, KA_R, "KA_R");
+        CreateHIDAction(HID_KEYBOARD, KA_S, "KA_S");
+        CreateHIDAction(HID_KEYBOARD, KA_T, "KA_T");
+        CreateHIDAction(HID_KEYBOARD, KA_U, "KA_U");
+        CreateHIDAction(HID_KEYBOARD, KA_V, "KA_V");
+        CreateHIDAction(HID_KEYBOARD, KA_W, "KA_W");
+        CreateHIDAction(HID_KEYBOARD, KA_X, "KA_X");
+        CreateHIDAction(HID_KEYBOARD, KA_Y, "KA_Y");
+        CreateHIDAction(HID_KEYBOARD, KA_Z, "KA_Z");
 
         // function keys
-        MapRawToCode(HID_KEYBOARD, 112, "KB_F1");
-        MapRawToCode(HID_KEYBOARD, 113, "KB_F2");
-        MapRawToCode(HID_KEYBOARD, 114, "KB_F3");
-        MapRawToCode(HID_KEYBOARD, 115, "KB_F4");
-        MapRawToCode(HID_KEYBOARD, 116, "KB_F5");
-        MapRawToCode(HID_KEYBOARD, 117, "KB_F6");
-        MapRawToCode(HID_KEYBOARD, 118, "KB_F7");
-        MapRawToCode(HID_KEYBOARD, 119, "KB_F8");
-        MapRawToCode(HID_KEYBOARD, 120, "KB_F9");
-        MapRawToCode(HID_KEYBOARD, 121, "KB_F10");
-        MapRawToCode(HID_KEYBOARD, 122, "KB_F11");
-        MapRawToCode(HID_KEYBOARD, 123, "KB_F12");
+        CreateHIDAction(HID_KEYBOARD, KA_F1, "KA_F1");
+        CreateHIDAction(HID_KEYBOARD, KA_F2, "KA_F2");
+        CreateHIDAction(HID_KEYBOARD, KA_F3, "KA_F3");
+        CreateHIDAction(HID_KEYBOARD, KA_F4, "KA_F4");
+        CreateHIDAction(HID_KEYBOARD, KA_F5, "KA_F5");
+        CreateHIDAction(HID_KEYBOARD, KA_F6, "KA_F6");
+        CreateHIDAction(HID_KEYBOARD, KA_F7, "KA_F7");
+        CreateHIDAction(HID_KEYBOARD, KA_F8, "KA_F8");
+        CreateHIDAction(HID_KEYBOARD, KA_F9, "KA_F9");
+        CreateHIDAction(HID_KEYBOARD, KA_F10, "KA_F10");
+        CreateHIDAction(HID_KEYBOARD, KA_F11, "KA_F11");
+        CreateHIDAction(HID_KEYBOARD, KA_F12, "KA_F12");
 
         // special characters
-        MapRawToCode(HID_KEYBOARD, 186, "KB_SEMICOLON");
-        MapRawToCode(HID_KEYBOARD, 187, "KB_EQUALS");
-        MapRawToCode(HID_KEYBOARD, 188, "KB_COMMA");
-        MapRawToCode(HID_KEYBOARD, 189, "KB_MINUS");
-        MapRawToCode(HID_KEYBOARD, 190, "KB_PERIOD");
-        MapRawToCode(HID_KEYBOARD, 191, "KB_FORWARDSLASH");
-        MapRawToCode(HID_KEYBOARD, 192, "KB_TICK");
-        MapRawToCode(HID_KEYBOARD, 219, "KB_LEFTBRACKET");
-        MapRawToCode(HID_KEYBOARD, 220, "KB_BACKSLASH");
-        MapRawToCode(HID_KEYBOARD, 221, "KB_RIGHTBRACKET");
-        MapRawToCode(HID_KEYBOARD, 222, "KB_APOSTRAPHE");
+        CreateHIDAction(HID_KEYBOARD, KA_SEMICOLON, "KA_SEMICOLON");
+        CreateHIDAction(HID_KEYBOARD, KA_EQUAL, "KA_EQUAL");
+        CreateHIDAction(HID_KEYBOARD, KA_COMMA, "KA_COMMA");
+        CreateHIDAction(HID_KEYBOARD, KA_MINUS, "KA_MINUS");
+        CreateHIDAction(HID_KEYBOARD, KA_PERIOD, "KA_PERIOD");
+        CreateHIDAction(HID_KEYBOARD, KA_SLASH, "KA_SLASH");
+        CreateHIDAction(HID_KEYBOARD, KA_GRAVE_ACCENT, "KA_GRAVE_ACCENT");
+        CreateHIDAction(HID_KEYBOARD, KA_LEFT_BRACKET, "KA_LEFT_BRACKET");
+        CreateHIDAction(HID_KEYBOARD, KA_BACKSLASH, "KA_BACKSLASH");
+        CreateHIDAction(HID_KEYBOARD, KA_RIGHT_BRACKET, "KA_RIGHT_BRACKET");
+        CreateHIDAction(HID_KEYBOARD, KA_APOSTROPHE, "KA_APOSTROPHE");
 
         // numpad
-        MapRawToCode(HID_KEYBOARD, 13, "KB_NUMPLUS");
-        MapRawToCode(HID_KEYBOARD, 96, "KB_NUM0");
-        MapRawToCode(HID_KEYBOARD, 97, "KB_NUM1");
-        MapRawToCode(HID_KEYBOARD, 98, "KB_NUM2");
-        MapRawToCode(HID_KEYBOARD, 99, "KB_NUM3");
-        MapRawToCode(HID_KEYBOARD, 100, "KB_NUM4");
-        MapRawToCode(HID_KEYBOARD, 101, "KB_NUM5");
-        MapRawToCode(HID_KEYBOARD, 102, "KB_NUM6");
-        MapRawToCode(HID_KEYBOARD, 103, "KB_NUM7");
-        MapRawToCode(HID_KEYBOARD, 104, "KB_NUM8");
-        MapRawToCode(HID_KEYBOARD, 105, "KB_NUM9");
-        MapRawToCode(HID_KEYBOARD, 106, "KB_NUMMULTIPLY");
-        MapRawToCode(HID_KEYBOARD, 107, "KB_NUMENTER");
-        MapRawToCode(HID_KEYBOARD, 109, "KB_NUMMINUS");
-        MapRawToCode(HID_KEYBOARD, 110, "KB_NUMPERIOD");
-        MapRawToCode(HID_KEYBOARD, 111, "KB_NUMDIVIDE");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_0, "KB_NUM0");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_1, "KA_NUM_1");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_2, "KA_NUM_2");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_3, "KA_NUM_3");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_4, "KA_NUM_4");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_5, "KA_NUM_5");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_6, "KA_NUM_6");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_7, "KA_NUM_7");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_8, "KA_NUM_8");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_9, "KA_NUM_9");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_DECIMAL, "KA_NUM_DECIMAL");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_ENTER, "KA_NUM_ENTER");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_ADD, "KA_NUM_ADD");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_SUBTRACT, "KA_NUM_SUBTRACT");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_MULTIPLY, "KA_NUM_MULTIPLY");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_DIVIDE, "KA_NUM_DIVIDE");
 
         // mouse input mapping
-        MapRawToCode(HID_MOUSE, MC_XAXIS, "MC_XAXIS");
-        MapRawToCode(HID_MOUSE, MC_YAXIS, "MC_YAXIS");
-        MapRawToCode(HID_MOUSE, MC_LEFT, "MC_LEFT");
-        MapRawToCode(HID_MOUSE, MC_MIDDLE, "MC_MIDDLE");
-        MapRawToCode(HID_MOUSE, MC_RIGHT, "MC_RIGHT");
-        MapRawToCode(HID_MOUSE, MC_4, "MC_4");
-        MapRawToCode(HID_MOUSE, MC_5, "MC_5");
+        CreateHIDAction(HID_MOUSE, MA_X_AXIS, "MA_X_AXIS");
+        CreateHIDAction(HID_MOUSE, MA_Y_AXIS, "MA_Y_AXIS");
+        CreateHIDAction(HID_MOUSE, MA_1, "MA_1"); // MA_LEFT
+        CreateHIDAction(HID_MOUSE, MA_2, "MA_2"); // MA_MIDDLE
+        CreateHIDAction(HID_MOUSE, MA_3, "MA_3"); // MA_RIGHT
+        CreateHIDAction(HID_MOUSE, MA_4, "MA_4");
+        CreateHIDAction(HID_MOUSE, MA_5, "MA_5");
     }
 
     HIDPlatformTranslator::~HIDPlatformTranslator()
@@ -179,8 +181,8 @@ namespace alpha
         return nullptr;
     }
 
-    void HIDPlatformTranslator::MapRawToCode(HID device, unsigned short raw, const std::string & code)
+    void HIDPlatformTranslator::CreateHIDAction(HID device, unsigned short code, const std::string & name)
     {
-        m_actions[device][raw] = new HIDAction(raw, code);
+        m_actions[device][code] = new HIDAction(code, name);
     }
 }

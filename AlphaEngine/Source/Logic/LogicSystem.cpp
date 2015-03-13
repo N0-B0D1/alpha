@@ -23,6 +23,7 @@ limitations under the License.
 #include "Events/EventData_HIDKeyAction.h"
 #include "FSA/StateMachine.h"
 #include "HID/HIDContextManager.h"
+#include "HID/HIDConstants.h"
 #include "Audio/AudioSystem.h"
 #include "Audio/Sound.h"
 
@@ -147,8 +148,6 @@ namespace alpha
         // read any published EventData_HIDKeyAction events that may have occured since the last update.
         while (std::shared_ptr<const EventData_HIDKeyAction> data = m_subHIDKeyAction->GetNextEvent())
         {
-            //LOG("Graphics system received EntityCreated event");
-            //m_pSceneManager->Add(data->GetEntity());
             bool pressed = data->GetPressed();
             HIDAction action = data->GetAction();
             HID device = data->GetDevice();
@@ -169,8 +168,8 @@ namespace alpha
             case HID_MOUSE:
                 switch (action.raw)
                 {
-                case MC_XAXIS:
-                case MC_YAXIS:
+                case MA_X_AXIS:
+                case MA_Y_AXIS:
                     m_pHIDContextManager->MouseMoved(&action, data->GetRelative(), data->GetAbsolute());
                     break;
                 default:
@@ -185,8 +184,6 @@ namespace alpha
                     break;
                 }
 
-                break;
-            default:
                 break;
             }
         }

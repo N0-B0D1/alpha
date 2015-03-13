@@ -27,14 +27,12 @@ bool DemoGameState::VInitialize()
     auto root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test->Get("root"));
     if (root != nullptr)
     {
-        // set this entities position to (-5, 0, 0)
         root->SetPosition(alpha::Vector3(0, 1, -1));
     }
 
     root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test2->Get("root"));
     if (root != nullptr)
     {
-        // set this entities position to (5, 0, 0)
         root->SetPosition(alpha::Vector3(5, 5, 0));
     }
 

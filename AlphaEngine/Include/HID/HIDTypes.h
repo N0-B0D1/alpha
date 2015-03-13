@@ -40,18 +40,6 @@ namespace alpha
         HID_MOUSE,
     } HID;
 
-    /** Define simplified mouse actions */
-    typedef enum MouseCode
-    {
-        MC_XAXIS,
-        MC_YAXIS,
-        MC_LEFT,
-        MC_RIGHT,
-        MC_MIDDLE,
-        MC_4,
-        MC_5,
-    } MouseCode;
-
     /** POD class allows tracking of mouse position at a given point in time. */
     struct MousePosition
     {

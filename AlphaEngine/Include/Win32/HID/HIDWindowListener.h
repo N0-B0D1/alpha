@@ -48,6 +48,8 @@ namespace alpha
 
         /** Helper function to handle WM_INPUT message. */
         void WMInputHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+        /** Convert raw keyboard key codes as needed. */
+        unsigned short ConvertKeyCode(RAWKEYBOARD kbRaw);
 
         /** Register raw input devices, so we can query their state in our WndProc */
         void RegisterRawHIDs();

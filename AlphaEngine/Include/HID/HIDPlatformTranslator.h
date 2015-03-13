@@ -21,6 +21,7 @@ limitations under the License.
 #include <map>
 
 #include "HID/HIDTypes.h"
+#include "HID/HIDConstants.h"
 
 namespace alpha
 {
@@ -39,7 +40,7 @@ namespace alpha
     private:
         HIDAction * TranslateCode(const HID & device, const unsigned short & code);
         /** Creates a maping of a raw input to a engine code name. */
-        void MapRawToCode(HID device, unsigned short raw, const std::string & code);
+        void CreateHIDAction(HID device, unsigned short code, const std::string & name);
 
         /** Maps platform specific codes to generic engine inputs. */
         std::map<unsigned short, HIDAction *> m_actions[2];
