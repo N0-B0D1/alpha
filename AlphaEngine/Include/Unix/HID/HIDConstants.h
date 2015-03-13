@@ -155,6 +155,11 @@ namespace alpha
         MA_MIDDLE = MA_2,
         MA_RIGHT = MA_3,
 
+        MA_WHEEL_FORWARD = 15,
+        MA_WHEEL_BACK = 16,
+        MA_WHEEL_LEFT = 17,
+        MA_WHEEL_RIGHT = 18,
+
         MA_X_AXIS = 10,
         MA_Y_AXIS = 11,
     } MouseAction;

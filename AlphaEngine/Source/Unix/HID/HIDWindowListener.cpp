@@ -35,6 +35,13 @@ namespace alpha
             g_pWindowListener->GLFWMouseKeyCallback(window, button, action, mods);
         }
     }
+    static void StaticGLFWMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
+    {
+        if (g_pWindowListener != nullptr)
+        {
+            g_pWindowListener->GLFWMouseScrollCallback(window, xoffset, yoffset);
+        }
+    }
     static void StaticGLFWMousePositionCallback(GLFWwindow * window, double xpos, double ypos)
     {
         if (g_pWindowListener != nullptr)
@@ -52,6 +59,7 @@ namespace alpha
         // hook up GLFW listeners callbacks
         glfwSetKeyCallback(g_pWindow, StaticGLFWKeyCallback);
         glfwSetMouseButtonCallback(g_pWindow, StaticGLFWMouseKeyCallback);
+        glfwSetScrollCallback(g_pWindow, StaticGLFWMouseScrollCallback);
         glfwSetCursorPosCallback(g_pWindow, StaticGLFWMousePositionCallback);
 
         // set platform context, to translate to engine input codes
@@ -103,12 +111,45 @@ namespace alpha
         }
     }
     
-    void HIDWindowListener::GLFWMouseKeyCallback(GLFWwindow * /*window*/, int button, int action, int /*mods*/)
+    void HIDWindowListener::GLFWMouseKeyCallback(GLFWwindow * /*window*/, int button, int action, int mods)
     {
         auto pAction = m_pPlatformTranslator->TranslateMouseCode(button);
         if (pAction)
         {
             this->DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, action == GLFW_PRESS);
+        }
+        else
+        {
+            LOG_WARN("Unknown mouse key click: ", button, ", ", action, ", ", mods);
+        }
+    }
+
+    void HIDWindowListener::GLFWMouseScrollCallback(GLFWwindow * /*window*/, double xoffset, double yoffset)
+    {
+        if (yoffset > 0)
+        {
+            // forward
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_FORWARD);
+            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, yoffset, 120);
+        }
+        else
+        {
+            // back scroll
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_BACK);
+            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, yoffset, -120);
+        }
+
+        if (xoffset > 0)
+        {
+            // left
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_LEFT);
+            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, true);
+        }
+        else
+        {
+            // right
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_RIGHT);
+            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, true);
         }
     }
 
