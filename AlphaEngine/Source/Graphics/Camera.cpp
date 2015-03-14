@@ -36,7 +36,7 @@ namespace alpha
     }
     Camera::~Camera() { }
 
-    void Camera::Update(short width, short height)
+    void Camera::Update(float width, float height)
     {
         if (auto pCameraComponent = m_pCameraComponent.lock())
         {

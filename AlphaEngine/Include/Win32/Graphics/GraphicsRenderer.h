@@ -30,6 +30,7 @@ namespace alpha
     class GraphicsWindow;
     class RenderData;
     class Asset;
+    class Camera;
 
     class GraphicsRenderer
     {
@@ -42,7 +43,7 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render(std::vector<RenderData *> renderables);
+        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderData *> renderables);
 
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
 

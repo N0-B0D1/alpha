@@ -15,6 +15,10 @@
 
 DemoGameState::DemoGameState()
     : m_pInputContext(nullptr)
+    , m_strafeLeft(false)
+    , m_strafeRight(false)
+    , m_moveForward(false)
+    , m_moveBack(false)
 { }
 DemoGameState::~DemoGameState() { }
 
@@ -59,6 +63,8 @@ bool DemoGameState::VInitialize()
     this->SetActiveInputContext(m_pInputContext);
     this->BindState("STRAFE_LEFT", [this](bool pressed) { this->OnStrafeLeft(pressed); });
     this->BindState("STRAFE_RIGHT", [this](bool pressed) { this->OnStrafeRight(pressed); });
+    this->BindState("MOVE_FORWARD", [this](bool pressed) { this->OnMoveForward(pressed); });
+    this->BindState("MOVE_BACK", [this](bool pressed) { this->OnMoveBack(pressed); });
 
     return true;
 }
@@ -124,29 +130,38 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
     }
 
     // update camera position based on user input
-    auto camera = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
-    if (camera)
+    if (m_strafeLeft || m_strafeRight || m_moveForward || m_moveBack)
     {
-        alpha::Vector3 direction;
-
-        if (m_strafeLeft)
+        auto camera = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
+        if (camera)
         {
-            // move in negative x direction
-            direction.x -= 1;
-        }
+            alpha::Vector3 direction = camera->GetPosition();
+            float speed = 1;
+            float distance = (speed * static_cast<float>(elapsedTime)); // distance = speed x time
 
-        if (m_strafeRight)
-        {
-            // move in positive x direction
-            direction.x += 1;
-        }
+            // For each button pressed add distance in that direction.
+            // they will offset and zero out if both opposing buttons are pressed.
+            if (m_strafeLeft)
+            {
+                // move in negative x direction
+                direction.x -= distance;
+            }
+            if (m_strafeRight)
+            {
+                // move in positive x direction
+                direction.x += distance;
+            }
+            if (m_moveForward)
+            {
+                direction.z -= distance;
+            }
+            if (m_moveBack)
+            {
+                direction.z += distance;
+            }
 
-        // combine left and right
-        // if both are set then they should zero out,
-        // and no movement is made
-        //
-        // distance = speed x time
-        //float speed = 100.f;
+            camera->SetPosition(direction);
+        }
     }
 
     return true;
@@ -181,4 +196,14 @@ void DemoGameState::OnStrafeLeft(bool pressed)
 void DemoGameState::OnStrafeRight(bool pressed)
 {
     m_strafeRight = pressed;
+}
+
+void DemoGameState::OnMoveForward(bool pressed)
+{
+    m_moveForward = pressed;
+}
+
+void DemoGameState::OnMoveBack(bool pressed)
+{
+    m_moveBack = pressed;
 }

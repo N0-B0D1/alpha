@@ -26,6 +26,7 @@ limitations under the License.
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/GraphicsWindow.h"
 #include "Graphics/RenderData.h"
+#include "Graphics/Camera.h"
 #include "Math/Matrix.h"
 #include "Math/Matrix_Conversions.h"
 #include "Math/Vector3.h"
@@ -51,18 +52,11 @@ namespace alpha
     ID3D11Texture2D*        m_pDepthStencil = nullptr;
     ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
 
-    DirectX::XMMATRIX       m_World;
-    DirectX::XMMATRIX       m_View;
-    DirectX::XMMATRIX       m_Projection;
-
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
     bool GraphicsRenderer::Initialize()
     {
-        /** TODO pass in hInstance and nCmdShow options */
-        //m_hInstance = GetModuleHandle(NULL);
-        //if (FAILED(this->InitializeWindow()))
         m_pWindow = new GraphicsWindow();
         if (!m_pWindow->Initialize())
         {
@@ -98,25 +92,10 @@ namespace alpha
         return m_pWindow->Update(currentTime, elapsedTime);
     }
 
-    void GraphicsRenderer::Render(std::vector<RenderData *> renderables)
+    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderData *> renderables)
     {
         // 1. pre-render
         this->PreRender(renderables);
-
-        // Update our time
-        static float t = 0.0f;
-        if (m_driverType == D3D_DRIVER_TYPE_REFERENCE)
-        {
-            t += (float)DirectX::XM_PI * 0.0125f;
-        }
-        else
-        {
-            static ULONGLONG timeStart = 0;
-            ULONGLONG timeCur = GetTickCount64();
-            if (timeStart == 0)
-                timeStart = timeCur;
-            t = (timeCur - timeStart) / 1000.0f;
-        }
 
         // Setup our lighting parameters
         Vector4 vLightDirs[2] =
@@ -153,8 +132,8 @@ namespace alpha
             // update constant buffer
             ConstantBuffer cb;
             cb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(rd->m_world));
-            cb.mView = DirectX::XMMatrixTranspose(m_View);
-            cb.mProjection = DirectX::XMMatrixTranspose(m_Projection);
+            cb.mView = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetView()));
+            cb.mProjection = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetProjection()));
             cb.vLightDir[0] = vLightDirs[0];
             cb.vLightDir[1] = vLightDirs[1];
             cb.vLightColor[0] = vLightColors[0];
@@ -171,75 +150,6 @@ namespace alpha
 
             m_pImmediateContext->DrawIndexed(rd->m_indices.size(), 0, 0);
         }
-
-        /*
-        //
-        // Animate the cube
-        //
-        m_World = DirectX::XMMatrixRotationY(t);
-
-        // Setup our lighting parameters
-        Vector4 vLightDirs[2] =
-        {
-            Vector4(-0.577f, 0.577f, -0.577f, 1.0f),
-            Vector4(0.0f, 0.0f, -1.0f, 1.0f),
-        };
-        Vector4 vLightColors[2] =
-        {
-            Vector4(0.5f, 0.5f, 0.5f, 1.0f),
-            Vector4(0.5f, 0.0f, 0.0f, 1.0f)
-        };
-
-        // Rotate the second light around the origin
-        DirectX::XMMATRIX mRotate = DirectX::XMMatrixRotationY(-2.0f * t);
-        DirectX::XMVECTOR vLightDir = DirectX::XMLoadFloat4(&vLightDirs[1]);
-        vLightDir = DirectX::XMVector3Transform(vLightDir, mRotate);
-        DirectX::XMStoreFloat4(&vLightDirs[1], vLightDir);
-
-        // clear ... zap!
-        m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
-        m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-        // update variables
-        ConstantBuffer cb;
-        cb.mWorld = DirectX::XMMatrixTranspose(m_World);
-        cb.mView = DirectX::XMMatrixTranspose(m_View);
-        cb.mProjection = DirectX::XMMatrixTranspose(m_Projection);
-        cb.vLightDir[0] = vLightDirs[0];
-        cb.vLightDir[1] = vLightDirs[1];
-        cb.vLightColor[0] = vLightColors[0];
-        cb.vLightColor[1] = vLightColors[1];
-        cb.vOutputColor = Vector4(0, 0, 0, 0);
-        m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-
-        // already added the triangle vertex buffer in init
-        // now render it
-        m_pImmediateContext->VSSetShader(m_pVertexShader, nullptr, 0);
-        m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
-
-        m_pImmediateContext->PSSetShader(m_pPixelShader, nullptr, 0);
-        m_pImmediateContext->PSSetConstantBuffers(0, 1, &m_pConstantBuffer);
-
-        m_pImmediateContext->DrawIndexed(36, 0, 0);
-
-        //
-        // Render each light
-        //
-        for (int m = 0; m < 2; m++)
-        {
-            XMMATRIX mLight = XMMatrixTranslationFromVector(5.0f * XMLoadFloat4(&vLightDirs[m]));
-            XMMATRIX mLightScale = XMMatrixScaling(0.2f, 0.2f, 0.2f);
-            mLight = mLightScale * mLight;
-
-            // Update the world variable to reflect the current light
-            cb.mWorld = XMMatrixTranspose(mLight);
-            cb.vOutputColor = vLightColors[m];
-            m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-
-            m_pImmediateContext->PSSetShader(m_pPixelShaderSolid, nullptr, 0);
-            m_pImmediateContext->DrawIndexed(36, 0, 0);
-        }
-        */
 
         // swap buffer that we just drew to.
         m_pSwapChain->Present(0, 0);
@@ -439,6 +349,7 @@ namespace alpha
         m_pImmediateContext->RSSetViewports(1, &vp);
 
         // Initialize the view matrix
+        /*
         XMVECTOR Eye = XMVectorSet(0.0f, 4.0f, -20.0f, 0.0f);
         XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
         XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -446,6 +357,7 @@ namespace alpha
 
         // Initialize the projection matrix
         m_Projection = XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
+        */
 
         return S_OK;
     }

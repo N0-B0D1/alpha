@@ -42,6 +42,9 @@ namespace alpha
         Vector3 & operator*=(const Vector3 & right);
         Vector3 & operator*=(float right);
         Vector3 & operator/=(float right);
+
+        /** Interpolate between two points in space with the given time slice */
+        static Vector3 Lerp(const Vector3 & start, const Vector3 & end, float t);
     };
 
     Vector3 operator+(const Vector3 & left, const Vector3 & right);

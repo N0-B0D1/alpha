@@ -39,7 +39,7 @@ namespace alpha
         virtual ~Camera();
 
         /** Update the camera each frame, expects the current screen width and height as arguments */
-        void Update(short width, short height);
+        void Update(float width, float height);
 
         /** Set the camera component that will drive this camera. */
         void SetCameraComponent(std::weak_ptr<CameraComponent> pCameraComponent);

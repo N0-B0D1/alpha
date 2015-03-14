@@ -20,7 +20,9 @@ limitations under the License.
 
 namespace alpha
 {
-    Vector3::Vector3() { }
+    Vector3::Vector3()
+        : x(0.f), y(0.f), z(0.f)
+    { }
     Vector3::Vector3(float fx, float fy, float fz)
         : x(fx), y(fy), z(fz)
     { }
@@ -117,6 +119,14 @@ namespace alpha
         this->y /= right;
         this->z /= right;
         return *this;
+    }
+
+    Vector3 Vector3::Lerp(const Vector3 & start, const Vector3 & end, float t)
+    {
+        float oneMinusT = 1.f - t;
+        return Vector3(oneMinusT * start.x + t * end.x,
+                       oneMinusT * start.y + t * end.y,
+                       oneMinusT * start.z + t * end.z);
     }
 
     Vector3 operator+(const Vector3 & left, const Vector3 & right)
