@@ -144,12 +144,12 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
             if (m_strafeLeft)
             {
                 // move in negative x direction
-                direction.x -= distance;
+                direction.x += distance;
             }
             if (m_strafeRight)
             {
                 // move in positive x direction
-                direction.x += distance;
+                direction.x -= distance;
             }
             if (m_moveForward)
             {
