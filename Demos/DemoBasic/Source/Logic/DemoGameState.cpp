@@ -6,6 +6,7 @@
 #include "FSA/GameState.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
+#include "Entities/CameraComponent.h"
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
 #include "Audio/Sound.h"
@@ -14,6 +15,10 @@
 
 DemoGameState::DemoGameState()
     : m_pInputContext(nullptr)
+    , m_strafeLeft(false)
+    , m_strafeRight(false)
+    , m_moveForward(false)
+    , m_moveBack(false)
 { }
 DemoGameState::~DemoGameState() { }
 
@@ -23,6 +28,16 @@ bool DemoGameState::VInitialize()
 
     m_test = CreateEntity("Entities/test.lua");
     m_test2 = CreateEntity("Entities/test.lua");
+    m_pCamera = CreateEntity("Entities/camera.lua");
+
+    // set our camera as the active camera for the scene
+    auto pCameraComponent = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
+    if (pCameraComponent)
+    {
+        // set start position for the camera
+        pCameraComponent->SetPosition(alpha::Vector3(0, 0, 20));
+        SetActiveCamera(pCameraComponent);
+    }
 
     auto root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_test->Get("root"));
     if (root != nullptr)
@@ -47,6 +62,9 @@ bool DemoGameState::VInitialize()
     m_pInputContext = new DemoContext();
     this->SetActiveInputContext(m_pInputContext);
     this->BindState("STRAFE_LEFT", [this](bool pressed) { this->OnStrafeLeft(pressed); });
+    this->BindState("STRAFE_RIGHT", [this](bool pressed) { this->OnStrafeRight(pressed); });
+    this->BindState("MOVE_FORWARD", [this](bool pressed) { this->OnMoveForward(pressed); });
+    this->BindState("MOVE_BACK", [this](bool pressed) { this->OnMoveBack(pressed); });
 
     return true;
 }
@@ -111,6 +129,41 @@ bool DemoGameState::VUpdate(double /*currentTime*/, double elapsedTime)
         slerpTime += static_cast<float>(elapsedTime) / 45.f;
     }
 
+    // update camera position based on user input
+    if (m_strafeLeft || m_strafeRight || m_moveForward || m_moveBack)
+    {
+        auto camera = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
+        if (camera)
+        {
+            alpha::Vector3 direction = camera->GetPosition();
+            float speed = 1;
+            float distance = (speed * static_cast<float>(elapsedTime)); // distance = speed x time
+
+            // For each button pressed add distance in that direction.
+            // they will offset and zero out if both opposing buttons are pressed.
+            if (m_strafeLeft)
+            {
+                // move in negative x direction
+                direction.x += distance;
+            }
+            if (m_strafeRight)
+            {
+                // move in positive x direction
+                direction.x -= distance;
+            }
+            if (m_moveForward)
+            {
+                direction.z -= distance;
+            }
+            if (m_moveBack)
+            {
+                direction.z += distance;
+            }
+
+            camera->SetPosition(direction);
+        }
+    }
+
     return true;
 }
 
@@ -137,12 +190,20 @@ std::shared_ptr<alpha::AState> DemoGameState::VShutdown()
 
 void DemoGameState::OnStrafeLeft(bool pressed)
 {
-    if (pressed)
-    {
-        m_strafingLeft = true;
-    }
-    else
-    {
-        m_strafingLeft = false;
-    }
+    m_strafeLeft = pressed;
+}
+
+void DemoGameState::OnStrafeRight(bool pressed)
+{
+    m_strafeRight = pressed;
+}
+
+void DemoGameState::OnMoveForward(bool pressed)
+{
+    m_moveForward = pressed;
+}
+
+void DemoGameState::OnMoveBack(bool pressed)
+{
+    m_moveBack = pressed;
 }

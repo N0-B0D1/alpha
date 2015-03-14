@@ -18,6 +18,7 @@ limitations under the License.
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/SceneManager.h"
 #include "Graphics/RenderData.h"
+#include "Graphics/Camera.h"
 #include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
@@ -29,6 +30,10 @@ namespace alpha
         , m_pAssets(nullptr)
         , m_pRenderer(nullptr)
         , m_pSceneManager(nullptr)
+        , m_pCamera(nullptr)
+        , m_subEntityCreated(nullptr)
+        , m_subSetActiveCamera(nullptr)
+        , m_pubThreadTaskCreated(nullptr)
     { }
     GraphicsSystem::~GraphicsSystem() { }
 
@@ -54,6 +59,11 @@ namespace alpha
 
         // create event subscribers
         m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated>>();
+        // create set active camera subscription
+        m_subSetActiveCamera = std::make_shared<EventDataSubscriber<EventData_SetActiveCamera>>();
+
+        // create our player camera view of the scene
+        m_pCamera = std::make_shared<Camera>(Vector3(0.f, 0.f, 20.f));
 
         return true;
     }
@@ -72,8 +82,14 @@ namespace alpha
 
     void GraphicsSystem::Render()
     {
+        // udpate the camera pre-render, so it can adjust to any game logic changes
+        m_pCamera->Update(800, 600);
+
+        // XXX TODO - pass camera into scene manager so the renderables can be frustum culled ... maybe ?
         std::vector<RenderData *> renderables = m_pSceneManager->GetRenderData();
-        m_pRenderer->Render(renderables);
+
+        // Render the array of renderables from the given camera viewpoint
+        m_pRenderer->Render(m_pCamera, renderables);
     }
 
     void GraphicsSystem::SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
@@ -86,7 +102,7 @@ namespace alpha
         // add any new entities to the graphics system
         // update any existing entities in the scene
         // remove and destroyed entities from the scene.
-        this->ReadSubscription();
+        this->ReadSubscriptions();
 
         // udpate scene manager
         m_pSceneManager->Update(currentTime, elapsedTime);
@@ -99,7 +115,7 @@ namespace alpha
         m_pAssets = pAssets;
     }
 
-    void GraphicsSystem::ReadSubscription()
+    void GraphicsSystem::ReadSubscriptions()
     {
         // read any published EventData_EntityCreated events that may have occured since the last update.
         while(std::shared_ptr<const EventData_EntityCreated> data = m_subEntityCreated->GetNextEvent())
@@ -107,11 +123,22 @@ namespace alpha
             LOG("Graphics system received EntityCreated event");
             m_pSceneManager->Add(data->GetEntity());
         }
+
+        while(auto data = m_subSetActiveCamera->GetNextEvent())
+        {
+            LOG("Graphics system received SetActiveCamera event.");
+            m_pCamera->SetCameraComponent(data->GetCameraComponent());
+        }
     }
 
     std::shared_ptr<AEventDataSubscriber> GraphicsSystem::GetEntityCreatedSubscriber() const
     {
         return m_subEntityCreated;
+    }
+
+    std::shared_ptr<AEventDataSubscriber> GraphicsSystem::GetSetActiveCameraSubscriber() const
+    {
+        return m_subSetActiveCamera;
     }
 
     std::shared_ptr<Asset> GraphicsSystem::LoadShaderFile(const std::string & name)

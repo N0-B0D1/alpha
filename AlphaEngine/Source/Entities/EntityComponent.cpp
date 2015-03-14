@@ -96,9 +96,6 @@ namespace alpha
         m_vScale.z = this->GetAxis(scale, "z");
 
         this->UpdateTransform();
-
-        LOG(" .... test position = (", this->m_vPosition.x, ", ", this->m_vPosition.y, ", ", this->m_vPosition.z, ")");
-        LOG(" .... test scale = (", this->m_vScale.x, ", ", this->m_vScale.y, ", ", this->m_vScale.z, ")");
     }
 
     bool SceneComponent::IsDirty() const

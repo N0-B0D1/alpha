@@ -40,6 +40,8 @@ namespace alpha
         static Matrix Rotate(const Quaternion & rotation);
         static Matrix Translate(const Vector3 & position);
         static Matrix Scale(const Vector3 & scale);
+
+        static Matrix Projection(float fov, float aspect, float near, float far);
     };
 
     Matrix operator* (const Matrix& left, const Matrix& right);

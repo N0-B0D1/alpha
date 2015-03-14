@@ -27,6 +27,7 @@ namespace alpha
     class AlphaController;
     class LogicSystem;
     class Entity;
+    class CameraComponent;
     class Sound;
     class HIDContext;
 
@@ -65,6 +66,9 @@ namespace alpha
         void BindState(std::string state, std::function<void(bool)> delegate);
         /** Bind function delegate to input action axis range */
         void BindRange(std::string range, std::function<void(long, float)> delegate);
+
+        /** Set the specified camera as the active camera to render with */
+        void SetActiveCamera(std::shared_ptr<CameraComponent> pCameraComponent);
 
     private:
         void SetLogic(std::shared_ptr<LogicSystem> pLogic);

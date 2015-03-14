@@ -39,16 +39,25 @@ public:
     virtual std::shared_ptr<AState> VShutdown();
 
     void OnStrafeLeft(bool pressed);
+    void OnStrafeRight(bool pressed);
+    void OnMoveForward(bool pressed);
+    void OnMoveBack(bool pressed);
 
 private:
     std::shared_ptr<alpha::Entity> m_test;
     std::shared_ptr<alpha::Entity> m_test2;
 
+    std::shared_ptr<alpha::Entity> m_pCamera;
+
     std::weak_ptr<alpha::Sound> m_pTestSound;
 
     DemoContext * m_pInputContext;
 
-    bool m_strafingLeft;
+    /** Track input state */
+    bool m_strafeLeft;
+    bool m_strafeRight;
+    bool m_moveForward;
+    bool m_moveBack;
 };
 
 #endif // DEMO_GAME_STATE_H

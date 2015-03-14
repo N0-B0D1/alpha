@@ -25,12 +25,14 @@ limitations under the License.
 #include "Events/EventDataSubscriber.h"
 #include "Events/EventData_EntityCreated.h"
 #include "Events/EventData_ThreadTaskCreated.h"
+#include "Events/EventData_SetActiveCamera.h"
 
 namespace alpha
 {
     class GraphicsRenderer;
     class SceneManager;
     class RenderData;
+    class Camera;
     class AssetSystem;
     class Asset;
 
@@ -49,6 +51,8 @@ namespace alpha
 
         /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
         std::shared_ptr<AEventDataSubscriber> GetEntityCreatedSubscriber() const;
+        /** Retrieve subscriber for SetActiveCamera */
+        std::shared_ptr<AEventDataSubscriber> GetSetActiveCameraSubscriber() const;
 
         /** Helper method for loading shader asset files */
         std::shared_ptr<Asset> LoadShaderFile(const std::string & name);
@@ -59,19 +63,21 @@ namespace alpha
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
         /** Read the EntityCreated subscription on each update to handle any new entities that need to be rendered. */
-        void ReadSubscription();
+        void ReadSubscriptions();
 
         /** A handle to the main asset system. */
         std::shared_ptr<AssetSystem> m_pAssets;
-
         /** Renderer implementation (e.g.: DirectX, OpenGL) */
         GraphicsRenderer *m_pRenderer;
-
         /** SceneManager for tracking logic and propagation of renderable objects in the Scene */
         SceneManager * m_pSceneManager;
+        /** Track the current camera that is viewing the scene */
+        std::shared_ptr<Camera> m_pCamera;
 
         /** Subscriber for new entity created events */
         std::shared_ptr<EventDataSubscriber<EventData_EntityCreated>> m_subEntityCreated;
+        /** Subscriber for setting the active camera on the scene */
+        std::shared_ptr<EventDataSubscriber<EventData_SetActiveCamera>> m_subSetActiveCamera;
 
         /** Publisher for new threading tasks */
         std::shared_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pubThreadTaskCreated;

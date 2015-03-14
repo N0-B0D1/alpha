@@ -25,6 +25,7 @@ limitations under the License.
 #include "Events/EventDataPublisher.h"
 #include "Events/EventData_EntityCreated.h"
 #include "Events/EventData_HIDKeyAction.h"
+#include "Events/EventData_SetActiveCamera.h"
 
 namespace alpha
 {
@@ -38,6 +39,11 @@ namespace alpha
 
     class LogicSystem : public AlphaSystem
     {
+        /**
+         * All game states maintain a pointer to the logic system,
+         * allowing them to make logic layer actions as if they where
+         * the logic layer themselves.
+         */
         friend class AGameState;
 
     public:
@@ -64,6 +70,8 @@ namespace alpha
 
         /** event subscriptions */
         void SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
+        /** Subscribe to set active camera events */
+        void SubscribeToSetActiveCamera(std::shared_ptr<AEventDataSubscriber> pSubscriber);
 
         /** Retrieve the HIDKeyAction subscriber so it can be 'subscribed' to the publisher */
         std::shared_ptr<AEventDataSubscriber> GetHIDKeyActionSubscriber() const;
@@ -85,6 +93,8 @@ namespace alpha
 
         /** Publisher for new entities created */
         EventDataPublisher<EventData_EntityCreated> m_pubEntityCreated;
+        /** Publisher for setting active camera */
+        EventDataPublisher<EventData_SetActiveCamera> m_pubSetActiveCamera;
 
         /** Subscriber for HIDKeyAction events */
         std::shared_ptr<EventDataSubscriber<EventData_HIDKeyAction>> m_subHIDKeyAction;

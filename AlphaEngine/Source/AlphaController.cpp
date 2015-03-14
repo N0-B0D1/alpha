@@ -138,6 +138,7 @@ namespace alpha
 
         // wire up pub-sub relations
         m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
+        m_pLogic->SubscribeToSetActiveCamera(m_pGraphics->GetSetActiveCameraSubscriber());
         m_pInput->SubscribeToHIDKeyAction(m_pLogic->GetHIDKeyActionSubscriber());
 
         // initialize the specified game state

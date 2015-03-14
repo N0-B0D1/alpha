@@ -28,6 +28,7 @@ limitations under the License.
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/RenderWindow.h"
 #include "Graphics/RenderData.h"
+#include "Graphics/Camera.h"
 
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
@@ -71,7 +72,7 @@ namespace alpha
 		return true;
 	}
 
-    void GraphicsRenderer::Render(std::vector<RenderData *> renderables)
+    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderData *> renderables)
     {
         this->PreRender(renderables);
 
@@ -83,29 +84,23 @@ namespace alpha
         // draw some stuff, like a cube or some shit.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // get/make view and projection matrix
+        // view matrix
+        Matrix view = pCamera->GetView();
+        // projection matrix
+        Matrix proj = pCamera->GetProjection();
+
         for (auto rd : renderables)
         {
-            // model matrix
+            // attach model world matrix to shader
             GLuint modelLoc = glGetUniformLocation(rd->m_shaderProgram, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &rd->m_world.m_11);
 
-            // view matrix
-            Matrix view = Matrix::Translate(Vector3(0.0f, 0.0f, 20.0f));
+            // attach view matrix to shader
             GLuint viewLoc = glGetUniformLocation(rd->m_shaderProgram, "view");
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view.m_11);
 
-            // projection matrix
-            float fov = 45.f;
-            float aspect = 800.f / 600.f;
-            float depth = 100.f - 0.1f;
-            float oneOverDepth = 1 / depth;
-            Matrix proj;
-            proj.m_22 = 1 / tan(0.5f * fov);
-            proj.m_11 = (1) * proj.m_22 / aspect;
-            proj.m_33 = 100.f * oneOverDepth;
-            proj.m_43 = (-100.f * 0.1f) * oneOverDepth;
-            proj.m_34 = 1.f;
-            proj.m_44 = 0.f;
+            // attach projection matrix to shader
             GLuint projLoc = glGetUniformLocation(rd->m_shaderProgram, "projection");
             glUniformMatrix4fv(projLoc, 1, GL_FALSE, &proj.m_11);
 

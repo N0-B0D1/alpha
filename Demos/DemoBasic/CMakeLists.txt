@@ -87,9 +87,13 @@ install(TARGETS DemoBasic DESTINATION bin)
 # make content files available for debugging
 if (MSVC)
 	# XXX need to do this for other build targets as well
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
+	#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_PS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_PS.hlsl)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_VS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_VS.hlsl)
+	
+    # copy Entities
+    file(GLOB ENTITY_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/*.lua")
+    file(COPY ${ENTITY_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/")
 	
     # copy Media files
     file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.wav")

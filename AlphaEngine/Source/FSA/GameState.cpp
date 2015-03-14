@@ -22,6 +22,7 @@ limitations under the License.
 #include "Audio/Sound.h"
 #include "HID/HIDContextManager.h"
 #include "HID/HIDContext.h"
+#include "Events/EventData_SetActiveCamera.h"
 
 namespace alpha
 {
@@ -74,5 +75,12 @@ namespace alpha
     void AGameState::BindRange(std::string range, std::function<void(long, float)> delegate)
     {
         m_pLogic->m_pHIDContextManager->BindRange(range, delegate);
+    }
+
+    void AGameState::SetActiveCamera(std::shared_ptr<CameraComponent> pCameraComponent)
+    {
+        // create an Entity Created event, and publish it to all subscribers
+        auto event = std::make_shared<EventData_SetActiveCamera>(pCameraComponent);
+        m_pLogic->m_pubSetActiveCamera.Publish(event);
     }
 }
