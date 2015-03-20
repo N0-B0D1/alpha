@@ -14,3 +14,10 @@
 
 # Lua
 add_subdirectory(Lua)
+set_target_properties(Lua PROPERTIES FOLDER 3rdParty)
+
+# Assimp
+add_subdirectory(Assimp)
+set_target_properties(assimp PROPERTIES FOLDER 3rdParty)
+set_target_properties(zlibstatic PROPERTIES FOLDER 3rdParty)
+set_target_properties(uninstall PROPERTIES FOLDER 3rdParty)

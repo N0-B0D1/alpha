@@ -22,6 +22,8 @@ endif()
 
 project(ALPHA)
 
+# use solution folders for IDE's
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # set build target variables
 if (WIN32)

@@ -15,3 +15,4 @@
 # build Basic demo
 # Basic demo showcases the minimal need to set up ALPHA
 add_subdirectory(DemoBasic)
+set_target_properties(DemoBasic PROPERTIES FOLDER Demos)
