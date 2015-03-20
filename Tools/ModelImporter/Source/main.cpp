@@ -18,8 +18,23 @@ limitations under the License.
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-int main(int /*argc*/, char ** /*argv*/)
+int main(int /*argc*/, char * argv[])
 {
-    getchar();
+    // assume second argument is a path to a model
+    char * path = argv[1];
+    printf("Importing model: %s\r\n", path);
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+    if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        printf("Error !! %s\r\n", importer.GetErrorString());
+    }
+    else
+    {
+        printf("Model loaded ...\r\n");
+    }
+
     return 0;
 }
