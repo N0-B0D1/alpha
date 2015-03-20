@@ -22,9 +22,9 @@ source_group(Header FILES ${HEADER_FILES})
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 source_group(Source FILES ${SOURCE_FILES})
 
+# create lia as static lib to be included in the engine
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_library(Lua ${HEADER_FILES} ${SOURCE_FILES})
 
-#install(FILES ${HEADER_FILES} DESTINATION include/lua)
 install(TARGETS Lua DESTINATION lib/Release CONFIGURATIONS Release) # Release install
 install(TARGETS Lua DESTINATION lib/Debug CONFIGURATIONS Debug) #Debug install

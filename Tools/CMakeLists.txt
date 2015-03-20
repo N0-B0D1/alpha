@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# build Basic demo
-# Basic demo showcases the minimal need to set up ALPHA
-add_subdirectory(DemoBasic)
-set_target_properties(DemoBasic PROPERTIES FOLDER Demos)
+# ModelImporter
+add_subdirectory(ModelImporter)
+set_target_properties(ModelImporter PROPERTIES FOLDER Tools)

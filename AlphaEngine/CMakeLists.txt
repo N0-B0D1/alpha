@@ -78,8 +78,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR
 #include 3rdParty dependencies
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/Lua/src)
 
+# create engine as static lib
 add_library(AlphaEngine ${HEADER_FILES} ${SOURCE_FILES})
 
-#install(TARGETS AlphaEngine DESTINATION lib)
+# TODO fix install solution to be more extensible
 install(TARGETS AlphaEngine DESTINATION lib/Release CONFIGURATIONS Release)
 install(TARGETS AlphaEngine DESTINATION lib/Debug CONFIGURATIONS Debug)

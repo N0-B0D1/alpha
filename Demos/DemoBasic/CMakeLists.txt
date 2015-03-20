@@ -22,8 +22,9 @@ source_group(Header FILES ${HEADER_FILES})
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 source_group(Source FILES ${SOURCE_FILES})
 
+# for for adding subdirectory source files easily
+# helps with grouping into directories for IDE's liek Visual Studio
 function (include_demo_source sub_dir)
-
     # better than nothing for now
     # XXX should figure out how to replace '/' with '\\', in windows
     # and if that will even work for source_group's
@@ -32,8 +33,6 @@ function (include_demo_source sub_dir)
     
     # add header files
     file(GLOB SUB_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/${sub_dir}/*.h")
-    #file(GLOB SUB_PLAT_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR}/${sub_dir}/*.h")
-    #list(APPEND SUB_HEADER_FILES ${SUB_PLAT_HEADER_FILES})
     source_group(Header\\${SUB_GROUP} FILES ${SUB_HEADER_FILES})
     
     # add sub group to final list of header files for building
@@ -41,39 +40,22 @@ function (include_demo_source sub_dir)
 
     # add source files
     file(GLOB SUB_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/${sub_dir}/*.cpp")
-    #file(GLOB SUB_PLAT_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/${ALPHA_BUILD_TARGET_DIR}/${sub_dir}/*.cpp")
-    #list(APPEND SUB_SOURCE_FILES ${SUB_PLAT_SOURCE_FILES})
     source_group(Source\\${SUB_GROUP} FILES ${SUB_SOURCE_FILES})
     
     # add sub group source files to final list of source files for building
     set(SOURCE_FILES ${SOURCE_FILES} ${SUB_SOURCE_FILES} PARENT_SCOPE)
-    
-    # install any header files for exporting the final SDK
-    #install(FILES ${SUB_HEADER_FILES} DESTINATION include/AlphaEngine/${sub_dir})
-    
 endfunction ()
-
-#file(GLOB LOGIC_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/Logic/*.h")
-#source_group(Header\\Logic FILES ${LOGIC_HEADER_FILES})
-#list(APPEND HEADER_FILES ${LOGIC_HEADER_FILES})
-
-#file(GLOB LOGIC_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/Logic/*.cpp")
-#source_group(Source\\Logic FILES ${LOGIC_SOURCE_FILES})
-#list(APPEND SOURCE_FILES ${LOGIC_SOURCE_FILES})
 
 include_demo_source("HID")
 include_demo_source("Logic")
 
-# make basic demo project
+# include engine source, and project source for demo
 include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include)
 include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include/${ALPHA_BUILD_TARGET_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
-add_executable(
-    DemoBasic WIN32 
-    ${HEADER_FILES}
-    ${SOURCE_FILES}
-)
+# create demo as an executable
+add_executable(DemoBasic WIN32 ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(DemoBasic ${ALPHA_LIBRARIES})
 
 # Windows link and project settings for Visual Studio
@@ -86,7 +68,6 @@ install(TARGETS DemoBasic DESTINATION bin)
 
 # make content files available for debugging
 if (MSVC)
-	# XXX need to do this for other build targets as well
 	#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_PS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_PS.hlsl)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_VS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_VS.hlsl)
@@ -103,7 +84,7 @@ if (MSVC)
     file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.mp3")
     file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Media/")
 	
-	# XXX Not sure if this is corrent to do ...
+	# XXX Not sure if this is correct to do ...
 	# copy fmod.dll to bin directory, so it can be loaded, only do this for windows
     file(GLOB FMOD_DLL "${FMOD_LOWLEVELAPI_DIRECTORY}/lib/fmodL.dll")
     file(COPY ${FMOD_DLL} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/")
