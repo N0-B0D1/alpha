@@ -47,7 +47,9 @@ add_subdirectory(3rdParty)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DALPHA_DEBUG")
 
-# set compiler specific flags
+# set compiler specific flags for our projects
+# since we want more strict compilation (treat warnings as errors) which seemingly most
+# 3rdParty libs don't care about, we do this after the 3rdParty folder is setup.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(warnings "-Wall -Wextra -Werror")
     FIND_LIBRARY(X11_LIB X11)
@@ -76,10 +78,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	set(PLATFORM_LIBS ${PLATFORM_LIBS} ${FMOD_LOWLEVELAPI_DIRECTORY}/lib/fmodL_vc.lib)
 
 endif()
-
-# include openal directory
-#set(SDK_OPENAL_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/openal" CACHE PATH "OpenAL SDK Path")
-#include_directories(${SDK_OPENAL_DIRECTORY})
 
 # apply flags to global settings
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")

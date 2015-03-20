@@ -27,8 +27,10 @@ include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include)
 include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include/${ALPHA_BUILD_TARGET_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
+# create executable for this tool
 add_executable(ModelImporter ${HEADER_FILES} ${SOURCE_FILES})
-target_link_libraries(ModelImporter ${ALPHA_LIBRARIES})
+# link to engine, and assimp
+target_link_libraries(ModelImporter ${ALPHA_LIBRARIES} assimp)
 
 # Windows link and project settings for Visual Studio
 if (MSVC)
