@@ -93,3 +93,6 @@ add_subdirectory(AlphaEngine)
 
 # build Demos
 add_subdirectory(Demos)
+
+# build Engine Tools
+add_subdirectory(Tools)
