@@ -28,6 +28,13 @@ namespace alpha
     public:
         explicit Model(std::vector<Mesh> meshes);
 
+        std::vector<Mesh> GetMeshes() const;
+
+        /** Write model data out to stream */
+        void Serialize(std::ostream & stream) const;
+        /** Read model data from stream, create a return a new model */
+        static Model * Deserialize(std::istream & stream);
+
     private:
         std::vector<Mesh> m_meshes;
     };

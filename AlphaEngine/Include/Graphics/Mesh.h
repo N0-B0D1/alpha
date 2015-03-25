@@ -33,6 +33,14 @@ namespace alpha
     public:
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 
+        std::vector<Vertex> GetVertices() const;
+        std::vector<unsigned int> GetIndices() const;
+
+        /** Write mesh data out to stream */
+        void Serialize(std::ostream & stream) const;
+        /** Read data from stream, create and return a new Mesh object */
+        static Mesh Deserialize(std::istream & stream);
+
     private:
         std::vector<Vertex> m_vertices;
         std::vector<unsigned int> m_indices;

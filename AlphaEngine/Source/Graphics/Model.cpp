@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <fstream>
+#include <string>
+#include <sstream>
+
 #include "Graphics/Model.h"
 #include "Graphics/Mesh.h"
 
@@ -22,4 +26,45 @@ namespace alpha
     Model::Model(std::vector<Mesh> meshes)
         : m_meshes(meshes)
     { }
+
+    std::vector<Mesh> Model::GetMeshes() const
+    {
+        return m_meshes;
+    }
+
+    void Model::Serialize(std::ostream & stream) const
+    {
+        // serializing a model amounts to serializing all meshes
+
+        // output the number of meshes
+        char * sizeBuf = new char[sizeof(unsigned int)];
+        sprintf(sizeBuf, "%d", m_meshes.size());
+        stream.write(sizeBuf, sizeof(unsigned int));
+
+        // serialize each mesh
+        for (auto mesh : this->m_meshes)
+        {
+            mesh.Serialize(stream);
+        }
+    }
+
+    Model * Model::Deserialize(std::istream & stream)
+    {
+        // first data point should be the number of meshes to make
+        unsigned int numMeshes;
+        char * buf = new char[sizeof(unsigned int)];
+        stream.read(buf, sizeof(unsigned int));
+        std::stringstream str(buf);
+        str >> numMeshes;
+
+
+        // then deserialize a mesh up to numMeshes
+        std::vector<Mesh> meshes;
+        for (unsigned int i = 0; i < numMeshes; ++i)
+        {
+            meshes.push_back(Mesh::Deserialize(stream));
+        }
+
+        return new Model(meshes);
+    }
 }
