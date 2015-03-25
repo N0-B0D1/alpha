@@ -50,15 +50,15 @@ namespace alpha
 
         // walk the tree, and create render data for renderable scene nodes.
         // make a task for each entity scene node set, and publish it
-        for (auto pair : m_nodes)
+        if (auto spPublisher = m_pTaskPublisher.lock())
         {
-            if (auto spPublisher = m_pTaskPublisher.lock())
+            for (auto pair : m_nodes)
             {
                 Task * pTask = new RenderDataTask(pair.second);
                 auto pEvent = std::make_shared<EventData_ThreadTaskCreated>(pTask);
                 spPublisher->Publish(pEvent);
+                this->BuildRenderData(pair.first, pair.second, m_vRenderData);
             }
-            this->BuildRenderData(pair.first, pair.second, m_vRenderData);
         }
 
         return true;
@@ -66,14 +66,6 @@ namespace alpha
 
     std::vector<RenderData *> & SceneManager::GetRenderData()
     {
-        /*
-        m_vRenderData.clear();
-        for (auto pair : m_nodes)
-        {
-            this->BuildRenderData(pair.first, pair.second, m_vRenderData);
-        }
-        */
-
         // get the latest set of render data to be rendered.
         return m_vRenderData;
     }
@@ -123,12 +115,9 @@ namespace alpha
 
         for (auto component : components)
         {
-            LOG("SceneManager ", "Creating SceneNode for entity.");
-
             // creat this node
             std::shared_ptr<SceneComponent> scene_component = std::dynamic_pointer_cast<SceneComponent>(component.second);
             auto node = new SceneNode(pParent, scene_component);
-            //nodes[component.first] = std::make_shared<SceneNode>(pParent, scene_component);
 
             // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
             std::map<unsigned int, SceneNode *> child_nodes = this->CreateNodes(component.second->GetComponents(), node);
@@ -151,12 +140,10 @@ namespace alpha
             if (iter.second->IsRenderable())
             {
                 // make render data for this node
-                //RenderData * rd = new RenderData();
-                //renderables.push_back(rd);
                 renderables.push_back(iter.second->GetRenderData());
             }
 
-            // recurse each child 
+            // recurse each child node
             this->BuildRenderData(entity_id, iter.second->GetChildren(), renderables);
         }
     }

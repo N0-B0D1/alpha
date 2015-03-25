@@ -56,15 +56,7 @@ namespace alpha
             m_pRenderData = new RenderData();
         }
 
-        m_pRenderData->m_world = this->GetWorldTransform(); //m_pSceneComponent->GetTransform();
-        /*
-        if (m_pSceneComponent->IsDirty())
-        {
-            // update position
-            m_pRenderData->SetPosition(m_pSceneComponent->GetPosition());
-            m_pRenderData->SetScale(m_pSceneComponent->GetScale());
-        }
-        */
+        m_pRenderData->m_world = this->GetWorldTransform();
 
         return m_pRenderData;
     }
@@ -83,7 +75,6 @@ namespace alpha
     {
         if (m_parent != nullptr)
         {
-            // this seems backwards, but makes it work as expected ...
             return m_pSceneComponent->GetTransform() * m_parent->GetWorldTransform();
         }
         return m_pSceneComponent->GetTransform();
