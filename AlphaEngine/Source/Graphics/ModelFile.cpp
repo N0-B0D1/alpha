@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <fstream>
 #include <sstream>
+#include <string.h>
 
 #include "Graphics/ModelFile.h"
 #include "Graphics/Model.h"

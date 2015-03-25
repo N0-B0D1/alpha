@@ -40,7 +40,7 @@ namespace alpha
     {
         // output number of vertices
         char * vertSizeBuf = new char[sizeof(unsigned int)];
-        sprintf(vertSizeBuf, "%d", m_vertices.size());
+        sprintf(vertSizeBuf, "%zu", m_vertices.size());
         stream.write(vertSizeBuf, sizeof(unsigned int));
 
         // then output the actual vertex data one at a time
@@ -51,7 +51,7 @@ namespace alpha
 
         // output the number of indices
         char * indSizeBuf = new char[sizeof(unsigned int)];
-        sprintf(indSizeBuf, "%d", m_indices.size());
+        sprintf(indSizeBuf, "%zu", m_indices.size());
         stream.write(indSizeBuf, sizeof(unsigned int));
 
         // then output the actual indices list
@@ -85,8 +85,8 @@ namespace alpha
         unsigned int numIndices;
         char * indBuf = new char[sizeof(unsigned int)];
         stream.read(indBuf, sizeof(unsigned int));
-        std::stringstream indStr(indBuf);
-        indStr >> numIndices;
+        std::stringstream index_size_stream(indBuf);
+        index_size_stream >> numIndices;
 
         // create indices list up to numIndices
         std::vector<unsigned int> indices;
@@ -94,8 +94,8 @@ namespace alpha
         {
             unsigned int ind;
             stream.read(indBuf, sizeof(unsigned int));
-            indStr = std::stringstream(indBuf);
-            indStr >> ind;
+            std::stringstream index_stream(indBuf);
+            index_stream >> ind;
             indices.push_back(ind);
         }
 

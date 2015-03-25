@@ -38,7 +38,7 @@ namespace alpha
 
         // output the number of meshes
         char * sizeBuf = new char[sizeof(unsigned int)];
-        sprintf(sizeBuf, "%d", m_meshes.size());
+        sprintf(sizeBuf, "%zu", m_meshes.size());
         stream.write(sizeBuf, sizeof(unsigned int));
 
         // serialize each mesh
