@@ -28,6 +28,7 @@ bool DemoGameState::VInitialize()
 
     m_test = CreateEntity("Entities/test.lua");
     m_test2 = CreateEntity("Entities/test.lua");
+    m_cube = CreateEntity("Entities/cube.lua");
     m_pCamera = CreateEntity("Entities/camera.lua");
 
     // set our camera as the active camera for the scene
@@ -49,6 +50,13 @@ bool DemoGameState::VInitialize()
     if (root != nullptr)
     {
         root->SetPosition(alpha::Vector3(5, 5, 0));
+    }
+
+    // create cube model entity
+    root = std::dynamic_pointer_cast<alpha::SceneComponent>(m_cube->Get("root"));
+    if (root != nullptr)
+    {
+        root->SetPosition(alpha::Vector3(-5, -5, 0));
     }
 
     // create a test sound to play

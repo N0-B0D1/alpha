@@ -20,6 +20,7 @@ limitations under the License.
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
 #include "Entities/PrimitiveComponent.h"
+#include "Entities/MeshComponent.h"
 #include "Entities/CameraComponent.h"
 #include "Entities/EntityScript.h"
 
@@ -32,6 +33,7 @@ namespace alpha
     EntityFactory::EntityFactory()
     {
         RegisterComponent<PrimitiveComponent>(EntityComponent::GetIDFromName(PrimitiveComponent::sk_name));
+        RegisterComponent<MeshComponent>(EntityComponent::GetIDFromName(MeshComponent::sk_name));
         RegisterComponent<CameraComponent>(EntityComponent::GetIDFromName(CameraComponent::sk_name));
     }
 

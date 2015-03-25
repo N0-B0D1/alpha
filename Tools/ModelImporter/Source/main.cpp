@@ -159,10 +159,6 @@ int main(int argc, char * argv[])
         std::string source = argv[1];
         std::string target = argv[2];
 
-        //// test
-        //std::string source = "E:/Models/cube.fbx";
-        //std::string target = "E:/Models/output/cube.am";
-
         ConvertModel(source, target);
     }
     else
@@ -170,6 +166,13 @@ int main(int argc, char * argv[])
         printf("AssimpModelImporter Usage:");
         printf("AssimpModelImport {source-input-path} {target-output-path}");
     }
+
+    /*
+    //// test
+    std::string source = "E:/Models/cube.fbx";
+    std::string target = "E:/Models/output/cube.am";
+    ConvertModel(source, target);
+    */
 
     return 0;
 }
