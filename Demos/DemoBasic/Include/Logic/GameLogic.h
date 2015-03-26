@@ -32,10 +32,6 @@ public:
     virtual ~GameLogic();
 
     virtual bool VInitialize();
-
-private:
-    std::shared_ptr<alpha::Entity> m_test;
-    std::shared_ptr<alpha::Entity> m_test2;
 };
 
 #endif // GAME_LOGIC_H
