@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "Graphics/SceneNode.h"
 #include "Graphics/RenderData.h"
+#include "Assets/Asset.h"
 #include "Entities/EntityComponent.h"
 #include "Math/Matrix.h"
 #include "Math/Vector3.h"
@@ -78,5 +79,10 @@ namespace alpha
             return m_pSceneComponent->GetTransform() * m_parent->GetWorldTransform();
         }
         return m_pSceneComponent->GetTransform();
+    }
+
+    void SceneNode::SetMesh(std::shared_ptr<Asset> pAsset)
+    {
+        m_pMeshAsset = pAsset;
     }
 }

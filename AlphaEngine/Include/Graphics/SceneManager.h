@@ -26,6 +26,7 @@ limitations under the License.
 
 namespace alpha
 {
+    class AssetSystem;
     class Entity;
     class EntityComponent;
     class SceneNode;
@@ -37,7 +38,7 @@ namespace alpha
     class SceneManager
     {
     public:
-        explicit SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher);
+        explicit SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher, std::weak_ptr<AssetSystem> pAssets);
         virtual ~SceneManager();
 
         /** Keeps the Render Data structurs up to date, and preped for rendering if needed */
@@ -74,12 +75,15 @@ namespace alpha
         /** Recursively build render data for an entities scene node map */
         void BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderData *> & renderables) const;
 
+        /** Handle to the asset system, so that the scene manager can pull in any necessary assets */
+        std::weak_ptr<AssetSystem> m_pAssets;
+
         /** Map of entity ID to SceneNode maps */
         std::map<unsigned int, std::map<unsigned int, SceneNode *> > m_nodes;
-        
         /** Store Render Data array for easy retrieval when rendering. */
         std::vector<RenderData *> m_vRenderData;
 
+        /** Handle to task publisher for creating thread tasks. */
         std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pTaskPublisher;
     };
 }

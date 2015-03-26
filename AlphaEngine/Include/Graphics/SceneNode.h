@@ -24,6 +24,7 @@ limitations under the License.
 
 namespace alpha
 {
+    class Asset;
     class RenderData;
 
     class SceneNode
@@ -48,6 +49,9 @@ namespace alpha
         /** Build and return this nodes world transform */
         Matrix GetWorldTransform() const;
 
+        /** Set the model mesh that should for which render data will be build for this node */
+        void SetMesh(std::shared_ptr<Asset> pAsset);
+
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */
         SceneNode * m_parent;
@@ -60,6 +64,9 @@ namespace alpha
 
         /** A handle to the SceneComponent which this SceneNode represents */
         std::shared_ptr<SceneComponent> m_pSceneComponent;
+
+        /** The mesh model that this node will build render data for. */
+        std::shared_ptr<Asset> m_pMeshAsset;
 
         /** Store render data, and only update/destroy it as needed */
         RenderData * m_pRenderData;

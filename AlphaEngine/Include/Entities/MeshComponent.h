@@ -32,6 +32,8 @@ namespace alpha
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
         virtual std::string VGetName() const;
 
+        std::string GetMeshPath() const;
+
     private:
         std::string m_sModelPath;
     };

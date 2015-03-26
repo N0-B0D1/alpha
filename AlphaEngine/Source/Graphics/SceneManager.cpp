@@ -18,16 +18,19 @@ limitations under the License.
 #include "Graphics/SceneNode.h"
 #include "Graphics/RenderData.h"
 #include "Graphics/RenderDataTask.h"
+#include "Assets/AssetSystem.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
+#include "Entities/MeshComponent.h"
 #include "Events/EventDataPublisher.h"
 #include "Events/EventData_ThreadTaskCreated.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    SceneManager::SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher)
-        : m_pTaskPublisher(pTaskPublisher)
+    SceneManager::SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher, std::weak_ptr<AssetSystem> pAssets)
+        : m_pAssets(pAssets)
+        , m_pTaskPublisher(pTaskPublisher)
     { }
     SceneManager::~SceneManager()
     {
@@ -118,6 +121,19 @@ namespace alpha
             // creat this node
             std::shared_ptr<SceneComponent> scene_component = std::dynamic_pointer_cast<SceneComponent>(component.second);
             auto node = new SceneNode(pParent, scene_component);
+
+            // add any necessary assets to the scene node
+            // XXX this should also happen during update incase the model asset is changed anytime during 
+            // the scene components life cycle
+            if (auto mesh_component = std::dynamic_pointer_cast<MeshComponent>(scene_component))
+            {
+                auto path = mesh_component->GetMeshPath();
+                if (auto pAssets = m_pAssets.lock())
+                {
+                    auto asset = pAssets->GetAsset(path.c_str());
+                    node->SetMesh(asset);
+                }
+            }
 
             // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
             std::map<unsigned int, SceneNode *> child_nodes = this->CreateNodes(component.second->GetComponents(), node);

@@ -54,4 +54,9 @@ namespace alpha
     {
         return MeshComponent::sk_name;
     }
+
+    std::string MeshComponent::GetMeshPath() const
+    {
+        return m_sModelPath;
+    }
 }

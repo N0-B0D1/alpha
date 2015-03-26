@@ -55,7 +55,7 @@ namespace alpha
         m_pubThreadTaskCreated = std::make_shared<EventDataPublisher<EventData_ThreadTaskCreated>>();
 
         // Scene renerable manager
-        m_pSceneManager = new SceneManager(m_pubThreadTaskCreated);
+        m_pSceneManager = new SceneManager(m_pubThreadTaskCreated, m_pAssets);
 
         // create event subscribers
         m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated>>();
