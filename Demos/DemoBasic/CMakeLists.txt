@@ -84,6 +84,10 @@ if (MSVC)
     file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.mp3")
     file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Media/")
 	
+	# copy model files
+    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Models/*.am")
+    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Models/")
+	
 	# XXX Not sure if this is correct to do ...
 	# copy fmod.dll to bin directory, so it can be loaded, only do this for windows
     file(GLOB FMOD_DLL "${FMOD_LOWLEVELAPI_DIRECTORY}/lib/fmodL.dll")
