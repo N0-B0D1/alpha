@@ -53,6 +53,9 @@ namespace alpha
 
         // walk the tree, and create render data for renderable scene nodes.
         // make a task for each entity scene node set, and publish it
+
+        /*
+        // XXX This doesn't actually work ... animations are extremely clunky
         if (auto spPublisher = m_pTaskPublisher.lock())
         {
             for (auto pair : m_nodes)
@@ -63,6 +66,7 @@ namespace alpha
                 this->BuildRenderData(pair.first, pair.second, m_vRenderData);
             }
         }
+        */
 
         return true;
     }

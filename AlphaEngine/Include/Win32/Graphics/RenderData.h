@@ -30,6 +30,7 @@ limitations under the License.
 namespace alpha
 {
     struct Matrix;
+    class Model;
 
     // define some D3D helper structures, TODO make not static
     typedef struct SimpleVertex
@@ -68,6 +69,9 @@ namespace alpha
         //
         /** objects world transform matrix */
         Matrix m_world;
+
+        /** The model that this render data will represent and render */
+        Model * m_pModel;
 
         /** vertex vertices array */
         std::vector<SimpleVertex> m_vertices;

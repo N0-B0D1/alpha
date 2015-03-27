@@ -14,8 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <sstream>
+
 #include "Graphics/SceneNode.h"
 #include "Graphics/RenderData.h"
+#include "Graphics/Model.h"
 #include "Assets/Asset.h"
 #include "Entities/EntityComponent.h"
 #include "Math/Matrix.h"
@@ -84,5 +87,17 @@ namespace alpha
     void SceneNode::SetMesh(std::shared_ptr<Asset> pAsset)
     {
         m_pMeshAsset = pAsset;
+
+        // set model if thise node has one
+        if (m_pMeshAsset != nullptr)
+        {
+            std::vector<unsigned char> data = m_pMeshAsset->GetData();
+            if (data.size() > 0)
+            {
+                char * buffer = reinterpret_cast<char *>(&data[0]);
+                std::stringstream str(buffer);
+                m_pRenderData->m_pModel = Model::Deserialize(str);
+            }
+        }
     }
 }
