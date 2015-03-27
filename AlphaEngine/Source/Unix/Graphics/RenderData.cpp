@@ -16,11 +16,13 @@ limitations under the License.
 
 #include "Graphics/RenderData.h"
 #include "Math/Vector3.h"
+#include "Graphics/Model.h"
 
 namespace alpha
 {
     RenderData::RenderData(std::string psEntryPoint /*= "PS"*/)
         : m_psEntryPoint(psEntryPoint)
+        , m_pModel(nullptr)
         , m_vertexBuffer(0)
         , m_vertexAttribute(0)
         , m_elementBuffer(0)

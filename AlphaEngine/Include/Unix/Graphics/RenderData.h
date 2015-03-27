@@ -29,6 +29,7 @@ limitations under the License.
 namespace alpha
 {
     struct Matrix;
+    class Model;
 
     /**
      * \brief RenderData is a containing that gets passed along the Render Pipeline
@@ -53,6 +54,9 @@ namespace alpha
         //
         /** objects world transform matrix */
         Matrix m_world;
+
+        /** The mesh model to render */
+        Model * m_pModel;
 
         // opengl variables
         std::vector<GLfloat> m_vertices;

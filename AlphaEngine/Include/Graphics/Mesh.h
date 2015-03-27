@@ -17,18 +17,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <fstream>
 #include <vector>
 
+#include "Graphics/Renderable.h"
 #include "Math/Vector3.h"
 
 namespace alpha
 {
-    struct Vertex {
-        Vector3 position;
-        Vector3 normal;
-    };
-
-    class Mesh
+    class Mesh : public Renderable
     {
     public:
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
