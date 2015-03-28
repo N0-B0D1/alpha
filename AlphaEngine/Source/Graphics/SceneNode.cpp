@@ -19,6 +19,7 @@ limitations under the License.
 #include "Graphics/SceneNode.h"
 #include "Graphics/RenderData.h"
 #include "Graphics/Model.h"
+#include "Graphics/ModelFile.h"
 #include "Assets/Asset.h"
 #include "Entities/EntityComponent.h"
 #include "Math/Matrix.h"
@@ -91,13 +92,7 @@ namespace alpha
         // set model if thise node has one
         if (m_pMeshAsset != nullptr)
         {
-            std::vector<unsigned char> data = m_pMeshAsset->GetData();
-            if (data.size() > 0)
-            {
-                char * buffer = reinterpret_cast<char *>(&data[0]);
-                std::stringstream str(buffer);
-                m_pRenderData->m_pModel = Model::Deserialize(str);
-            }
+            m_pRenderData->m_pModel = LoadModelFromAsset(pAsset);
         }
     }
 }

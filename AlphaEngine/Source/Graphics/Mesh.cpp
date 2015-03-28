@@ -40,7 +40,7 @@ namespace alpha
     {
         // output number of vertices
         char * vertSizeBuf = new char[sizeof(unsigned int)];
-        sprintf(vertSizeBuf, "%zu", m_vertices.size());
+        sprintf(vertSizeBuf, "%d", (unsigned int)m_vertices.size());
         stream.write(vertSizeBuf, sizeof(unsigned int));
 
         // then output the actual vertex data one at a time
@@ -51,7 +51,7 @@ namespace alpha
 
         // output the number of indices
         char * indSizeBuf = new char[sizeof(unsigned int)];
-        sprintf(indSizeBuf, "%zu", m_indices.size());
+        sprintf(indSizeBuf, "%d", (unsigned int)m_indices.size());
         stream.write(indSizeBuf, sizeof(unsigned int));
 
         // then output the actual indices list

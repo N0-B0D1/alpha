@@ -133,7 +133,7 @@ void ConvertModel(const std::string & source, const std::string & target)
         }
 
         //// TEST
-        /*
+        
         std::ifstream infile;
         infile.open(target, std::ios::in | std::ios::binary);
         if (infile.is_open())
@@ -144,7 +144,7 @@ void ConvertModel(const std::string & source, const std::string & target)
                 delete mod;
             }
         }
-        */
+        
         ////
     }
 }
@@ -167,12 +167,12 @@ int main(int argc, char * argv[])
         printf("AssimpModelImport {source-input-path} {target-output-path}");
     }
 
-    /*
+    
     //// test
     std::string source = "E:/Models/cube.fbx";
     std::string target = "E:/Models/output/cube.am";
     ConvertModel(source, target);
-    */
+    
 
     return 0;
 }

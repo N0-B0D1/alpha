@@ -31,7 +31,10 @@ namespace alpha
         if (data.size() > 0)
         {
             char * buffer = reinterpret_cast<char *>(&data[0]);
-            std::stringstream str(buffer);
+            //unsigned char * buffer = &data[0];
+            //std::stringstream str(buffer, std::ios::in | std::ios::binary);
+            std::stringstream str;
+            str.write(buffer, data.size());
             return DeserializeModel(str);
         }
         return nullptr;
