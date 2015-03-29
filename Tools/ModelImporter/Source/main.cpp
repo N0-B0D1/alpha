@@ -169,11 +169,11 @@ int main(int argc, char * argv[])
 
     
     //// test
-    /*
+    
     std::string source = "E:/Models/cube.fbx";
     std::string target = "E:/Models/output/cube.am";
     ConvertModel(source, target);
-    */
+    
 
     return 0;
 }

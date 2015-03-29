@@ -52,6 +52,7 @@ namespace alpha
     ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
     ID3D11Texture2D*        m_pDepthStencil = nullptr;
     ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
+    ID3D11RasterizerState*  m_pWireFrame = nullptr;
 
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
@@ -101,6 +102,9 @@ namespace alpha
         // clear ... zap!
         m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
         m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+        // sets wireframe mode
+        //m_pImmediateContext->RSSetState(m_pWireFrame);
 
         for (RenderSet * render_set : renderables)
         {
@@ -304,16 +308,12 @@ namespace alpha
         vp.TopLeftY = 0;
         m_pImmediateContext->RSSetViewports(1, &vp);
 
-        // Initialize the view matrix
-        /*
-        XMVECTOR Eye = XMVectorSet(0.0f, 4.0f, -20.0f, 0.0f);
-        XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        m_View = XMMatrixLookAtLH(Eye, At, Up);
-
-        // Initialize the projection matrix
-        m_Projection = XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
-        */
+        // set default rasterization
+        D3D11_RASTERIZER_DESC rasterDesc;
+        ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
+        rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+        rasterDesc.CullMode = D3D11_CULL_NONE;
+        hr = m_pd3dDevice->CreateRasterizerState(&rasterDesc, &m_pWireFrame);
 
         return S_OK;
     }
@@ -322,6 +322,7 @@ namespace alpha
     {
         if (m_pImmediateContext) m_pImmediateContext->ClearState();
 
+        if (m_pWireFrame) m_pWireFrame->Release();
         if (m_pDepthStencil) m_pDepthStencil->Release();
         if (m_pDepthStencilView) m_pDepthStencilView->Release();
         if (m_pRenderTargetView) m_pRenderTargetView->Release();
@@ -331,16 +332,6 @@ namespace alpha
         if (m_pImmediateContext) m_pImmediateContext->Release();
         if (m_pd3dDevice1) m_pd3dDevice1->Release();
         if (m_pd3dDevice) m_pd3dDevice->Release();
-
-        /*
-        m_pd3dDevice = nullptr;
-        m_pd3dDevice1 = nullptr;
-        m_pImmediateContext = nullptr;
-        m_pImmediateContext1 = nullptr;
-        m_pSwapChain = nullptr;
-        m_pSwapChain1 = nullptr;
-        m_pRenderTargetView = nullptr;
-        */
     }
 
     void GraphicsRenderer::PreRender(std::vector<RenderSet *> renderSets)
@@ -383,31 +374,33 @@ namespace alpha
             if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr)
             {
                 D3D11_BUFFER_DESC bd;
+                D3D11_SUBRESOURCE_DATA InitData;
+
                 ZeroMemory(&bd, sizeof(bd));
                 bd.Usage = D3D11_USAGE_DEFAULT;
                 bd.ByteWidth = sizeof(Vertex) * renderable->vertices.size();
                 bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
                 bd.CPUAccessFlags = 0;
-
-                D3D11_SUBRESOURCE_DATA InitData;
                 ZeroMemory(&InitData, sizeof(InitData));
                 InitData.pSysMem = &renderable->vertices[0];
-
                 hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pVertexBuffer);
                 //if (FAILED(hr))
                 //    return hr;
 
                 // index buffer
+                ZeroMemory(&bd, sizeof(bd));
                 bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(WORD) * renderable->indices.size();
+                bd.ByteWidth = sizeof(unsigned int) * renderable->indices.size();
                 bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
                 bd.CPUAccessFlags = 0;
+                ZeroMemory(&InitData, sizeof(InitData));
                 InitData.pSysMem = &renderable->indices[0];
                 hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pIndexBuffer);
                 //if (FAILED(hr))
                 //    return hr;
 
                 // constant buffer
+                ZeroMemory(&bd, sizeof(bd));
                 bd.Usage = D3D11_USAGE_DEFAULT;
                 bd.ByteWidth = sizeof(ConstantBuffer);
                 bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -446,7 +439,8 @@ namespace alpha
             m_pImmediateContext->IASetVertexBuffers(0, 1, &renderable->m_pVertexBuffer, &stride, &offset);
 
             // Set index buffer
-            m_pImmediateContext->IASetIndexBuffer(renderable->m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+            //m_pImmediateContext->IASetIndexBuffer(renderable->m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+            m_pImmediateContext->IASetIndexBuffer(renderable->m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
             // Set primitive topology
             m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
