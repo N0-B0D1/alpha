@@ -68,45 +68,36 @@ install(TARGETS DemoBasic DESTINATION bin)
 
 # make content files available for debugging
 if (MSVC)
-	#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/test.lua ${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/test.lua)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_PS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_PS.hlsl)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/Basic_VS.hlsl ${CMAKE_BINARY_DIR}/bin/Debug/Content/Shaders/Basic_VS.hlsl)
-	
-    # copy Entities
-    file(GLOB ENTITY_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/*.lua")
-    file(COPY ${ENTITY_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Entities/")
-	
-    # copy Media files
-    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.wav")
-    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Media/")
-    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.ogg")
-    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Media/")
-    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.mp3")
-    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Media/")
-	
-	# copy model files
-    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Models/*.am")
-    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/Content/Models/")
-	
 	# XXX Not sure if this is correct to do ...
 	# copy fmod.dll to bin directory, so it can be loaded, only do this for windows
     file(GLOB FMOD_DLL "${FMOD_LOWLEVELAPI_DIRECTORY}/lib/fmodL.dll")
     file(COPY ${FMOD_DLL} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/")
-else ()
-    # copy Entities
-    file(GLOB ENTITY_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/*.lua")
-    file(COPY ${ENTITY_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Entities/")
-	
-    # copy Media files
-    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.wav")
-    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Media/")
-    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.ogg")
-    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Media/")
-    file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.mp3")
-    file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Media/")
 
-    # copy shader content files for GLSL
-    file(GLOB CONTENT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/*.glsl")
-    file(COPY ${CONTENT_FILES} DESTINATION "${CMAKE_BINARY_DIR}/bin/Content/Shaders/")
+    set(WORKING_DIR /bin/Debug/Content)
+    set(SHADER_EXT hlsl)
+else ()
+    set(WORKING_DIR /bin/Content)
+    set(SHADER_EXT glsl)
 endif (MSVC)
+
+
+# copy Entities
+file(GLOB ENTITY_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Entities/*.lua")
+file(COPY ${ENTITY_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Entities/")
+
+# copy Media files
+file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.wav")
+file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Media/")
+file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.ogg")
+file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Media/")
+file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Media/*.mp3")
+file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Media/")
+	
+# copy model files
+file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Models/*.am")
+file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Models/")
+
+# copy shader content files for GLSL
+file(GLOB CONTENT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/*.${SHADER_EXT}")
+file(COPY ${CONTENT_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Shaders/")
 
