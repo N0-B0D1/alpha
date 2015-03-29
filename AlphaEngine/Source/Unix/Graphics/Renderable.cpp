@@ -18,5 +18,13 @@ limitations under the License.
 
 namespace alpha
 {
+    Renderable::Renderable(std::vector<Vertex> vertexList, std::vector<unsigned int> indexList)
+        : vertices(vertexList)
+        , indices(indexList)
+        , m_vertexBuffer(0)
+        , m_vertexAttribute(0)
+        , m_elementBuffer(0)
+        , m_shaderProgram(0)
+    { }
     Renderable::~Renderable() { }
 }

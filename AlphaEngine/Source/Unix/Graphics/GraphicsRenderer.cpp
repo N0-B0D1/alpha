@@ -27,7 +27,8 @@ limitations under the License.
 
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/RenderWindow.h"
-#include "Graphics/RenderData.h"
+#include "Graphics/RenderSet.h"
+#include "Graphics/Renderable.h"
 #include "Graphics/Camera.h"
 
 #include "Assets/Asset.h"
@@ -72,9 +73,9 @@ namespace alpha
 		return true;
 	}
 
-    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderData *> renderables)
+    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets)
     {
-        this->PreRender(renderables);
+        this->PreRender(render_sets);
 
         auto window = m_pWindow->GetWindow();
 
@@ -84,37 +85,9 @@ namespace alpha
         // draw some stuff, like a cube or some shit.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // get/make view and projection matrix
-        // view matrix
-        Matrix view = pCamera->GetView();
-        // projection matrix
-        Matrix proj = pCamera->GetProjection();
-
-        for (auto rd : renderables)
+        for (auto rs : render_sets)
         {
-            // attach model world matrix to shader
-            GLuint modelLoc = glGetUniformLocation(rd->m_shaderProgram, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &rd->m_world.m_11);
-
-            // attach view matrix to shader
-            GLuint viewLoc = glGetUniformLocation(rd->m_shaderProgram, "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view.m_11);
-
-            // attach projection matrix to shader
-            GLuint projLoc = glGetUniformLocation(rd->m_shaderProgram, "projection");
-            glUniformMatrix4fv(projLoc, 1, GL_FALSE, &proj.m_11);
-
-            // set shader program
-            glUseProgram(rd->m_shaderProgram);
-
-            // bind vertices to array object
-            glBindVertexArray(rd->m_vertexAttribute);
-
-            // draw the triangles
-            glDrawElements(GL_TRIANGLES, rd->m_indices.size(), GL_UNSIGNED_INT, (void*)0);
-
-            // unbind array object
-            glBindVertexArray(0);
+            this->SetRender(pCamera, rs);
         }
 
         // swap buffer to display cool new render objects.
@@ -151,28 +124,38 @@ namespace alpha
         return true;
     }
 
-    void GraphicsRenderer::PreRender(std::vector<RenderData *> renderables)
+    void GraphicsRenderer::PreRender(std::vector<RenderSet *> render_sets)
     {
-        for (auto rd : renderables)
+        for (auto rs : render_sets)
         {
-            if (rd->m_vertexBuffer == 0 || rd->m_vertexAttribute == 0 || rd->m_elementBuffer == 0)
+            this->PreRenderSet(rs);
+        }
+    }
+
+    void GraphicsRenderer::PreRenderSet(RenderSet * renderSet)
+    {
+        auto renderables = renderSet->GetRenderables();
+
+        for (Renderable * renderable : renderables)
+        {
+            if (renderable->m_vertexBuffer == 0 || renderable->m_vertexAttribute == 0 || renderable->m_elementBuffer == 0)
             {
                 // make vertex buffer object (vbo)
-                glGenBuffers(1, &rd->m_vertexBuffer);
+                glGenBuffers(1, &renderable->m_vertexBuffer);
                 // make vertex array object (vao)
-                glGenVertexArrays(1, &rd->m_vertexAttribute);
+                glGenVertexArrays(1, &renderable->m_vertexAttribute);
                 // make element buffer object
-                glGenBuffers(1, &rd->m_elementBuffer);
+                glGenBuffers(1, &renderable->m_elementBuffer);
 
-                glBindVertexArray(rd->m_vertexAttribute);
+                glBindVertexArray(renderable->m_vertexAttribute);
                 
                     // copy vertices into vertex buffer
-                    glBindBuffer(GL_ARRAY_BUFFER, rd->m_vertexBuffer);
-                    glBufferData(GL_ARRAY_BUFFER, rd->m_vertices.size() * sizeof(GLfloat), rd->m_vertices.data(), GL_STATIC_DRAW);
+                    glBindBuffer(GL_ARRAY_BUFFER, renderable->m_vertexBuffer);
+                    glBufferData(GL_ARRAY_BUFFER, renderable->vertices.size() * sizeof(GLfloat), renderable->vertices.data(), GL_STATIC_DRAW);
 
                     // set indicies into element buffer
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rd->m_elementBuffer);
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, rd->m_indices.size() * sizeof(GLuint), rd->m_indices.data(), GL_STATIC_DRAW);
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable->m_elementBuffer);
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, renderable->indices.size() * sizeof(GLuint), renderable->indices.data(), GL_STATIC_DRAW);
 
                     // set vertex attribute pointers
                     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
@@ -181,7 +164,7 @@ namespace alpha
                 glBindVertexArray(0);
             }
 
-            if (rd->m_shaderProgram == 0)
+            if (renderable->m_shaderProgram == 0)
             {
                 // create vertex shader
                 GLuint vs = this->CreateVertexShaderFromAsset(m_vsDefaultShader);
@@ -190,24 +173,63 @@ namespace alpha
                 GLuint ps = this->CreatePixelShaderFromAsset(m_psDefaultShader);
 
                 // make shader program, to render with
-                rd->m_shaderProgram = glCreateProgram();
-                glAttachShader(rd->m_shaderProgram, ps);
-                glAttachShader(rd->m_shaderProgram, vs);
-                glLinkProgram(rd->m_shaderProgram);
+                renderable->m_shaderProgram = glCreateProgram();
+                glAttachShader(renderable->m_shaderProgram, ps);
+                glAttachShader(renderable->m_shaderProgram, vs);
+                glLinkProgram(renderable->m_shaderProgram);
 
                 GLint result = GL_FALSE;
                 int info_log_length = 0;
 
-                glGetProgramiv(rd->m_shaderProgram, GL_LINK_STATUS, &result);
-                glGetProgramiv(rd->m_shaderProgram, GL_INFO_LOG_LENGTH, &info_log_length);
+                glGetProgramiv(renderable->m_shaderProgram, GL_LINK_STATUS, &result);
+                glGetProgramiv(renderable->m_shaderProgram, GL_INFO_LOG_LENGTH, &info_log_length);
                 std::vector<char> ProgramErrorMessage( int(1) > info_log_length ? int(1) : info_log_length );
-                glGetProgramInfoLog(rd->m_shaderProgram, info_log_length, NULL, &ProgramErrorMessage[0]);
+                glGetProgramInfoLog(renderable->m_shaderProgram, info_log_length, NULL, &ProgramErrorMessage[0]);
                 //LOG("GraphicsRenderer > Shader program results: ", &ProgramErrorMessage[0]);
 
                 // now that we've built the shader program, dispose of the shaders
                 glDeleteShader(ps);
                 glDeleteShader(vs);
             }
+        }
+    }
+
+    void GraphicsRenderer::SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet)
+    {
+
+        // get/make view and projection matrix
+        // view matrix
+        Matrix view = pCamera->GetView();
+        // projection matrix
+        Matrix proj = pCamera->GetProjection();
+        
+        auto renderables = renderSet->GetRenderables();
+
+        for (Renderable * renderable : renderables)
+        {
+            // attach model world matrix to shader
+            GLuint modelLoc = glGetUniformLocation(renderable->m_shaderProgram, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &renderSet->worldTransform.m_11);
+
+            // attach view matrix to shader
+            GLuint viewLoc = glGetUniformLocation(renderable->m_shaderProgram, "view");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view.m_11);
+
+            // attach projection matrix to shader
+            GLuint projLoc = glGetUniformLocation(renderable->m_shaderProgram, "projection");
+            glUniformMatrix4fv(projLoc, 1, GL_FALSE, &proj.m_11);
+
+            // set shader program
+            glUseProgram(renderable->m_shaderProgram);
+
+            // bind vertices to array object
+            glBindVertexArray(renderable->m_vertexAttribute);
+
+            // draw the triangles
+            glDrawElements(GL_TRIANGLES, renderable->indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+            // unbind array object
+            glBindVertexArray(0);
         }
     }
 

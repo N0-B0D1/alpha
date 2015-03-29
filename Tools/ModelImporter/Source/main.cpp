@@ -30,7 +30,7 @@ limitations under the License.
 /**
  * Create a Mesh for each aiMesh
  */
-alpha::Mesh processMesh(aiMesh * mesh, const aiScene * /*scene*/)
+alpha::Mesh * processMesh(aiMesh * mesh, const aiScene * /*scene*/)
 {
     //printf("parsing a mesh.\r\n");
 
@@ -82,13 +82,13 @@ alpha::Mesh processMesh(aiMesh * mesh, const aiScene * /*scene*/)
     
     //printf("done parsing mesh\r\n");
 
-    return alpha::Mesh(vertices, indices);
+    return new alpha::Mesh(vertices, indices);
 }
 
 /**
  * Process all meshes at this node, an recurse through child nodes.
  */
-void processNode(aiNode * node, const aiScene * scene, std::vector<alpha::Mesh> & meshes)
+void processNode(aiNode * node, const aiScene * scene, std::vector<alpha::Renderable *> & meshes)
 {
     //printf("parsing a node\r\n");
 
@@ -120,7 +120,7 @@ void ConvertModel(const std::string & source, const std::string & target)
     else
     {
         //printf("Loading model ...\r\n");
-        std::vector<alpha::Mesh> meshes;
+        std::vector<alpha::Renderable *> meshes;
         processNode(scene->mRootNode, scene, meshes);
         alpha::Model mod(meshes);
 

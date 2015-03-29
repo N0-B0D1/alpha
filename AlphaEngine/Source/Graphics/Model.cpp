@@ -25,8 +25,19 @@ limitations under the License.
 namespace alpha
 {
     Model::Model(std::vector<Renderable *> meshes)
-        : m_meshes(meshes)
+        : RenderSet("PS")
+        , m_meshes(meshes)
     { }
+    Model::~Model()
+    {
+        for (auto renderable : m_meshes)
+        {
+            if (renderable)
+            {
+                delete renderable;
+            }
+        }
+    }
 
     std::vector<Renderable *> Model::GetRenderables()
     {

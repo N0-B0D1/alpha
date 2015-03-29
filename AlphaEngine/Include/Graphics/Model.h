@@ -29,6 +29,7 @@ namespace alpha
     {
     public:
         explicit Model(std::vector<Renderable *> meshes);
+        virtual ~Model();
 
         std::vector<Renderable *> GetRenderables();
 

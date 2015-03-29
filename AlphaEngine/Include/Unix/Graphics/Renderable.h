@@ -17,6 +17,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <vector>
+
+#include <GL/gl.h>
+
 #include "Math/Vector3.h"
 
 namespace alpha
@@ -39,7 +43,19 @@ namespace alpha
     class Renderable
     {
     public:
+        Renderable(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
         virtual ~Renderable();
+
+        /** platform agnostic list of vertices */
+        std::vector<Vertex> vertices;
+        /** platform agnostic list of indices */
+        std::vector<unsigned int> indices;
+
+        /** OpenGL specific variables */
+        GLuint m_vertexBuffer;
+        GLuint m_vertexAttribute;
+        GLuint m_elementBuffer;
+        GLuint m_shaderProgram;
     };
 }
 
