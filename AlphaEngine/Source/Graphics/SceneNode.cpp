@@ -17,7 +17,7 @@ limitations under the License.
 #include <sstream>
 
 #include "Graphics/SceneNode.h"
-#include "Graphics/RenderData.h"
+#include "Graphics/RenderSet.h"
 #include "Graphics/Model.h"
 #include "Graphics/ModelFile.h"
 #include "Assets/Asset.h"
@@ -30,7 +30,7 @@ namespace alpha
     SceneNode::SceneNode(SceneNode * pParent, std::shared_ptr<SceneComponent> component)
         : m_parent(pParent)
         , m_pSceneComponent(component)
-        , m_pRenderData(nullptr)
+        , m_pRenderSet(nullptr)
     { }
     SceneNode::~SceneNode()
     {
@@ -40,7 +40,7 @@ namespace alpha
             delete pair.second;
         }
         // destroy render data, so all gpu resources are released
-        if (m_pRenderData) { delete m_pRenderData; }
+        if (m_pRenderSet) { delete m_pRenderSet; }
     }
 
     void SceneNode::SetParent(SceneNode * pParent)
@@ -54,16 +54,14 @@ namespace alpha
         return m_pSceneComponent != nullptr;
     }
 
-    RenderData * SceneNode::GetRenderData()
+    RenderSet * SceneNode::GetRenderSet()
     {
-        if (m_pRenderData == nullptr)
+        if (m_pRenderSet != nullptr)
         {
-            m_pRenderData = new RenderData();
+            m_pRenderSet->worldTransform = this->GetWorldTransform();
         }
 
-        m_pRenderData->m_world = this->GetWorldTransform();
-
-        return m_pRenderData;
+        return m_pRenderSet;
     }
 
     void SceneNode::SetChildren(std::map<unsigned int, SceneNode *> children)
@@ -92,7 +90,8 @@ namespace alpha
         // set model if thise node has one
         if (m_pMeshAsset != nullptr)
         {
-            m_pRenderData->m_pModel = LoadModelFromAsset(pAsset);
+            // Create the render set for this scene node
+            m_pRenderSet = LoadModelFromAsset(pAsset);
         }
     }
 }

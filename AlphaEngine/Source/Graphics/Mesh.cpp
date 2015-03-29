@@ -22,48 +22,47 @@ limitations under the License.
 namespace alpha
 {
     Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
-        : m_vertices(vertices)
-        , m_indices(indices)
+        : Renderable(vertices, indices)
     { }
 
     std::vector<Vertex> Mesh::GetVertices() const
     {
-        return m_vertices;
+        return vertices;
     }
 
     std::vector<unsigned int> Mesh::GetIndices() const
     {
-        return m_indices;
+        return indices;
     }
 
     void Mesh::Serialize(std::ostream & stream) const
     {
         // output number of vertices
         char * vertSizeBuf = new char[sizeof(unsigned int)];
-        sprintf(vertSizeBuf, "%d", (unsigned int)m_vertices.size());
+        sprintf(vertSizeBuf, "%d", (unsigned int)vertices.size());
         stream.write(vertSizeBuf, sizeof(unsigned int));
 
         // then output the actual vertex data one at a time
-        for (auto vertex : m_vertices)
+        for (auto vertex : vertices)
         {
             stream.write(reinterpret_cast<char *>(&vertex), sizeof(Vertex));
         }
 
         // output the number of indices
         char * indSizeBuf = new char[sizeof(unsigned int)];
-        sprintf(indSizeBuf, "%d", (unsigned int)m_indices.size());
+        sprintf(indSizeBuf, "%d", (unsigned int)indices.size());
         stream.write(indSizeBuf, sizeof(unsigned int));
 
         // then output the actual indices list
         char * indBuf = new char[sizeof(unsigned int)];
-        for (auto index : m_indices)
+        for (auto index : indices)
         {
             sprintf(indBuf, "%d", index);
             stream.write(indBuf, sizeof(unsigned int));
         }
     }
 
-    Mesh Mesh::Deserialize(std::istream & stream)
+    Mesh * Mesh::Deserialize(std::istream & stream)
     {
         // get the number of vertices to make
         unsigned int numVerts;
@@ -100,6 +99,6 @@ namespace alpha
         }
 
         // make and return the new mesh
-        return Mesh(vertices, indices);
+        return new Mesh(vertices, indices);
     }
 }

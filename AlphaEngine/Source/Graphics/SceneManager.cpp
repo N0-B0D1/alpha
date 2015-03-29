@@ -68,10 +68,15 @@ namespace alpha
         }
         */
 
+        for (auto pair : m_nodes)
+        {
+            this->BuildRenderData(pair.first, pair.second, m_vRenderData);
+        }
+
         return true;
     }
 
-    std::vector<RenderData *> & SceneManager::GetRenderData()
+    std::vector<RenderSet *> & SceneManager::GetRenderData()
     {
         // get the latest set of render data to be rendered.
         return m_vRenderData;
@@ -149,7 +154,7 @@ namespace alpha
         return nodes;
     }
 
-    void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderData *> & renderables) const
+    void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderSet *> & renderables) const
     {
         // XXX not sure if the entity id is neede at this point ... refactor as needed.
 
@@ -160,7 +165,11 @@ namespace alpha
             if (iter.second->IsRenderable())
             {
                 // make render data for this node
-                renderables.push_back(iter.second->GetRenderData());
+                RenderSet * rs = iter.second->GetRenderSet();
+                if (rs != nullptr)
+                {
+                    renderables.push_back(rs);
+                }
             }
 
             // recurse each child node

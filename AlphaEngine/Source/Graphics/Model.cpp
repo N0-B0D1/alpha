@@ -20,14 +20,15 @@ limitations under the License.
 
 #include "Graphics/Model.h"
 #include "Graphics/Mesh.h"
+#include "Graphics/Renderable.h"
 
 namespace alpha
 {
-    Model::Model(std::vector<Mesh> meshes)
+    Model::Model(std::vector<Renderable *> meshes)
         : m_meshes(meshes)
     { }
 
-    std::vector<Mesh> Model::GetMeshes() const
+    std::vector<Renderable *> Model::GetRenderables()
     {
         return m_meshes;
     }
@@ -42,9 +43,10 @@ namespace alpha
         stream.write(sizeBuf, sizeof(unsigned int));
 
         // serialize each mesh
-        for (auto mesh : this->m_meshes)
+        for (Renderable * r : this->m_meshes)
         {
-            mesh.Serialize(stream);
+            auto mesh = dynamic_cast<const Mesh *>(r);
+            mesh->Serialize(stream);
         }
     }
 
@@ -57,9 +59,8 @@ namespace alpha
         std::stringstream str(buf);
         str >> numMeshes;
 
-
         // then deserialize a mesh up to numMeshes
-        std::vector<Mesh> meshes;
+        std::vector<Renderable *> meshes;
         for (unsigned int i = 0; i < numMeshes; ++i)
         {
             meshes.push_back(Mesh::Deserialize(stream));

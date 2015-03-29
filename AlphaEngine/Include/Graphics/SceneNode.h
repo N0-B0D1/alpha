@@ -25,7 +25,7 @@ limitations under the License.
 namespace alpha
 {
     class Asset;
-    class RenderData;
+    class RenderSet;
 
     class SceneNode
     {
@@ -39,7 +39,7 @@ namespace alpha
         /** Check if this node is renderable, or just a spacer node. */
         bool IsRenderable() const;
 
-        RenderData * GetRenderData();
+        RenderSet * GetRenderSet();
 
         /** Attach children */
         void SetChildren(std::map<unsigned int, SceneNode *> children);
@@ -69,7 +69,7 @@ namespace alpha
         std::shared_ptr<Asset> m_pMeshAsset;
 
         /** Store render data, and only update/destroy it as needed */
-        RenderData * m_pRenderData;
+        RenderSet * m_pRenderSet;
     };
 }
 

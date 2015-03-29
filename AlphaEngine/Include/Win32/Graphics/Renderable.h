@@ -17,7 +17,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <vector>
+
+#include <d3d11_1.h>
+#include <DirectXMath.h>
+
 #include "Math/Vector3.h"
+#include "Math/Vector4.h"
 
 namespace alpha
 {
@@ -26,6 +32,17 @@ namespace alpha
         Vector3 position;
         Vector3 normal;
     };
+
+    typedef struct ConstantBuffer
+    {
+        DirectX::XMMATRIX mWorld;
+        DirectX::XMMATRIX mView;
+        DirectX::XMMATRIX mProjection;
+        Vector4 vLightDir[2];
+        Vector4 vLightColor[2];
+        Vector4 ambient;
+        Vector4 vOutputColor;
+    } ConstantBuffer;
 
     /**
      * The Renderable object represents the smallest subset of data
@@ -39,7 +56,20 @@ namespace alpha
     class Renderable
     {
     public:
+        Renderable(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
         virtual ~Renderable();
+
+        /** vertex vertices array */
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+
+        /** D3D11 data structures */
+        ID3D11VertexShader * m_pVertexShader;
+        ID3D11InputLayout * m_pInputLayout;
+        ID3D11PixelShader * m_pPixelShader;
+        ID3D11Buffer * m_pVertexBuffer;
+        ID3D11Buffer * m_pIndexBuffer;
+        ID3D11Buffer * m_pConstantBuffer;
     };
 }
 

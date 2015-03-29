@@ -14,30 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <map>
-
-#include "Graphics/RenderDataTask.h"
-#include "Graphics/SceneNode.h"
 #include "Graphics/RenderSet.h"
 
 namespace alpha
 {
-    RenderDataTask::RenderDataTask(std::map<unsigned int, SceneNode *> nodes)
-        : m_nodes(nodes)
+    RenderSet::RenderSet(std::string psEntryPoint /*= "PS"*/)
+        : m_psEntryPoint(psEntryPoint)
     { }
-
-    void RenderDataTask::VExecute()
-    {
-        this->UpdateNodes(m_nodes);
-    }
-
-    void RenderDataTask::UpdateNodes(std::map<unsigned int, SceneNode *> nodes)
-    {
-        for (auto pair : nodes)
-        {
-            RenderSet * rs = pair.second->GetRenderSet();
-            rs->worldTransform = pair.second->GetWorldTransform();
-            this->UpdateNodes(pair.second->GetChildren());
-        }
-    }
+    RenderSet::~RenderSet() { }
 }

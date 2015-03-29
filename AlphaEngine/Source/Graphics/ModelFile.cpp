@@ -31,8 +31,6 @@ namespace alpha
         if (data.size() > 0)
         {
             char * buffer = reinterpret_cast<char *>(&data[0]);
-            //unsigned char * buffer = &data[0];
-            //std::stringstream str(buffer, std::ios::in | std::ios::binary);
             std::stringstream str;
             str.write(buffer, data.size());
             return DeserializeModel(str);
@@ -45,6 +43,9 @@ namespace alpha
         ModelFileHeader header;
         stream.read(reinterpret_cast<char *>(&header), sizeof(ModelFileHeader));
 
+        // check to make sure this is a valid Alpha-Model
+        // In the future we can deserialize the file differently
+        // based on the version as well.
         if (strcmp(header.signature, MODELFILE_SIG) == 0 && header.version == MODELFILE_V1)
         {
             return Model::Deserialize(stream);

@@ -86,7 +86,7 @@ namespace alpha
         m_pCamera->Update(800, 600);
 
         // XXX TODO - pass camera into scene manager so the renderables can be frustum culled ... maybe ?
-        std::vector<RenderData *> renderables = m_pSceneManager->GetRenderData();
+        std::vector<RenderSet *> renderables = m_pSceneManager->GetRenderData();
 
         // Render the array of renderables from the given camera viewpoint
         m_pRenderer->Render(m_pCamera, renderables);

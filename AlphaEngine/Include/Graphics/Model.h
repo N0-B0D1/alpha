@@ -19,16 +19,20 @@ limitations under the License.
 
 #include <vector>
 
+#include "Graphics/RenderSet.h"
+
 namespace alpha
 {
     class Mesh;
 
-    class Model
+    class Model : public RenderSet
     {
     public:
-        explicit Model(std::vector<Mesh> meshes);
+        explicit Model(std::vector<Renderable *> meshes);
 
-        std::vector<Mesh> GetMeshes() const;
+        std::vector<Renderable *> GetRenderables();
+
+        //std::vector<Mesh> GetMeshes() const;
 
         /** Write model data out to stream */
         void Serialize(std::ostream & stream) const;
@@ -36,7 +40,7 @@ namespace alpha
         static Model * Deserialize(std::istream & stream);
 
     private:
-        std::vector<Mesh> m_meshes;
+        std::vector<Renderable *> m_meshes;
     };
 }
 

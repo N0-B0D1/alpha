@@ -1,5 +1,5 @@
-#ifndef ALPHA_MESH_H
-#define ALPHA_MESH_H
+#ifndef ALPHA_RENDER_SET_H
+#define ALPHA_RENDER_SET_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,27 +17,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <fstream>
 #include <vector>
 
-#include "Graphics/Renderable.h"
-#include "Math/Vector3.h"
+#include "Math/Matrix.h"
 
 namespace alpha
 {
-    class Mesh : public Renderable
+    class Renderable;
+
+    /**
+     * A RenderSet represents a set of Renderables.
+     * e.g.: A Model is a RenderSet which represents a set of Renderable Mesh objects.
+     */
+    class RenderSet
     {
     public:
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+        explicit RenderSet(std::string psEntryPoint = "PS");
+        virtual ~RenderSet();
 
-        std::vector<Vertex> GetVertices() const;
-        std::vector<unsigned int> GetIndices() const;
+        virtual std::vector<Renderable *> GetRenderables() = 0;
 
-        /** Write mesh data out to stream */
-        void Serialize(std::ostream & stream) const;
-        /** Read data from stream, create and return a new Mesh object */
-        static Mesh * Deserialize(std::istream & stream);
+        /** The pixel shader entry point */
+        std::string m_psEntryPoint;
+
+        Matrix worldTransform;
     };
 }
 
-#endif // ALPHA_MESH_H
+#endif // ALPHA_RENDER_SET_H
