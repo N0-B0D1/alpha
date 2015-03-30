@@ -14,8 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <sstream>
+
 #include "Graphics/SceneNode.h"
-#include "Graphics/RenderData.h"
+#include "Graphics/RenderSet.h"
+#include "Graphics/Model.h"
+#include "Graphics/ModelFile.h"
+#include "Assets/Asset.h"
 #include "Entities/EntityComponent.h"
 #include "Math/Matrix.h"
 #include "Math/Vector3.h"
@@ -25,7 +30,7 @@ namespace alpha
     SceneNode::SceneNode(SceneNode * pParent, std::shared_ptr<SceneComponent> component)
         : m_parent(pParent)
         , m_pSceneComponent(component)
-        , m_pRenderData(nullptr)
+        , m_pRenderSet(nullptr)
     { }
     SceneNode::~SceneNode()
     {
@@ -35,7 +40,7 @@ namespace alpha
             delete pair.second;
         }
         // destroy render data, so all gpu resources are released
-        if (m_pRenderData) { delete m_pRenderData; }
+        if (m_pRenderSet) { delete m_pRenderSet; }
     }
 
     void SceneNode::SetParent(SceneNode * pParent)
@@ -49,24 +54,14 @@ namespace alpha
         return m_pSceneComponent != nullptr;
     }
 
-    RenderData * SceneNode::GetRenderData()
+    RenderSet * SceneNode::GetRenderSet()
     {
-        if (m_pRenderData == nullptr)
+        if (m_pRenderSet != nullptr)
         {
-            m_pRenderData = new RenderData();
+            m_pRenderSet->worldTransform = this->GetWorldTransform();
         }
 
-        m_pRenderData->m_world = this->GetWorldTransform(); //m_pSceneComponent->GetTransform();
-        /*
-        if (m_pSceneComponent->IsDirty())
-        {
-            // update position
-            m_pRenderData->SetPosition(m_pSceneComponent->GetPosition());
-            m_pRenderData->SetScale(m_pSceneComponent->GetScale());
-        }
-        */
-
-        return m_pRenderData;
+        return m_pRenderSet;
     }
 
     void SceneNode::SetChildren(std::map<unsigned int, SceneNode *> children)
@@ -83,9 +78,20 @@ namespace alpha
     {
         if (m_parent != nullptr)
         {
-            // this seems backwards, but makes it work as expected ...
             return m_pSceneComponent->GetTransform() * m_parent->GetWorldTransform();
         }
         return m_pSceneComponent->GetTransform();
+    }
+
+    void SceneNode::SetMesh(std::shared_ptr<Asset> pAsset)
+    {
+        m_pMeshAsset = pAsset;
+
+        // set model if thise node has one
+        if (m_pMeshAsset != nullptr)
+        {
+            // Create the render set for this scene node
+            m_pRenderSet = LoadModelFromAsset(pAsset);
+        }
     }
 }

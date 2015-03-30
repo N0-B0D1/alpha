@@ -33,7 +33,7 @@ namespace alpha
 
     void HIDContextManager::KeyboardButtonUp(const HIDAction * const action)
     {
-        LOG("KEY STATE RELEASED: ", action->name);
+        //LOG("KEY STATE RELEASED: ", action->name);
 
         if (m_pActiveContext)
         {
@@ -56,7 +56,7 @@ namespace alpha
 
     void HIDContextManager::KeyboardButtonDown(const HIDAction * const action)
     {
-        LOG("KEY STATE INITIATED: ", action->name);
+        //LOG("KEY STATE INITIATED: ", action->name);
 
         if (m_pActiveContext)
         {
@@ -94,19 +94,19 @@ namespace alpha
         }
     }
 
-    void HIDContextManager::MouseButtonDown(const HIDAction * const action)
+    void HIDContextManager::MouseButtonDown(const HIDAction * const /*action*/)
     {
-        LOG("KEY STATE INITIATED: ", action->name);
+        //LOG("KEY STATE INITIATED: ", action->name);
     }
 
-    void HIDContextManager::MouseButtonUp(const HIDAction * const action)
+    void HIDContextManager::MouseButtonUp(const HIDAction * const /*action*/)
     {
-        LOG("KEY STATE RELEASED: ", action->name);
+        //LOG("KEY STATE RELEASED: ", action->name);
     }
 
-    void HIDContextManager::MouseMoved(const HIDAction * const action, long relative, float absolute)
+    void HIDContextManager::MouseMoved(const HIDAction * const /*action*/, long /*relative*/, float /*absolute*/)
     {
-        LOG("Mouse: ", action->name, " ", relative, " - ", absolute);
+        //LOG("Mouse: ", action->name, " ", relative, " - ", absolute);
     }
 
     void HIDContextManager::BindAction(std::string action, std::function<void()> delegate)

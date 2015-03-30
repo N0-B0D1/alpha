@@ -1,6 +1,3 @@
-#ifndef GAME_LOGIC_H
-#define GAME_LOGIC_H
-
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -17,21 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Entities/Entity.h"
+#include "Graphics/Renderable.h"
 
-#include "Logic/LogicSystem.h"
-
-namespace alpha {
-    class AssetSystem;
-}
-
-class GameLogic : public alpha::LogicSystem
+namespace alpha
 {
-public:
-    GameLogic();
-    virtual ~GameLogic();
-
-    virtual bool VInitialize();
-};
-
-#endif // GAME_LOGIC_H
+    Renderable::Renderable(std::vector<Vertex> vertexList, std::vector<unsigned int> indexList)
+        : vertices(vertexList)
+        , indices(indexList)
+        , m_vertexBuffer(0)
+        , m_vertexAttribute(0)
+        , m_elementBuffer(0)
+        , m_shaderProgram(0)
+    { }
+    Renderable::~Renderable() { }
+}

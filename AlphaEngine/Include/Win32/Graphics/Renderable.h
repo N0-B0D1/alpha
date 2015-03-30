@@ -1,5 +1,5 @@
-#ifndef ALPHA_RENDER_DATA_H
-#define ALPHA_RENDER_DATA_H
+#ifndef ALPHA_RENDERABLE_H
+#define ALPHA_RENDERABLE_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,27 +17,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <memory>
 #include <vector>
 
 #include <d3d11_1.h>
 #include <DirectXMath.h>
 
-#include "Math/Matrix.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
 
 namespace alpha
 {
-    struct Matrix;
-    class Model;
-
-    // define some D3D helper structures, TODO make not static
-    typedef struct SimpleVertex
+    struct Vertex
     {
-        Vector3 Pos;
-        Vector3 Normal;
-    } SimpleVertex;
+        Vector3 position;
+        Vector3 normal;
+    };
+
     typedef struct ConstantBuffer
     {
         DirectX::XMMATRIX mWorld;
@@ -50,32 +45,23 @@ namespace alpha
     } ConstantBuffer;
 
     /**
-     * \brief RenderData is a containing that gets passed along the Render Pipeline
+     * The Renderable object represents the smallest subset of data
+     * to be rendered by the rendering engine, and is platform specific.
      *
-     * As the RenderData object is passed along the render pipeline data is preped
-     * for rendering, and once it gets the render stage, the renderer can simply grab
-     * the various data and render it immediately.
+     * e.g.: A Mesh is a Renderable, and a Model contains a set of
+     * Renderable Meshes.
+     * A SceneNode represents a Model and therefore will produce a
+     * list of Renderable Meshes when needed.
      */
-    class RenderData
+    class Renderable
     {
     public:
-        explicit RenderData(std::string psEntryPoint = "PS");
-        virtual ~RenderData();
-
-        /** The pixel shader entry point */
-        std::string m_psEntryPoint;
-
-        // setup variables
-        //
-        /** objects world transform matrix */
-        Matrix m_world;
-
-        /** The model that this render data will represent and render */
-        Model * m_pModel;
+        Renderable(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+        virtual ~Renderable();
 
         /** vertex vertices array */
-        std::vector<SimpleVertex> m_vertices;
-        std::vector<unsigned short> m_indices;
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
 
         /** D3D11 data structures */
         ID3D11VertexShader * m_pVertexShader;
@@ -87,4 +73,4 @@ namespace alpha
     };
 }
 
-#endif // ALPHA_RENDER_DATA_H
+#endif // ALPHA_RENDERABLE_H

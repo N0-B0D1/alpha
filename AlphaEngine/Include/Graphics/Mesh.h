@@ -1,5 +1,5 @@
-#ifndef ENTITY_MANAGER_H
-#define ENTITY_MANAGER_H
+#ifndef ALPHA_MESH_H
+#define ALPHA_MESH_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,25 +17,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <fstream>
+#include <vector>
+
+#include "Graphics/Renderable.h"
+#include "Math/Vector3.h"
+
 namespace alpha
 {
-    /**
-     * The entity manager tracks entities,
-     * updates components by type,
-     * and ticks each entity, to call user defined script tick
-     */
-    class EntityManager
+    class Mesh : public Renderable
     {
     public:
-        explicit EntityManager();
-        virtual ~EntityManager();
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 
-        bool Update();
+        std::vector<Vertex> GetVertices() const;
+        std::vector<unsigned int> GetIndices() const;
 
-    private:
-        void UpdateComponents();
-        void TickEntities();
+        /** Write mesh data out to stream */
+        void Serialize(std::ostream & stream) const;
+        /** Read data from stream, create and return a new Mesh object */
+        static Mesh * Deserialize(std::istream & stream);
     };
 }
 
-#endif
+#endif // ALPHA_MESH_H

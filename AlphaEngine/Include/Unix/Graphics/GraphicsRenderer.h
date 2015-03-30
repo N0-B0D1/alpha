@@ -28,7 +28,7 @@ limitations under the License.
 namespace alpha
 {
 	class RenderWindow;
-    class RenderData;
+    class RenderSet;
     class Camera;
     class Asset;
 
@@ -44,7 +44,7 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderData *> renderables);
+        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables);
 
         /** Set basic GLSL shaders for default usage */
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
@@ -54,7 +54,11 @@ namespace alpha
         bool InitializeDevice();
 
         /** PreRender takes a list of data that will be rendered, and preps it rendering. */
-        void PreRender(std::vector<RenderData *> renderables);
+        void PreRender(std::vector<RenderSet *> renderables);
+        /** Pre-render a set of Renderables */
+        void PreRenderSet(RenderSet * renderSet);
+        /** Render a set of renderables */
+        void SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet);
 
         RenderWindow *m_pWindow;
 

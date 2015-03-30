@@ -1,5 +1,5 @@
-#ifndef GAME_LOGIC_H
-#define GAME_LOGIC_H
+#ifndef ALPHA_CONSTANTS_H
+#define ALPHA_CONSTANTS_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,21 +17,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Entities/Entity.h"
+#define UINT_LENGTH 10
 
-#include "Logic/LogicSystem.h"
-
-namespace alpha {
-    class AssetSystem;
-}
-
-class GameLogic : public alpha::LogicSystem
-{
-public:
-    GameLogic();
-    virtual ~GameLogic();
-
-    virtual bool VInitialize();
-};
-
-#endif // GAME_LOGIC_H
+#endif // ALPHA_CONSTANTS_H

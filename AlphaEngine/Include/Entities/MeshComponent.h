@@ -1,3 +1,6 @@
+#ifndef ALPHA_MESH_COMPONENT_H
+#define ALPHA_MESH_COMPONENT_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -14,20 +17,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Entities/EntityManager.h"
+#include "Entities/EntityComponent.h"
 
 namespace alpha
 {
-    EntityManager::EntityManager() { }
-    EntityManager::~EntityManager() { }
-
-    void EntityManager::UpdateComponents()
+    class MeshComponent : public SceneComponent
     {
+    public:
+        static const std::string sk_name;
 
-    }
+        virtual ~MeshComponent();
 
-    void EntityManager::TickEntities()
-    {
+        virtual void VInitialize(std::shared_ptr<LuaVar> var);
+        virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
+        virtual std::string VGetName() const;
 
-    }
+        std::string GetMeshPath() const;
+
+    private:
+        std::string m_sModelPath;
+    };
 }
+
+#endif // ALPHA_MESH_COMPONENT_H

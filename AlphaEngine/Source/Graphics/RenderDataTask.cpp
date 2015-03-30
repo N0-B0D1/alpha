@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "Graphics/RenderDataTask.h"
 #include "Graphics/SceneNode.h"
-#include "Graphics/RenderData.h"
+#include "Graphics/RenderSet.h"
 
 namespace alpha
 {
@@ -35,8 +35,8 @@ namespace alpha
     {
         for (auto pair : nodes)
         {
-            RenderData * rd = pair.second->GetRenderData();
-            rd->m_world = pair.second->GetWorldTransform();
+            RenderSet * rs = pair.second->GetRenderSet();
+            rs->worldTransform = pair.second->GetWorldTransform();
             this->UpdateNodes(pair.second->GetChildren());
         }
     }

@@ -19,11 +19,12 @@ components = {
         -- scene components exist as children of the root node, we
         -- can set the root nodes transform, and that will become the
         -- Entities transform in the world.
-		type = "primitive",
+		type = "mesh",
 		transform = {
 			position = { x = 0.0, y = 0.0, z = 0.0 },
 			rotation = { x = 0.0, y = 0.0, z = 0.0 },
 			scale = { x = 1.0, y = 1.0, z = 1.0 }
-		}
+		},
+		model = "Models/cube.am",
 	}
 }

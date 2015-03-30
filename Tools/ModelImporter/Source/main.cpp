@@ -14,18 +14,104 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-int main(int /*argc*/, char * argv[])
+#include "Graphics/Model.h"
+#include "Graphics/Mesh.h"
+#include "Graphics/ModelFile.h"
+
+/**
+ * Create a Mesh for each aiMesh
+ */
+alpha::Mesh * processMesh(aiMesh * mesh, const aiScene * /*scene*/)
 {
-    // assume second argument is a path to a model
-    char * path = argv[1];
-    printf("Importing model: %s\r\n", path);
+    //printf("parsing a mesh.\r\n");
+
+    std::vector<alpha::Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
+    {
+        alpha::Vertex v;
+
+        // process vertex positions
+        //printf("%f, %f, %f,\r\n", mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+
+        // load mesh vertex position
+        v.position.x = mesh->mVertices[i].x;
+        v.position.y = mesh->mVertices[i].y;
+        v.position.z = mesh->mVertices[i].z;
+
+        // load mesh normal coordinates
+        if (mesh->mNormals)
+        {
+            v.normal.x = mesh->mNormals[i].x;
+            v.normal.y = mesh->mNormals[i].y;
+            v.normal.z = mesh->mNormals[i].z;
+        }
+        else
+        {
+            v.normal.x = 0.f;
+            v.normal.y = 0.f;
+            v.normal.z = 0.f;
+        }
+
+        vertices.push_back(v);
+    }
+
+    // process indices
+    for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
+    {
+        aiFace face = mesh->mFaces[i];
+        for (unsigned int k = 0; k < face.mNumIndices; ++k)
+        {
+            //printf("%u, ", face.mIndices[k]);
+            indices.push_back(face.mIndices[k]);
+        }
+        //printf("\r\n");
+    }
+    
+    // process material
+    
+    //printf("done parsing mesh\r\n");
+
+    return new alpha::Mesh(vertices, indices);
+}
+
+/**
+ * Process all meshes at this node, an recurse through child nodes.
+ */
+void processNode(aiNode * node, const aiScene * scene, std::vector<alpha::Renderable *> & meshes)
+{
+    //printf("parsing a node\r\n");
+
+    for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+    {
+        aiMesh * mesh = scene->mMeshes[node->mMeshes[i]];
+        meshes.push_back(processMesh(mesh, scene));
+    }
+
+    for (unsigned int i = 0; i < node->mNumChildren; ++i)
+    {
+        processNode(node->mChildren[i], scene, meshes);
+    }
+
+    //printf("done parsing node.\r\n");
+}
+
+void ConvertModel(const std::string & source, const std::string & target)
+{
+    printf("Importing model: %s\r\n", source.c_str());
 
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = importer.ReadFile(source.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -33,8 +119,64 @@ int main(int /*argc*/, char * argv[])
     }
     else
     {
-        printf("Model loaded ...\r\n");
+        //printf("Loading model ...\r\n");
+        std::vector<alpha::Renderable *> meshes;
+        processNode(scene->mRootNode, scene, meshes);
+        alpha::Model mod(meshes);
+
+        std::ofstream out;
+        out.open(target, std::ios::out | std::ios::binary);
+        if (out.is_open())
+        {
+            alpha::SerializeModel(&mod, out);
+            out.close();
+        }
+
+        //// TEST
+        
+        std::ifstream infile;
+        infile.open(target, std::ios::in | std::ios::binary);
+        if (infile.is_open())
+        {
+            alpha::Model * mod = alpha::DeserializeModel(infile);
+            if (mod != nullptr)
+            {
+                delete mod;
+            }
+        }
+        
+        ////
     }
+}
+
+/**
+ * Import the model path provided by the user, and process the root node.
+ */
+int main(int argc, char * argv[])
+{
+    if (argc > 2)
+    {
+        std::string source = argv[1];
+        std::string target = argv[2];
+
+        ConvertModel(source, target);
+    }
+    else
+    {
+        printf("AssimpModelImporter Usage:");
+        printf("AssimpModelImport {source-input-path} {target-output-path}");
+    }
+
+    
+    //// test
+    
+    std::string source = "E:/Models/cube.fbx";
+    std::string target = "E:/Models/output/cube.am";
+    ConvertModel(source, target);
+    source = "E:/Models/Nanosuit2/nanosuit2.obj";
+    target = "E:/Models/output/nanosuit2.am";
+    ConvertModel(source, target);
+    
 
     return 0;
 }

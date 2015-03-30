@@ -46,6 +46,7 @@ public:
 private:
     std::shared_ptr<alpha::Entity> m_test;
     std::shared_ptr<alpha::Entity> m_test2;
+    std::shared_ptr<alpha::Entity> m_cube;
 
     std::shared_ptr<alpha::Entity> m_pCamera;
 

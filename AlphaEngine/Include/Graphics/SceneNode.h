@@ -24,7 +24,8 @@ limitations under the License.
 
 namespace alpha
 {
-    class RenderData;
+    class Asset;
+    class RenderSet;
 
     class SceneNode
     {
@@ -38,7 +39,7 @@ namespace alpha
         /** Check if this node is renderable, or just a spacer node. */
         bool IsRenderable() const;
 
-        RenderData * GetRenderData();
+        RenderSet * GetRenderSet();
 
         /** Attach children */
         void SetChildren(std::map<unsigned int, SceneNode *> children);
@@ -47,6 +48,9 @@ namespace alpha
 
         /** Build and return this nodes world transform */
         Matrix GetWorldTransform() const;
+
+        /** Set the model mesh that should for which render data will be build for this node */
+        void SetMesh(std::shared_ptr<Asset> pAsset);
 
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */
@@ -61,8 +65,11 @@ namespace alpha
         /** A handle to the SceneComponent which this SceneNode represents */
         std::shared_ptr<SceneComponent> m_pSceneComponent;
 
+        /** The mesh model that this node will build render data for. */
+        std::shared_ptr<Asset> m_pMeshAsset;
+
         /** Store render data, and only update/destroy it as needed */
-        RenderData * m_pRenderData;
+        RenderSet * m_pRenderSet;
     };
 }
 

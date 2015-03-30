@@ -19,7 +19,8 @@ components = {
         -- scene components exist as children of the root node, we
         -- can set the root nodes transform, and that will become the
         -- Entities transform in the world.
-		type = "primitive",
+		type = "mesh",
+		model = "Models/cube.am",
 		transform = {
 			position = { x = 0.0, y = 0.0, z = 0.0 },
 			rotation = { x = 0.0, y = 0.0, z = 0.0 },
@@ -28,7 +29,8 @@ components = {
 		components = {
 			-- components can exist inside other components
 			primitive_internal1 = {
-				type = "primitive",
+				type = "mesh",
+		        model = "Models/cube.am",
 				transform = {
 					position = { x = 4.0, y = 0.0, z = 0.0 },
 					rotation = { x = 0.0, y = 0.0, z = 0.0 },
@@ -36,7 +38,8 @@ components = {
 				},
 			},
 			primitive_internal2 = {
-				type = "primitive",
+				type = "mesh",
+        		model = "Models/cube.am",
 				transform = {
 					position = { x = -4.0, y = 0.0, z = 0.0 },
 					rotation = { x = 0.0, y = 0.0, z = 0.0 },
