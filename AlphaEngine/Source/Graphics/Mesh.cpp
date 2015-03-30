@@ -60,7 +60,6 @@ namespace alpha
         {
             sprintf(indBuf, "%d", index);
             stream.write(indBuf, UINT_LENGTH);
-            memset(indBuf, 0, UINT_LENGTH);
         }
     }
 
@@ -94,7 +93,6 @@ namespace alpha
         for (unsigned int i = 0; i < numIndices; ++i)
         {
             unsigned int ind;
-            memset(indBuf, 0, UINT_LENGTH);
             stream.read(indBuf, UINT_LENGTH);
             std::stringstream index_stream(indBuf);
             index_stream >> ind;
