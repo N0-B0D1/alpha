@@ -173,6 +173,9 @@ int main(int argc, char * argv[])
     std::string source = "E:/Models/cube.fbx";
     std::string target = "E:/Models/output/cube.am";
     ConvertModel(source, target);
+    source = "E:/Models/Nanosuit2/nanosuit2.obj";
+    target = "E:/Models/output/nanosuit2.am";
+    ConvertModel(source, target);
     
 
     return 0;

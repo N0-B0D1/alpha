@@ -18,6 +18,7 @@ limitations under the License.
 #include <sstream>
 
 #include "Graphics/Mesh.h"
+#include "Math/Constants.h"
 
 namespace alpha
 {
@@ -38,9 +39,9 @@ namespace alpha
     void Mesh::Serialize(std::ostream & stream) const
     {
         // output number of vertices
-        char * vertSizeBuf = new char[sizeof(unsigned int)];
+        char vertSizeBuf[UINT_LENGTH] = { 0 };
         sprintf(vertSizeBuf, "%d", (unsigned int)vertices.size());
-        stream.write(vertSizeBuf, sizeof(unsigned int));
+        stream.write(vertSizeBuf, UINT_LENGTH);
 
         // then output the actual vertex data one at a time
         for (auto vertex : vertices)
@@ -49,25 +50,26 @@ namespace alpha
         }
 
         // output the number of indices
-        char * indSizeBuf = new char[sizeof(unsigned int)];
+        char indSizeBuf[UINT_LENGTH] = { 0 };
         sprintf(indSizeBuf, "%d", (unsigned int)indices.size());
-        stream.write(indSizeBuf, sizeof(unsigned int));
+        stream.write(indSizeBuf, UINT_LENGTH);
 
         // then output the actual indices list
-        char * indBuf = new char[sizeof(unsigned int)];
+        char indBuf[UINT_LENGTH] = { 0 };
         for (auto index : indices)
         {
             sprintf(indBuf, "%d", index);
-            stream.write(indBuf, sizeof(unsigned int));
+            stream.write(indBuf, UINT_LENGTH);
+            memset(indBuf, 0, UINT_LENGTH);
         }
     }
 
     Mesh * Mesh::Deserialize(std::istream & stream)
     {
         // get the number of vertices to make
-        unsigned int numVerts;
-        char * vertBuf = new char[sizeof(unsigned int)];
-        stream.read(vertBuf, sizeof(unsigned int));
+        unsigned int numVerts = 0;
+        char vertBuf[UINT_LENGTH] = { 0 };
+        stream.read(vertBuf, UINT_LENGTH);
         std::stringstream vertStr(vertBuf);
         vertStr >> numVerts;
 
@@ -81,9 +83,9 @@ namespace alpha
         }
 
         // get the number of indices to pull from stream
-        unsigned int numIndices;
-        char * indBuf = new char[sizeof(unsigned int)];
-        stream.read(indBuf, sizeof(unsigned int));
+        unsigned int numIndices = 0;
+        char indBuf[UINT_LENGTH] = { 0 };
+        stream.read(indBuf, UINT_LENGTH);
         std::stringstream index_size_stream(indBuf);
         index_size_stream >> numIndices;
 
@@ -92,7 +94,8 @@ namespace alpha
         for (unsigned int i = 0; i < numIndices; ++i)
         {
             unsigned int ind;
-            stream.read(indBuf, sizeof(unsigned int));
+            memset(indBuf, 0, UINT_LENGTH);
+            stream.read(indBuf, UINT_LENGTH);
             std::stringstream index_stream(indBuf);
             index_stream >> ind;
             indices.push_back(ind);

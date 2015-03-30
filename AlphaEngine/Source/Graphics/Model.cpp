@@ -21,6 +21,7 @@ limitations under the License.
 #include "Graphics/Model.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Renderable.h"
+#include "Math/Constants.h"
 
 namespace alpha
 {
@@ -49,9 +50,9 @@ namespace alpha
         // serializing a model amounts to serializing all meshes
 
         // output the number of meshes
-        char * sizeBuf = new char[sizeof(unsigned int)];
+        char sizeBuf[UINT_LENGTH] = { 0 };
         sprintf(sizeBuf, "%d", (unsigned int)m_meshes.size());
-        stream.write(sizeBuf, sizeof(unsigned int));
+        stream.write(sizeBuf, UINT_LENGTH);
 
         // serialize each mesh
         for (Renderable * r : this->m_meshes)
@@ -64,9 +65,9 @@ namespace alpha
     Model * Model::Deserialize(std::istream & stream)
     {
         // first data point should be the number of meshes to make
-        unsigned int numMeshes;
-        char * buf = new char[sizeof(unsigned int)];
-        stream.read(buf, sizeof(unsigned int));
+        unsigned int numMeshes = 0;
+        char buf[UINT_LENGTH];
+        stream.read(buf, UINT_LENGTH);
         std::stringstream str(buf);
         str >> numMeshes;
 
