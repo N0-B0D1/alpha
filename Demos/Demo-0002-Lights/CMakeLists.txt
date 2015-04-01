@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECT(DemoBasic)
+PROJECT(Demo-0002-Lights)
 
 # define header files for the library
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.h")
@@ -22,7 +22,6 @@ source_group(Header FILES ${HEADER_FILES})
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp")
 source_group(Source FILES ${SOURCE_FILES})
 
-include_demo_source("HID")
 include_demo_source("Logic")
 
 # include engine source, and project source for demo
@@ -31,8 +30,8 @@ include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include/${ALPHA_BUILD_TARGET
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
 # create demo as an executable
-add_executable(DemoBasic WIN32 ${HEADER_FILES} ${SOURCE_FILES})
-target_link_libraries(DemoBasic ${ALPHA_LIBRARIES})
+add_executable(Demo-0002-Lights WIN32 ${HEADER_FILES} ${SOURCE_FILES})
+target_link_libraries(Demo-0002-Lights ${ALPHA_LIBRARIES})
 
 # Windows link and project settings for Visual Studio
 if (MSVC)
@@ -40,5 +39,5 @@ if (MSVC)
 endif (MSVC)
 
 # install demo to sdk folder
-install(TARGETS DemoBasic DESTINATION bin)
+install(TARGETS Demo-0002-Lights DESTINATION bin)
 
