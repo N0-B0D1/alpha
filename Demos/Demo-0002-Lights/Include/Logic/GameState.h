@@ -33,7 +33,8 @@ public:
     virtual std::shared_ptr<AState> VShutdown();
 
 private:
-    std::shared_ptr<alpha::Entity> m_cube;
+    std::shared_ptr<alpha::Entity> m_pCube;
+    std::shared_ptr<alpha::Entity> m_pCamera;
 };
 
 #endif // DEMO_GAME_STATE_H

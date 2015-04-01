@@ -223,6 +223,12 @@ namespace alpha
             GLuint projLoc = glGetUniformLocation(renderable->m_shaderProgram, "projection");
             glUniformMatrix4fv(projLoc, 1, GL_FALSE, &proj.m_11);
 
+            // XXX set test light color
+            GLuint objectColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "objectColor");
+            GLuint lightColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightColor");
+            glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
+            glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
+
             // set shader program
             glUseProgram(renderable->m_shaderProgram);
 
@@ -256,7 +262,7 @@ namespace alpha
         glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &info_log_length);
         std::vector<char> VertexShaderErrorMessage(info_log_length);
         glGetShaderInfoLog(vs, info_log_length, NULL, &VertexShaderErrorMessage[0]);
-        //LOG("GraphicsRenderer > Vertex Shader compilation result: ", &VertexShaderErrorMessage[0]);
+        LOG("GraphicsRenderer > Vertex Shader compilation result: ", &VertexShaderErrorMessage[0]);
 
         return vs;
     }
@@ -280,7 +286,7 @@ namespace alpha
         glGetShaderiv(ps, GL_INFO_LOG_LENGTH, &info_log_length);
         std::vector<char> VertexShaderErrorMessage(info_log_length);
         glGetShaderInfoLog(ps, info_log_length, NULL, &VertexShaderErrorMessage[0]);
-        //LOG("GraphicsRenderer > Pixel Shader compilation result: ", &VertexShaderErrorMessage[0]);
+        LOG("GraphicsRenderer > Pixel Shader compilation result: ", &VertexShaderErrorMessage[0]);
 
         return ps;
     }

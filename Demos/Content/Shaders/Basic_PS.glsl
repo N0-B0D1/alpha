@@ -1,6 +1,11 @@
 #version 330 core
-out vec3 color;
+out vec4 color;
 
-void main () {
-    color = vec3(1, 0, 0);
+uniform vec3 objectColor;
+uniform vec3 lightColor;
+
+void main ()
+{
+    vec3 ambient = 0.2f * lightColor;
+    color = vec4(ambient * objectColor, 1.0f);
 }
