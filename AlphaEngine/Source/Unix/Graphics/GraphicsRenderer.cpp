@@ -229,6 +229,10 @@ namespace alpha
             glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
             glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
 
+            // XXX set a test light position
+            GLuint lightPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightPos");
+            glUniform3f(lightPosLoc, 5.f, 2.f, 0.f);
+
             // set shader program
             glUseProgram(renderable->m_shaderProgram);
 
