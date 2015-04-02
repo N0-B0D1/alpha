@@ -422,8 +422,10 @@ namespace alpha
         };
         Vector4 vLightColors[2] =
         {
-            Vector4(0.5f, 0.5f, 0.5f, 1.0f),
-            Vector4(0.5f, 0.0f, 0.0f, 1.0f)
+            //Vector4(0.5f, 0.5f, 0.5f, 1.0f),
+            //Vector4(0.5f, 0.0f, 0.0f, 1.0f)
+            Vector4(1.f, 1.f, 1.f, 1.f),
+            Vector4(1.f, 1.f, 1.f, 1.f)
         };
 
         auto renderables = renderSet->GetRenderables();
@@ -455,7 +457,7 @@ namespace alpha
             cb.vLightColor[0] = vLightColors[0];
             cb.vLightColor[1] = vLightColors[1];
             cb.ambient = Vector4(0.2f, 0.2f, 0.2f, 1.0f);
-            cb.vOutputColor = Vector4(0.5f, 0.5f, 0.5f, 1.0f);
+            cb.vOutputColor = Vector4(1.f, 0.5f, 0.31f, 1.0f);
             m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
             // render object
