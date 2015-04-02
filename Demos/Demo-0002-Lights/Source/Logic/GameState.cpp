@@ -35,7 +35,7 @@ bool GameState::VInitialize()
     if (pCameraComponent)
     {
         // set start position for the camera
-        pCameraComponent->SetPosition(alpha::Vector3(0, -1.8, 10));
+        pCameraComponent->SetPosition(alpha::Vector3(0.f, -1.8f, 10.f));
 
         float degrees = 25;
         float radians = static_cast<float>(degrees * (3.14 / 180));
