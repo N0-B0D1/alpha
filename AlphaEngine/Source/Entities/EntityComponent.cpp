@@ -87,13 +87,15 @@ namespace alpha
         std::shared_ptr<LuaTable> scale = std::dynamic_pointer_cast<LuaTable>(table->Get("scale"));
 
         // get x, y, z values for each position, scale, and rotation.
-        m_vPosition.x = this->GetAxis(position, "x");
-        m_vPosition.y = this->GetAxis(position, "y");
-        m_vPosition.z = this->GetAxis(position, "z");
+        this->GetTableVarValue(position, "x", &m_vPosition.x);
+        this->GetTableVarValue(position, "y", &m_vPosition.y);
+        this->GetTableVarValue(position, "z", &m_vPosition.z);
 
-        m_vScale.x = this->GetAxis(scale, "x");
-        m_vScale.y = this->GetAxis(scale, "y");
-        m_vScale.z = this->GetAxis(scale, "z");
+        this->GetTableVarValue(scale, "x", &m_vScale.x);
+        this->GetTableVarValue(scale, "y", &m_vScale.y);
+        this->GetTableVarValue(scale, "z", &m_vScale.z);
+
+        // TODO - read rotation value and convert to quaternion
 
         this->UpdateTransform();
     }
@@ -129,7 +131,6 @@ namespace alpha
         m_vPosition.y = position.y;
         m_vPosition.z = position.z;
 
-        //m_dirty = true;
         this->UpdateTransform();
     }
     void SceneComponent::SetScale(const Vector3 & scale)
@@ -138,7 +139,6 @@ namespace alpha
         m_vScale.y = scale.y;
         m_vScale.z = scale.z;
 
-        //m_dirty = true;
         this->UpdateTransform();
     }
 
@@ -149,14 +149,16 @@ namespace alpha
         m_qRotation.z = rotation.z;
         m_qRotation.w = rotation.w;
 
-        //m_dirty = true;
         this->UpdateTransform();
     }
 
-    float SceneComponent::GetAxis(std::shared_ptr<LuaTable> table, const std::string axis)
+    void SceneComponent::GetTableVarValue(std::shared_ptr<LuaTable> table, const std::string key, float * const out)
     {
-        std::shared_ptr<LuaStatic<double> > var = std::dynamic_pointer_cast<LuaStatic<double>>(table->Get(axis));
-        return static_cast<float>(var->GetValue());
+        std::shared_ptr<LuaStatic<double> > var = std::dynamic_pointer_cast<LuaStatic<double>>(table->Get(key));
+        if (var != nullptr && out != nullptr)
+        {
+            *out = static_cast<float>(var->GetValue());
+        }
     }
 
     void SceneComponent::UpdateTransform()

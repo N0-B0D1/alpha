@@ -29,6 +29,7 @@ bool GameState::VInitialize()
     // setup the state, make actors, etc.
     m_pCube = CreateEntity("Entities/cube.lua");
     m_pCamera = CreateEntity("Entities/camera.lua");
+    m_pLight = CreateEntity("Entities/light.lua");
 
     // set our camera as the active camera for the scene
     auto pCameraComponent = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));

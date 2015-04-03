@@ -22,6 +22,7 @@ limitations under the License.
 #include "Entities/PrimitiveComponent.h"
 #include "Entities/MeshComponent.h"
 #include "Entities/CameraComponent.h"
+#include "Entities/LightComponent.h"
 #include "Entities/EntityScript.h"
 
 #include "Assets/AssetSystem.h"
@@ -35,6 +36,7 @@ namespace alpha
         RegisterComponent<PrimitiveComponent>(EntityComponent::GetIDFromName(PrimitiveComponent::sk_name));
         RegisterComponent<MeshComponent>(EntityComponent::GetIDFromName(MeshComponent::sk_name));
         RegisterComponent<CameraComponent>(EntityComponent::GetIDFromName(CameraComponent::sk_name));
+        RegisterComponent<LightComponent>(EntityComponent::GetIDFromName(LightComponent::sk_name));
     }
 
     std::shared_ptr<Entity> EntityFactory::CreateEntity(std::shared_ptr<Asset> asset)
