@@ -17,7 +17,7 @@ limitations under the License.
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/SceneManager.h"
-#include "Graphics/RenderData.h"
+#include "Graphics/Light.h"
 #include "Graphics/Camera.h"
 #include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
@@ -87,9 +87,10 @@ namespace alpha
 
         // XXX TODO - pass camera into scene manager so the renderables can be frustum culled ... maybe ?
         std::vector<RenderSet *> renderables = m_pSceneManager->GetRenderData();
+        std::vector<Light *> lights = m_pSceneManager->GetLightData();
 
         // Render the array of renderables from the given camera viewpoint
-        m_pRenderer->Render(m_pCamera, renderables);
+        m_pRenderer->Render(m_pCamera, renderables, lights);
     }
 
     void GraphicsSystem::SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)

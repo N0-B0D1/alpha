@@ -30,7 +30,7 @@ struct VS_INPUT
 struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
-    float3 Norm : TEXCOORD0;
+    float3 Norm : NORMAL;
 };
 
 

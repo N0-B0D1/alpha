@@ -17,6 +17,7 @@ limitations under the License.
 #include "Logic/GameState.h"
 #include "Entities/EntityComponent.h"
 #include "Entities/CameraComponent.h"
+#include "Entities/LightComponent.h"
 
 GameState::GameState()
     : m_pCube(nullptr)
@@ -44,6 +45,12 @@ bool GameState::VInitialize()
         pCameraComponent->SetRotation(q1);
 
         SetActiveCamera(pCameraComponent);
+    }
+
+    // move the light up and back
+    if (auto pLightComp = std::dynamic_pointer_cast<alpha::LightComponent>(m_pLight->Get("root")))
+    {
+        pLightComp->SetPosition(alpha::Vector3(2.f, 2.f, 2.f));
     }
 
     return true;

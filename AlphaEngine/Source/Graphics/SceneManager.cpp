@@ -16,12 +16,15 @@ limitations under the License.
 
 #include "Graphics/SceneManager.h"
 #include "Graphics/SceneNode.h"
-#include "Graphics/RenderData.h"
-#include "Graphics/RenderDataTask.h"
+//#include "Graphics/RenderData.h"
+//#include "Graphics/RenderDataTask.h"
+#include "Graphics/RenderSet.h"
+#include "Graphics/Light.h"
 #include "Assets/AssetSystem.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
 #include "Entities/MeshComponent.h"
+#include "Entities/LightComponent.h"
 #include "Events/EventDataPublisher.h"
 #include "Events/EventData_ThreadTaskCreated.h"
 #include "Toolbox/Logger.h"
@@ -50,6 +53,7 @@ namespace alpha
     {
         // clean the list, so it can be rebuilt.
         m_vRenderData.clear();
+        m_vLightData.clear();
 
         // walk the tree, and create render data for renderable scene nodes.
         // make a task for each entity scene node set, and publish it
@@ -70,7 +74,7 @@ namespace alpha
 
         for (auto pair : m_nodes)
         {
-            this->BuildRenderData(pair.first, pair.second, m_vRenderData);
+            this->BuildRenderData(pair.first, pair.second, m_vRenderData, m_vLightData);
         }
 
         return true;
@@ -80,6 +84,11 @@ namespace alpha
     {
         // get the latest set of render data to be rendered.
         return m_vRenderData;
+    }
+
+    std::vector<Light *> & SceneManager::GetLightData()
+    {
+        return m_vLightData;
     }
 
     bool SceneManager::Add(const std::shared_ptr<Entity> & entity)
@@ -144,6 +153,13 @@ namespace alpha
                 }
             }
 
+            if (auto light_component = std::dynamic_pointer_cast<LightComponent>(scene_component))
+            {
+                // create a light and set it on the scene noce
+                Light * pLight = new Light(light_component->GetColor());
+                node->SetLight(pLight);
+            }
+
             // do a depth first creation, so the list of child nodes can be passed into the scene node creation.
             std::map<unsigned int, SceneNode *> child_nodes = this->CreateNodes(component.second->GetComponents(), node);
             node->SetChildren(child_nodes);
@@ -154,7 +170,7 @@ namespace alpha
         return nodes;
     }
 
-    void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderSet *> & renderables) const
+    void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderSet *> & renderables, std::vector<Light *> & lights) const
     {
         // XXX not sure if the entity id is neede at this point ... refactor as needed.
 
@@ -162,18 +178,26 @@ namespace alpha
         for (auto iter : nodes)
         {
             // check this node
-            if (iter.second->IsRenderable())
+            
+            // prep the world transform for this node
+            Matrix world_transform = iter.second->GetWorldTransform();
+
+            // make render data for this node
+            if (RenderSet * rs = iter.second->GetRenderSet())
             {
-                // make render data for this node
-                RenderSet * rs = iter.second->GetRenderSet();
-                if (rs != nullptr)
-                {
-                    renderables.push_back(rs);
-                }
+                rs->worldTransform = world_transform;
+                renderables.push_back(rs);
+            }
+
+            // see if it is a light
+            if (Light * pLight = iter.second->GetLight())
+            {
+                pLight->worldTransform = world_transform;
+                lights.push_back(pLight);
             }
 
             // recurse each child node
-            this->BuildRenderData(entity_id, iter.second->GetChildren(), renderables);
+            this->BuildRenderData(entity_id, iter.second->GetChildren(), renderables, lights);
         }
     }
 }

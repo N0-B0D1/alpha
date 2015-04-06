@@ -27,6 +27,7 @@ limitations under the License.
 #include "Graphics/GraphicsWindow.h"
 #include "Graphics/RenderSet.h"
 #include "Graphics/Renderable.h"
+#include "Graphics/Light.h"
 #include "Graphics/Camera.h"
 #include "Math/Matrix.h"
 #include "Math/Matrix_Conversions.h"
@@ -94,7 +95,7 @@ namespace alpha
         return m_pWindow->Update(currentTime, elapsedTime);
     }
 
-    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables)
+    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights)
     {
         // 1. pre-render
         this->PreRender(renderables);
@@ -108,7 +109,7 @@ namespace alpha
 
         for (RenderSet * render_set : renderables)
         {
-            this->RenderRenderable(pCamera, render_set);
+            this->RenderRenderable(pCamera, render_set, lights);
         }
 
         // swap buffer that we just drew to.
@@ -338,6 +339,9 @@ namespace alpha
     {
         for (RenderSet * rs : renderSets)
         {
+            // XXX should determine the set of lights that will affect this render object set
+
+            // 
             this->PrepRenderable(rs);
         }
     }
@@ -412,21 +416,31 @@ namespace alpha
         }
     }
 
-    void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet)
+    void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)
     {
         // Setup our lighting parameters
         Vector4 vLightDirs[2] =
         {
-            Vector4(-0.577f, 0.577f, -0.577f, 1.0f),
-            Vector4(0.0f, 0.0f, -1.0f, 1.0f),
+            Vector4(0.f, 0.f, 0.f, 1.0f),
+            Vector4(0.f, 0.f, 0.f, 1.0f),
         };
         Vector4 vLightColors[2] =
         {
-            //Vector4(0.5f, 0.5f, 0.5f, 1.0f),
-            //Vector4(0.5f, 0.0f, 0.0f, 1.0f)
-            Vector4(1.f, 1.f, 1.f, 1.f),
-            Vector4(1.f, 1.f, 1.f, 1.f)
+            Vector4(0.f, 0.f, 0.f, 1.f),
+            Vector4(0.f, 0.f, 0.f, 1.f)
         };
+
+        switch (lights.size())
+        {
+        case 2:
+            vLightDirs[1] = Vector4(lights[1]->worldTransform.Position(), 1.f);
+            vLightColors[1] = lights[1]->m_color;
+        case 1:
+            vLightDirs[0] = Vector4(lights[0]->worldTransform.Position(), 1.f);
+            vLightColors[0] = lights[0]->m_color;
+        default:
+            break;
+        }
 
         auto renderables = renderSet->GetRenderables();
 

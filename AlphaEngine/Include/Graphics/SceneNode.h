@@ -26,6 +26,7 @@ namespace alpha
 {
     class Asset;
     class RenderSet;
+    class Light;
 
     class SceneNode
     {
@@ -52,6 +53,10 @@ namespace alpha
         /** Set the model mesh that should for which render data will be build for this node */
         void SetMesh(std::shared_ptr<Asset> pAsset);
 
+        /** Set the light data for this node */
+        void SetLight(Light * pLight);
+        Light * GetLight() const;
+
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */
         SceneNode * m_parent;
@@ -70,6 +75,9 @@ namespace alpha
 
         /** Store render data, and only update/destroy it as needed */
         RenderSet * m_pRenderSet;
+
+        /** Light information for this node */
+        Light * m_pLight;
     };
 }
 

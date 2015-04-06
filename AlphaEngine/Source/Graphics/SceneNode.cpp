@@ -20,6 +20,7 @@ limitations under the License.
 #include "Graphics/RenderSet.h"
 #include "Graphics/Model.h"
 #include "Graphics/ModelFile.h"
+#include "Graphics/Light.h"
 #include "Assets/Asset.h"
 #include "Entities/EntityComponent.h"
 #include "Math/Matrix.h"
@@ -31,6 +32,7 @@ namespace alpha
         : m_parent(pParent)
         , m_pSceneComponent(component)
         , m_pRenderSet(nullptr)
+        , m_pLight(nullptr)
     { }
     SceneNode::~SceneNode()
     {
@@ -41,6 +43,12 @@ namespace alpha
         }
         // destroy render data, so all gpu resources are released
         if (m_pRenderSet) { delete m_pRenderSet; }
+
+        // destroy light if set
+        if (m_pLight != nullptr)
+        {
+            delete m_pLight;
+        }
     }
 
     void SceneNode::SetParent(SceneNode * pParent)
@@ -56,11 +64,6 @@ namespace alpha
 
     RenderSet * SceneNode::GetRenderSet()
     {
-        if (m_pRenderSet != nullptr)
-        {
-            m_pRenderSet->worldTransform = this->GetWorldTransform();
-        }
-
         return m_pRenderSet;
     }
 
@@ -93,5 +96,15 @@ namespace alpha
             // Create the render set for this scene node
             m_pRenderSet = LoadModelFromAsset(pAsset);
         }
+    }
+
+    void SceneNode::SetLight(Light * pLight)
+    {
+        m_pLight = pLight;
+    }
+
+    Light * SceneNode::GetLight() const
+    {
+        return m_pLight;
     }
 }

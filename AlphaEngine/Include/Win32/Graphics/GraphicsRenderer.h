@@ -29,6 +29,7 @@ namespace alpha
 {
     class GraphicsWindow;
     class RenderSet;
+    class Light;
     class Asset;
     class Camera;
 
@@ -43,7 +44,7 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables);
+        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
 
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
 
@@ -79,7 +80,7 @@ namespace alpha
         /** PreRender takes a list of data that will be rendered, and preps it rendering. */
         void PreRender(std::vector<RenderSet *> renderSets);
         void PrepRenderable(RenderSet * renderSet);
-        void RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet);
+        void RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights);
 
         /** Compile a shader from a given asset file, which is presumably an hlsl file. */
         bool CompileShaderFromAsset(std::shared_ptr<Asset> asset, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);

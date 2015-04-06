@@ -1,5 +1,5 @@
-#ifndef ALPHA_MODEL_H
-#define ALPHA_MODEL_H
+#ifndef ALPHA_LIGHT_H
+#define ALPHA_LIGHT_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,30 +17,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <vector>
-
-#include "Graphics/RenderSet.h"
+#include "Math/Matrix.h"
+#include "Math/Vector4.h"
 
 namespace alpha
 {
-    class Mesh;
-
-    class Model : public RenderSet
+    /**
+     * Lights are Models that are rendered in the scene
+     * but also effect other renderables in the scene by emitting light.
+     */
+    class Light
     {
     public:
-        explicit Model(std::vector<Renderable *> meshes);
-        virtual ~Model();
+        Light();
+        explicit Light(Vector4 color);
+        virtual ~Light();
 
-        std::vector<Renderable *> GetRenderables();
+        Matrix worldTransform;
 
-        /** Write model data out to stream */
-        void Serialize(std::ostream & stream) const;
-        /** Read model data from stream, create a return a new model */
-        static Model * Deserialize(std::istream & stream);
-
-    private:
-        std::vector<Renderable *> m_meshes;
+        Vector4 m_color;
     };
 }
 
-#endif // ALPHA_MODEL_H
+#endif // ALPHA_LIGHT_H
