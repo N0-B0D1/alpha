@@ -31,6 +31,7 @@ bool GameState::VInitialize()
     m_pCube = CreateEntity("Entities/cube.lua");
     m_pCamera = CreateEntity("Entities/camera.lua");
     m_pLight = CreateEntity("Entities/light.lua");
+    m_pLight2 = CreateEntity("Entities/light.lua");
 
     // set our camera as the active camera for the scene
     auto pCameraComponent = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
@@ -51,6 +52,12 @@ bool GameState::VInitialize()
     if (auto pLightComp = std::dynamic_pointer_cast<alpha::LightComponent>(m_pLight->Get("root")))
     {
         pLightComp->SetPosition(alpha::Vector3(2.f, 2.f, 2.f));
+    }
+
+    // move second light forward and left
+    if (auto pLightComp = std::dynamic_pointer_cast<alpha::LightComponent>(m_pLight2->Get("root")))
+    {
+        pLightComp->SetPosition(alpha::Vector3(-2.f, 2.f, -2.f));
     }
 
     return true;

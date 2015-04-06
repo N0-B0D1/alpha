@@ -36,6 +36,7 @@ private:
     std::shared_ptr<alpha::Entity> m_pCube;
     std::shared_ptr<alpha::Entity> m_pCamera;
     std::shared_ptr<alpha::Entity> m_pLight;
+    std::shared_ptr<alpha::Entity> m_pLight2;
 };
 
 #endif // DEMO_GAME_STATE_H

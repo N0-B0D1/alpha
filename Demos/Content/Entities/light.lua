@@ -21,7 +21,7 @@ components = {
 			rotation = { x = 0.0, y = 0.0, z = 0.0 },
 			scale = { x = 1.0, y = 1.0, z = 1.0 }
 		},
-        color = { r = 1.0, g = 0.5, b = 0.0, a = 1.0 },
+        color = { r = 0.9, g = 0.9, b = 0.9, a = 1.0 },
 		components = {
 			-- define the lights physical representation as a child mesh component
 			light_mesh = {

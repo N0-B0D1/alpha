@@ -21,9 +21,7 @@ limitations under the License.
 #include <string>
 #include <vector>
 
-//#include<GL/gl.h>
 #include<GL/glx.h>
-//#include<GL/glu.h>
 
 namespace alpha
 {
@@ -31,6 +29,7 @@ namespace alpha
     class RenderSet;
     class Camera;
     class Asset;
+    class Light;
 
     class GraphicsRenderer
     {
@@ -44,7 +43,7 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables);
+        void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
 
         /** Set basic GLSL shaders for default usage */
         void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
@@ -58,7 +57,7 @@ namespace alpha
         /** Pre-render a set of Renderables */
         void PreRenderSet(RenderSet * renderSet);
         /** Render a set of renderables */
-        void SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet);
+        void SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights);
 
         RenderWindow *m_pWindow;
 
