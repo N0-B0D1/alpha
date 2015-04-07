@@ -1,13 +1,18 @@
-//--------------------------------------------------------------------------------------
-// File: Tutorial06.fx
+// Copyright 2014-2015 Jason R. Wendlandt
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-
-//--------------------------------------------------------------------------------------
-// Constant Buffer Variables
-//--------------------------------------------------------------------------------------
+// Constant Buffer
 cbuffer ConstantBuffer : register( b0 )
 {
 	matrix World;
@@ -19,8 +24,6 @@ cbuffer ConstantBuffer : register( b0 )
 	float4 vOutputColor;
 }
 
-
-//--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
     float4 Pos : POSITION;
@@ -33,28 +36,44 @@ struct PS_INPUT
     float3 Norm : NORMAL;
 };
 
-
-//--------------------------------------------------------------------------------------
 // Pixel Shader
-//--------------------------------------------------------------------------------------
 float4 PS( PS_INPUT input) : SV_Target
 {
+	float ambientStrength = 0.1f;
+	float specularStrength = 0.5f;
+	
     float4 finalColor = 0;
-	finalColor = ambient;
+	
+	float3 norm = normalize(input.Norm);
+	float4 viewPos = float4(View._41, View._42, View._43, 1.0f);
+	float4 viewDir = normalize(viewPos - input.Pos);
     
     //do NdotL lighting for 2 lights
-    for(int i=0; i<2; i++)
+    for(int i = 0; i < 2; i++)
     {
-        finalColor += saturate( dot( (float3)vLightDir[i],input.Norm) * vLightColor[i] );
+		// ambient
+		float4 ambientColor = ambientStrength * vLightColor[i];
+		
+		// diffuse
+		float4 lightDirection = normalize(vLightDir[i] * input.Pos);
+		float diff = max( dot(norm, lightDirection), 0.0);
+		float4 diffuse = diff * vLightColor[i];
+		
+		// specular
+		float3 reflectDirection = reflect(-lightDirection.xyz, norm.xyz);
+		float spec = pow(max(dot(viewDir.xyz, reflectDirection), 0.0), 32);
+		float4 specular = specularStrength * spec * vLightColor[i];
+		
+		finalColor += (ambientColor + diffuse + specular);
     }
+	
+	finalColor *= vOutputColor;
     finalColor.a = 1;
     return finalColor;
 }
 
 
-//--------------------------------------------------------------------------------------
-// PSSolid - render a solid color
-//--------------------------------------------------------------------------------------
+// Solid Pixel Shader
 float4 PSSolid( PS_INPUT input) : SV_Target
 {
     return vOutputColor;

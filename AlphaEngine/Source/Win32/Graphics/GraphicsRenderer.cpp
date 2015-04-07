@@ -507,7 +507,8 @@ namespace alpha
         {
             if (pErrorBlob)
             {
-                LOG_ERR("SHADER Failed to compile shader, ", reinterpret_cast<const char*>(pErrorBlob->GetBufferPointer()));
+                auto bufptr = reinterpret_cast<const char*>(pErrorBlob->GetBufferPointer());
+                LOG_ERR("SHADER Failed to compile shader, ", bufptr);
                 pErrorBlob->Release();
             }
             return false;
