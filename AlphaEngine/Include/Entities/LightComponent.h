@@ -1,5 +1,5 @@
-#ifndef ALPHA_MODEL_H
-#define ALPHA_MODEL_H
+#ifndef ALPHA_LIGHT_COMPONENT_H
+#define ALPHA_LIGHT_COMPONENT_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,30 +17,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <vector>
-
-#include "Graphics/RenderSet.h"
+#include "Entities/EntityComponent.h"
+#include "Math/Vector4.h"
 
 namespace alpha
 {
-    class Mesh;
-
-    class Model : public RenderSet
+    class LightComponent : public SceneComponent
     {
     public:
-        explicit Model(std::vector<Renderable *> meshes);
-        virtual ~Model();
+        static const std::string sk_name;
 
-        std::vector<Renderable *> GetRenderables();
+        virtual ~LightComponent();
 
-        /** Write model data out to stream */
-        void Serialize(std::ostream & stream) const;
-        /** Read model data from stream, create a return a new model */
-        static Model * Deserialize(std::istream & stream);
+        virtual void VInitialize(std::shared_ptr<LuaVar> var);
+        virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
+        virtual std::string VGetName() const;
+
+        Vector4 GetColor() const;
+        void SetColor(const Vector4 & color);
 
     private:
-        std::vector<Renderable *> m_meshes;
+        float GetColorVal(const std::string & key);
+        Vector4 m_color;
     };
 }
 
-#endif // ALPHA_MODEL_H
+#endif // ALPHA_LIGHT_COMPONENT_H

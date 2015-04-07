@@ -1,13 +1,18 @@
-//--------------------------------------------------------------------------------------
-// File: Tutorial06.fx
+// Copyright 2014-2015 Jason R. Wendlandt
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-
-//--------------------------------------------------------------------------------------
-// Constant Buffer Variables
-//--------------------------------------------------------------------------------------
+// Constant Buffer
 cbuffer ConstantBuffer : register( b0 )
 {
     matrix World;
@@ -19,8 +24,7 @@ cbuffer ConstantBuffer : register( b0 )
     float4 vOutputColor;
 }
 
-
-//--------------------------------------------------------------------------------------
+// Typedef input/output
 struct VS_INPUT
 {
     float4 Pos : POSITION;
@@ -30,13 +34,10 @@ struct VS_INPUT
 struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
-    float3 Norm : TEXCOORD0;
+    float3 Norm : NORMAL;
 };
 
-
-//--------------------------------------------------------------------------------------
 // Vertex Shader
-//--------------------------------------------------------------------------------------
 PS_INPUT VS( VS_INPUT input )
 {
     PS_INPUT output = (PS_INPUT)0;

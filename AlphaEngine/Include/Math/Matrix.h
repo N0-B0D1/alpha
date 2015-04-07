@@ -37,6 +37,8 @@ namespace alpha
                float _31, float _32, float _33, float _34,
                float _41, float _42, float _43, float _44);
 
+        Vector3 Position() const;
+
         static Matrix Rotate(const Quaternion & rotation);
         static Matrix Translate(const Vector3 & position);
         static Matrix Scale(const Vector3 & scale);

@@ -38,6 +38,11 @@ namespace alpha
         , m_41(_41), m_42(_42), m_43(_43), m_44(_44)
     { }
 
+    Vector3 Matrix::Position() const
+    {
+        return Vector3(m_41, m_42, m_43);
+    }
+
     Matrix Matrix::Rotate(const Quaternion & rotation)
     {
         float x2 = rotation.x * rotation.x;

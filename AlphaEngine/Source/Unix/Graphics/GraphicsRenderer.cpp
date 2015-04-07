@@ -30,6 +30,8 @@ limitations under the License.
 #include "Graphics/RenderSet.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Camera.h"
+#include "Graphics/Light.h"
+#include "Math/Vector4.h"
 
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
@@ -73,7 +75,7 @@ namespace alpha
 		return true;
 	}
 
-    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets)
+    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets, std::vector<Light *> lights)
     {
         this->PreRender(render_sets);
 
@@ -87,7 +89,7 @@ namespace alpha
 
         for (auto rs : render_sets)
         {
-            this->SetRender(pCamera, rs);
+            this->SetRender(pCamera, rs, lights);
         }
 
         // swap buffer to display cool new render objects.
@@ -198,16 +200,54 @@ namespace alpha
         }
     }
 
-    void GraphicsRenderer::SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet)
+    void GraphicsRenderer::SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)
     {
 
         // get/make view and projection matrix
         // view matrix
         Matrix view = pCamera->GetView();
+        Vector3 viewPosition = view.Position();
         // projection matrix
         Matrix proj = pCamera->GetProjection();
         
         auto renderables = renderSet->GetRenderables();
+
+        // Setup our lighting parameters
+        float vLightDirs[6] =
+        {
+            0.f, 0.f, 0.f,
+            0.f, 0.f, 0.f
+        };
+        float vLightColors[6] =
+        {
+            0.f, 0.f, 0.f,
+            0.f, 0.f, 0.f
+        };
+
+        Vector3 lightPos;
+        switch (lights.size())
+        {
+        case 2:
+            lightPos = lights[1]->worldTransform.Position();
+            vLightDirs[3] = lightPos.x;
+            vLightDirs[4] = lightPos.y;
+            vLightDirs[5] = lightPos.z;
+
+            vLightColors[3] = lights[1]->m_color.x;
+            vLightColors[4] = lights[1]->m_color.y;
+            vLightColors[5] = lights[1]->m_color.z;
+        case 1:
+            lightPos = lights[0]->worldTransform.Position();
+            vLightDirs[0] = lightPos.x;
+            vLightDirs[1] = lightPos.y;
+            vLightDirs[2] = lightPos.z;
+
+            vLightColors[0] = lights[0]->m_color.x;
+            vLightColors[1] = lights[0]->m_color.y;
+            vLightColors[2] = lights[0]->m_color.z;
+        default:
+            break;
+        }
 
         for (Renderable * renderable : renderables)
         {
@@ -222,6 +262,22 @@ namespace alpha
             // attach projection matrix to shader
             GLuint projLoc = glGetUniformLocation(renderable->m_shaderProgram, "projection");
             glUniformMatrix4fv(projLoc, 1, GL_FALSE, &proj.m_11);
+
+            // XXX set test light color
+            GLuint objectColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "objectColor");
+            glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
+
+            // set light colors
+            GLuint lightColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightColor");
+            glUniform3fv(lightColorLoc, 6, vLightColors);
+
+            // set light positions
+            GLuint lightPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightPos");
+            glUniform3fv(lightPosLoc, 6, vLightDirs);
+
+            // set specular lighting variables
+            GLuint viewPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "viewPos");
+            glUniform3f(viewPosLoc, viewPosition.x, viewPosition.y, viewPosition.z);
 
             // set shader program
             glUseProgram(renderable->m_shaderProgram);
@@ -256,7 +312,7 @@ namespace alpha
         glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &info_log_length);
         std::vector<char> VertexShaderErrorMessage(info_log_length);
         glGetShaderInfoLog(vs, info_log_length, NULL, &VertexShaderErrorMessage[0]);
-        //LOG("GraphicsRenderer > Vertex Shader compilation result: ", &VertexShaderErrorMessage[0]);
+        LOG("GraphicsRenderer > Vertex Shader compilation result: ", &VertexShaderErrorMessage[0]);
 
         return vs;
     }
@@ -280,7 +336,7 @@ namespace alpha
         glGetShaderiv(ps, GL_INFO_LOG_LENGTH, &info_log_length);
         std::vector<char> VertexShaderErrorMessage(info_log_length);
         glGetShaderInfoLog(ps, info_log_length, NULL, &VertexShaderErrorMessage[0]);
-        //LOG("GraphicsRenderer > Pixel Shader compilation result: ", &VertexShaderErrorMessage[0]);
+        LOG("GraphicsRenderer > Pixel Shader compilation result: ", &VertexShaderErrorMessage[0]);
 
         return ps;
     }

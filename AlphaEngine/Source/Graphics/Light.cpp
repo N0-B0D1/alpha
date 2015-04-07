@@ -1,6 +1,3 @@
-#ifndef VECTOR_4_H
-#define VECTOR_4_H
-
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -17,21 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Math/Vector3.h"
+#include "Graphics/Light.h"
 
 namespace alpha
 {
-    struct Vector4
+    Light::Light()
+        : m_color(1.f, 1.f, 1.f, 1.f)
+    { }
+    Light::Light(Vector4 color)
     {
-        float x, y, z, w;
-
-        Vector4();
-        Vector4(float _x, float _y, float _z, float _w);
-        Vector4(const Vector3 & vec3, float _w);
-        Vector4(const Vector4 &vec);
-
-        Vector4 & operator=(const Vector4 & right);
-    };
+        m_color = color;
+    }
+    Light::~Light() { }
 }
-
-#endif // VECTOR_4_H

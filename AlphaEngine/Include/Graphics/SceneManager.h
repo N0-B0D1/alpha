@@ -31,6 +31,7 @@ namespace alpha
     class EntityComponent;
     class SceneNode;
     class RenderSet;
+    class Light;
 
     /**
      * \brief The SceneManager manages the logical scene layout.
@@ -46,9 +47,13 @@ namespace alpha
 
         /**
          * \brief Constructs and array of data to be rendered on the next render call.
-         * \param renderables In parameter, render data will be constructed and added to this array.
          */
         std::vector<RenderSet *> & GetRenderData();
+
+        /**
+         * \brief Retrieve the lastest list of lights that is ready to be rendered.
+         */
+        std::vector<Light *> & GetLightData();
 
         /**
          * \brief Add an entity to the scene.
@@ -73,7 +78,7 @@ namespace alpha
         std::map<unsigned int, SceneNode *> CreateNodes(const std::map<unsigned int, std::shared_ptr<EntityComponent> > components, SceneNode * pParent);
 
         /** Recursively build render data for an entities scene node map */
-        void BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderSet *> & renderables) const;
+        void BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderSet *> & renderables, std::vector<Light *> & lights) const;
 
         /** Handle to the asset system, so that the scene manager can pull in any necessary assets */
         std::weak_ptr<AssetSystem> m_pAssets;
@@ -82,6 +87,8 @@ namespace alpha
         std::map<unsigned int, std::map<unsigned int, SceneNode *> > m_nodes;
         /** Store Render Data array for easy retrieval when rendering. */
         std::vector<RenderSet *> m_vRenderData;
+        /** Store a list of lights for use on the next render call. */
+        std::vector<Light *> m_vLightData;
 
         /** Handle to task publisher for creating thread tasks. */
         std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pTaskPublisher;

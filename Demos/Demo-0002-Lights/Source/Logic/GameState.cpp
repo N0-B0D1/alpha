@@ -16,16 +16,50 @@ limitations under the License.
 
 #include "Logic/GameState.h"
 #include "Entities/EntityComponent.h"
+#include "Entities/CameraComponent.h"
+#include "Entities/LightComponent.h"
 
 GameState::GameState()
-    : m_cube(nullptr)
+    : m_pCube(nullptr)
+    , m_pCamera(nullptr)
 { }
 GameState::~GameState() { }
 
 bool GameState::VInitialize()
 {
     // setup the state, make actors, etc.
-    m_cube = CreateEntity("Entities/cube.lua");
+    m_pCube = CreateEntity("Entities/cube.lua");
+    m_pCamera = CreateEntity("Entities/camera.lua");
+    m_pLight = CreateEntity("Entities/light.lua");
+    m_pLight2 = CreateEntity("Entities/light.lua");
+
+    // set our camera as the active camera for the scene
+    auto pCameraComponent = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
+    if (pCameraComponent)
+    {
+        // set start position for the camera
+        pCameraComponent->SetPosition(alpha::Vector3(0.f, -1.8f, 10.f));
+
+        float degrees = 25;
+        float radians = static_cast<float>(degrees * (3.14 / 180));
+        alpha::Quaternion q1 = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 1, 0), radians);
+        pCameraComponent->SetRotation(q1);
+
+        SetActiveCamera(pCameraComponent);
+    }
+
+    // move the light up and back
+    if (auto pLightComp = std::dynamic_pointer_cast<alpha::LightComponent>(m_pLight->Get("root")))
+    {
+        pLightComp->SetPosition(alpha::Vector3(2.f, 2.f, 2.f));
+    }
+
+    // move second light forward and left
+    if (auto pLightComp = std::dynamic_pointer_cast<alpha::LightComponent>(m_pLight2->Get("root")))
+    {
+        pLightComp->SetPosition(alpha::Vector3(-2.f, 2.f, -2.f));
+    }
+
     return true;
 }
 

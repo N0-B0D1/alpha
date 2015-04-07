@@ -102,13 +102,14 @@ namespace alpha
         void SetScale(const Vector3 & scale);
         void SetRotation(const Quaternion & rotation);
 
-    private:
+    protected:
         /** Helper function for retrieving x, y, or z vars from script tables */
-        float GetAxis(std::shared_ptr<LuaTable> table, const std::string axis);
+        void GetTableVarValue(std::shared_ptr<LuaTable> table, const std::string axis, float * const out);
 
         /** Update the transform matrix */
         void UpdateTransform();
 
+    private:
         /** This components relative transform */
         Vector3 m_vPosition;
         Vector3 m_vScale;
