@@ -33,18 +33,21 @@ limitations under the License.
 #include "Graphics/Light.h"
 #include "Math/Vector4.h"
 
+#include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    const std::string GraphicsRenderer::sk_shader_extension = "glsl";
-
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
-    bool GraphicsRenderer::Initialize()
+    bool GraphicsRenderer::Initialize(std::shared_ptr<AssetSystem> pAssets)
     {
+        // prep shader assets
+        m_vsDefaultShader = pAssets->GetAsset("Shaders/gl_vs_normal.glsl");
+        m_psDefaultShader = pAssets->GetAsset("Shaders/gl_ps_normal.glsl");
+
         LOG("GraphicsRenderer > Creating render window.");
 		m_pWindow = new RenderWindow();
 		if (!m_pWindow->Initialize())
@@ -94,12 +97,6 @@ namespace alpha
 
         // swap buffer to display cool new render objects.
         glfwSwapBuffers(window);
-    }
-
-    void GraphicsRenderer::SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader)
-    {
-        m_psDefaultShader = psShader;
-        m_vsDefaultShader = vsShader;
     }
 
     bool GraphicsRenderer::InitializeDevice()

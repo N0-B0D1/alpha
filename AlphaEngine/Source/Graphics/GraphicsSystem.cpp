@@ -39,14 +39,10 @@ namespace alpha
 
     bool GraphicsSystem::VInitialize()
     {
-        // load some basic shaders to use for everything until proper load pipeline is implemented
-        auto ps_shader = this->LoadShaderFile("Shaders/Basic_PS");
-        auto vs_shader = this->LoadShaderFile("Shaders/Basic_VS");
 
         // OS specific renderer
         m_pRenderer = new GraphicsRenderer();
-        m_pRenderer->SetBasicShaders(ps_shader, vs_shader);
-        if (!m_pRenderer->Initialize())
+        if (!m_pRenderer->Initialize(m_pAssets))
         {
             return false;
         }
@@ -140,14 +136,5 @@ namespace alpha
     std::shared_ptr<AEventDataSubscriber> GraphicsSystem::GetSetActiveCameraSubscriber() const
     {
         return m_subSetActiveCamera;
-    }
-
-    std::shared_ptr<Asset> GraphicsSystem::LoadShaderFile(const std::string & name)
-    {
-        std::string shader_path = std::string(name.c_str());
-        shader_path.append(".");
-        shader_path.append(GraphicsRenderer::sk_shader_extension.c_str());
-        std::shared_ptr<Asset> asset = m_pAssets->GetAsset(shader_path.c_str());
-        return asset;
     }
 }
