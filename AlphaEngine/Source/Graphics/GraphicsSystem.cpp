@@ -39,7 +39,6 @@ namespace alpha
 
     bool GraphicsSystem::VInitialize()
     {
-
         // OS specific renderer
         m_pRenderer = new GraphicsRenderer();
         if (!m_pRenderer->Initialize(m_pAssets))

@@ -31,6 +31,7 @@ namespace alpha
     class RenderSet;
     class Light;
     class Asset;
+    class AssetSystem;
     class Camera;
 
     class GraphicsRenderer
@@ -40,13 +41,11 @@ namespace alpha
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
-        bool Initialize();
+        bool Initialize(std::shared_ptr<AssetSystem> pAssets);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
         void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
-
-        void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
 
         // for each object to be rendered
         //
@@ -64,11 +63,6 @@ namespace alpha
         // -- pre-render ->>-------------------------------------------|
 
     private:
-        //virtual bool VUpdate(double currentTime, double elapsedTime);
-
-        // DirectX methods
-        //static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-        //HRESULT InitializeWindow();
         HRESULT InitializeDevice();
         void CleanupDevice();
 

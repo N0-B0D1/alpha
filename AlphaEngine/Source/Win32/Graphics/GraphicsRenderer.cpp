@@ -33,6 +33,7 @@ limitations under the License.
 #include "Math/Matrix_Conversions.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
+#include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
 
@@ -58,8 +59,11 @@ namespace alpha
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
-    bool GraphicsRenderer::Initialize()
+    bool GraphicsRenderer::Initialize(std::shared_ptr<AssetSystem> pAssets)
     {
+        m_vsDefaultShader = pAssets->GetAsset("Shaders/dx_vs_normal.hlsl");
+        m_psDefaultShader = pAssets->GetAsset("Shaders/dx_ps_normal.hlsl");
+
         m_pWindow = new GraphicsWindow();
         if (!m_pWindow->Initialize())
         {
@@ -114,12 +118,6 @@ namespace alpha
 
         // swap buffer that we just drew to.
         m_pSwapChain->Present(0, 0);
-    }
-
-    void GraphicsRenderer::SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader)
-    {
-        m_psDefaultShader = psShader;
-        m_vsDefaultShader = vsShader;
     }
 
     HRESULT GraphicsRenderer::InitializeDevice()
