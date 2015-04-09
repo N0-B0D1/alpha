@@ -16,15 +16,12 @@ limitations under the License.
 
 #include "Graphics/SceneManager.h"
 #include "Graphics/SceneNode.h"
-//#include "Graphics/RenderData.h"
-//#include "Graphics/RenderDataTask.h"
 #include "Graphics/RenderSet.h"
 #include "Graphics/Light.h"
 #include "Assets/AssetSystem.h"
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
 #include "Entities/MeshComponent.h"
-#include "Entities/LightComponent.h"
 #include "Events/EventDataPublisher.h"
 #include "Events/EventData_ThreadTaskCreated.h"
 #include "Toolbox/Logger.h"
@@ -153,10 +150,11 @@ namespace alpha
                 }
             }
 
-            if (auto light_component = std::dynamic_pointer_cast<LightComponent>(scene_component))
+            //if (auto light_component = std::dynamic_pointer_cast<LightComponent>(scene_component))
+            if (scene_component->EmitsLight())
             {
                 // create a light and set it on the scene noce
-                Light * pLight = new Light(light_component->GetColor());
+                Light * pLight = new Light(scene_component->GetColor());
                 node->SetLight(pLight);
             }
 
@@ -182,15 +180,23 @@ namespace alpha
             // prep the world transform for this node
             Matrix world_transform = iter.second->GetWorldTransform();
 
+            Light * pLight = iter.second->GetLight();
+
             // make render data for this node
             if (RenderSet * rs = iter.second->GetRenderSet())
             {
                 rs->worldTransform = world_transform;
+
+                // if this renderable has a light attached
+                // then it emits light and should use a different
+                // shader
+                rs->emitsLight = (pLight != nullptr);
+
                 renderables.push_back(rs);
             }
 
             // see if it is a light
-            if (Light * pLight = iter.second->GetLight())
+            if (pLight != nullptr)
             {
                 pLight->worldTransform = world_transform;
                 lights.push_back(pLight);

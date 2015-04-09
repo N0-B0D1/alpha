@@ -15,24 +15,14 @@
 -- component data table
 components = {
 	root = {
-		type = "light",
+		type = "mesh",
+		model = "Models/cube.am",
 		transform = {
 			position = { x = 0.0, y = 0.0, z = 0.0 },
 			rotation = { x = 0.0, y = 0.0, z = 0.0 },
-			scale = { x = 1.0, y = 1.0, z = 1.0 }
+			scale = { x = 0.25, y = 0.25, z = 0.25 }
 		},
-        color = { r = 0.9, g = 0.9, b = 0.9, a = 1.0 },
-		components = {
-			-- define the lights physical representation as a child mesh component
-			light_mesh = {
-				type = "mesh",
-		        model = "Models/cube.am",
-				transform = {
-					position = { x = 0.0, y = 0.0, z = 0.0 },
-					rotation = { x = 0.0, y = 0.0, z = 0.0 },
-					scale = { x = 0.5, y = 0.5, z = 0.5 }
-				},
-			}
-		}
+        light_emitter = true,
+        light_color = { r = 0.9, g = 0.9, b = 0.9, a = 1.0 }
 	}
 }

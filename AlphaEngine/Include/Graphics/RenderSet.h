@@ -42,6 +42,9 @@ namespace alpha
         std::string m_psEntryPoint;
 
         Matrix worldTransform;
+
+        /** Render set is a light */
+        bool emitsLight;
     };
 }
 

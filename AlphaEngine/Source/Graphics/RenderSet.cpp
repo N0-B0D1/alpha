@@ -20,6 +20,7 @@ namespace alpha
 {
     RenderSet::RenderSet(std::string psEntryPoint /*= "PS"*/)
         : m_psEntryPoint(psEntryPoint)
+        , emitsLight(false)
     { }
     RenderSet::~RenderSet() { }
 }

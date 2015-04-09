@@ -70,34 +70,59 @@ namespace alpha
 
     void SceneComponent::VInitialize(std::shared_ptr<LuaVar> var)
     {
-        // var should represent the transform table from the SceneComponent
-        // not the top level scene component.
+        // var should represent a LUA table containing some of the following variables:
+        // 1. transform
+        // 2. light_emitter
+        // 3. light_color
 
         if (var->GetVarType() != VT_TABLE)
         {
-            LOG_ERR("Script variable data does not represent a valid transform table.");
+            LOG_ERR("Script variable data does not represent a valid data table.");
             return;
         }
 
-        std::shared_ptr<LuaTable> table = std::dynamic_pointer_cast<LuaTable>(var);
+        std::shared_ptr<LuaTable> data_table = std::dynamic_pointer_cast<LuaTable>(var);
 
-        // get the position, scale, and rotation tables.
-        std::shared_ptr<LuaTable> position = std::dynamic_pointer_cast<LuaTable>(table->Get("position"));
-        std::shared_ptr<LuaTable> rotation = std::dynamic_pointer_cast<LuaTable>(table->Get("rotation"));
-        std::shared_ptr<LuaTable> scale = std::dynamic_pointer_cast<LuaTable>(table->Get("scale"));
+        // get and handle transform
+        std::shared_ptr<LuaTable> transform_table = std::dynamic_pointer_cast<LuaTable>(data_table->Get("transform"));
+        if (transform_table != nullptr)
+        {
+            // get the position, scale, and rotation tables.
+            std::shared_ptr<LuaTable> position = std::dynamic_pointer_cast<LuaTable>(transform_table->Get("position"));
+            std::shared_ptr<LuaTable> rotation = std::dynamic_pointer_cast<LuaTable>(transform_table->Get("rotation"));
+            std::shared_ptr<LuaTable> scale = std::dynamic_pointer_cast<LuaTable>(transform_table->Get("scale"));
 
-        // get x, y, z values for each position, scale, and rotation.
-        this->GetTableVarValue(position, "x", &m_vPosition.x);
-        this->GetTableVarValue(position, "y", &m_vPosition.y);
-        this->GetTableVarValue(position, "z", &m_vPosition.z);
+            // get x, y, z values for each position, scale, and rotation.
+            this->GetTableVarValue(position, "x", &m_vPosition.x);
+            this->GetTableVarValue(position, "y", &m_vPosition.y);
+            this->GetTableVarValue(position, "z", &m_vPosition.z);
 
-        this->GetTableVarValue(scale, "x", &m_vScale.x);
-        this->GetTableVarValue(scale, "y", &m_vScale.y);
-        this->GetTableVarValue(scale, "z", &m_vScale.z);
+            this->GetTableVarValue(scale, "x", &m_vScale.x);
+            this->GetTableVarValue(scale, "y", &m_vScale.y);
+            this->GetTableVarValue(scale, "z", &m_vScale.z);
 
-        // TODO - read rotation value and convert to quaternion
+            // TODO - read rotation value and convert to quaternion
 
-        this->UpdateTransform();
+            this->UpdateTransform();
+        }
+
+        // get light emitter state
+        m_bLightEmitter = false;
+        auto emitter_var = std::dynamic_pointer_cast<LuaStatic<bool>>(data_table->Get("light_emitter"));
+        if (emitter_var != nullptr)
+        {
+            m_bLightEmitter = emitter_var->GetValue();
+        }
+
+        // get light color value
+        auto light_color_table = std::dynamic_pointer_cast<LuaTable>(data_table->Get("light_color"));
+        if (light_color_table != nullptr)
+        {
+            this->GetTableVarValue(light_color_table, "r", &m_vLightColor.x);
+            this->GetTableVarValue(light_color_table, "g", &m_vLightColor.y);
+            this->GetTableVarValue(light_color_table, "b", &m_vLightColor.z);
+            this->GetTableVarValue(light_color_table, "z", &m_vLightColor.w);
+        }
     }
 
     bool SceneComponent::IsDirty() const
@@ -150,6 +175,16 @@ namespace alpha
         m_qRotation.w = rotation.w;
 
         this->UpdateTransform();
+    }
+
+    bool SceneComponent::EmitsLight() const
+    {
+        return m_bLightEmitter;
+    }
+
+    Vector4 SceneComponent::GetColor() const
+    {
+        return m_vLightColor;
     }
 
     void SceneComponent::GetTableVarValue(std::shared_ptr<LuaTable> table, const std::string key, float * const out)

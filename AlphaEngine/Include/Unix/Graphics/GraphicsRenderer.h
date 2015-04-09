@@ -59,6 +59,8 @@ namespace alpha
 
         std::shared_ptr<Asset> m_vsDefaultShader;
         std::shared_ptr<Asset> m_psDefaultShader;
+        std::shared_ptr<Asset> m_vsLightShader;
+        std::shared_ptr<Asset> m_psLightShader;
         
         const GLubyte *m_pRendererInfo;
         const GLubyte *m_pVersionInfo;

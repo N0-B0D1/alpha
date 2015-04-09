@@ -38,11 +38,7 @@ namespace alpha
         }
 
         // init base scene component
-        std::shared_ptr<LuaVar> transform = table->Get("transform");
-        if (transform != nullptr)
-        {
-            SceneComponent::VInitialize(transform);
-        }
+        SceneComponent::VInitialize(var);
     }
 
     bool MeshComponent::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)

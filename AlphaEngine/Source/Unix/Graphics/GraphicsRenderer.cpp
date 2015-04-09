@@ -47,6 +47,8 @@ namespace alpha
         // prep shader assets
         m_vsDefaultShader = pAssets->GetAsset("Shaders/gl_vs_normal.glsl");
         m_psDefaultShader = pAssets->GetAsset("Shaders/gl_ps_normal.glsl");
+        m_vsLightShader = pAssets->GetAsset("Shaders/gl_vs_light.glsl");
+        m_psLightShader = pAssets->GetAsset("Shaders/gl_ps_light.glsl");
 
         LOG("GraphicsRenderer > Creating render window.");
 		m_pWindow = new RenderWindow();
@@ -105,7 +107,7 @@ namespace alpha
         if (glewInit() != GLEW_OK)
         {
             LOG_ERR("Failed to initialize GLEW.");
-            return -1;
+            return false;
         }
 
         // store renderer and gl version ... for debug info?
@@ -134,6 +136,10 @@ namespace alpha
     void GraphicsRenderer::PreRenderSet(RenderSet * renderSet)
     {
         auto renderables = renderSet->GetRenderables();
+
+        // set the shader to user for renderables in this set
+        auto vsShader = renderSet->emitsLight ? m_vsLightShader : m_vsDefaultShader;
+        auto psShader = renderSet->emitsLight ? m_psLightShader : m_psDefaultShader;
 
         for (Renderable * renderable : renderables)
         {
@@ -170,10 +176,10 @@ namespace alpha
             if (renderable->m_shaderProgram == 0)
             {
                 // create vertex shader
-                GLuint vs = this->CreateVertexShaderFromAsset(m_vsDefaultShader);
+                GLuint vs = this->CreateVertexShaderFromAsset(vsShader);
                 
                 // create pixel/fragment shader
-                GLuint ps = this->CreatePixelShaderFromAsset(m_psDefaultShader);
+                GLuint ps = this->CreatePixelShaderFromAsset(psShader);
 
                 // make shader program, to render with
                 renderable->m_shaderProgram = glCreateProgram();
@@ -188,7 +194,7 @@ namespace alpha
                 glGetProgramiv(renderable->m_shaderProgram, GL_INFO_LOG_LENGTH, &info_log_length);
                 std::vector<char> ProgramErrorMessage( int(1) > info_log_length ? int(1) : info_log_length );
                 glGetProgramInfoLog(renderable->m_shaderProgram, info_log_length, NULL, &ProgramErrorMessage[0]);
-                //LOG("GraphicsRenderer > Shader program results: ", &ProgramErrorMessage[0]);
+                LOG("GraphicsRenderer > Shader compile program results: ", &ProgramErrorMessage[0]);
 
                 // now that we've built the shader program, dispose of the shaders
                 glDeleteShader(ps);
@@ -248,6 +254,9 @@ namespace alpha
 
         for (Renderable * renderable : renderables)
         {
+            // set shader program
+            glUseProgram(renderable->m_shaderProgram);
+
             // attach model world matrix to shader
             GLuint modelLoc = glGetUniformLocation(renderable->m_shaderProgram, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &renderSet->worldTransform.m_11);
@@ -264,20 +273,20 @@ namespace alpha
             GLuint objectColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "objectColor");
             glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
 
-            // set light colors
-            GLuint lightColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightColor");
-            glUniform3fv(lightColorLoc, 6, vLightColors);
+            if (!renderSet->emitsLight)
+            {
+                // set light colors
+                GLuint lightColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightColor");
+                glUniform3fv(lightColorLoc, 6, vLightColors);
 
-            // set light positions
-            GLuint lightPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightPos");
-            glUniform3fv(lightPosLoc, 6, vLightDirs);
+                // set light positions
+                GLuint lightPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightPos");
+                glUniform3fv(lightPosLoc, 6, vLightDirs);
 
-            // set specular lighting variables
-            GLuint viewPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "viewPos");
-            glUniform3f(viewPosLoc, viewPosition.x, viewPosition.y, viewPosition.z);
-
-            // set shader program
-            glUseProgram(renderable->m_shaderProgram);
+                // set specular lighting variables
+                GLuint viewPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "viewPos");
+                glUniform3f(viewPosLoc, viewPosition.x, viewPosition.y, viewPosition.z);
+            }
 
             // bind vertices to array object
             glBindVertexArray(renderable->m_vertexAttribute);
