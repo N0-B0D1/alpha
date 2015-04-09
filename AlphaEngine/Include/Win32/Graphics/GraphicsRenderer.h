@@ -70,6 +70,8 @@ namespace alpha
 
         std::shared_ptr<Asset> m_vsDefaultShader;
         std::shared_ptr<Asset> m_psDefaultShader;
+        std::shared_ptr<Asset> m_vsLightShader;
+        std::shared_ptr<Asset> m_psLightShader;
 
         /** PreRender takes a list of data that will be rendered, and preps it rendering. */
         void PreRender(std::vector<RenderSet *> renderSets);
@@ -84,8 +86,6 @@ namespace alpha
         ID3D11PixelShader * CreatePixelShaderFromAsset(std::shared_ptr<Asset> psAsset, const std::string & sEntryPoint);
         /** Creates and returns a Vertx Shader Layout from the given blobl data */
         ID3D11InputLayout * CreateInputLayoutFromVSBlob(ID3DBlob ** const pVSBlob);
-        /** Creates a Vertex Buffer based on the given input vertex array */
-        //ID3D11Buffer * CreateVertexBuffer()
     };
 }
 

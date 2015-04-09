@@ -57,7 +57,7 @@ bool GameState::VInitialize()
     // move second light forward and left
     if (auto pLightComp = std::dynamic_pointer_cast<alpha::MeshComponent>(m_pLight2->Get("root")))
     {
-        pLightComp->SetPosition(alpha::Vector3(-2.f, 2.f, -2.f));
+        pLightComp->SetPosition(alpha::Vector3(0.f, 0.f, -4.f));
     }
 
     return true;

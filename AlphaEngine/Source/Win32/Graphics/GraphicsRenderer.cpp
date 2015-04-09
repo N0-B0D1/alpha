@@ -56,13 +56,20 @@ namespace alpha
     ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
     ID3D11RasterizerState*  m_pWireFrame = nullptr;
 
-    GraphicsRenderer::GraphicsRenderer() { }
+    GraphicsRenderer::GraphicsRenderer()
+        : m_vsDefaultShader(nullptr)
+        , m_psDefaultShader(nullptr)
+        , m_vsLightShader(nullptr)
+        , m_psLightShader(nullptr)
+    { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
     bool GraphicsRenderer::Initialize(std::shared_ptr<AssetSystem> pAssets)
     {
         m_vsDefaultShader = pAssets->GetAsset("Shaders/dx_vs_normal.hlsl");
         m_psDefaultShader = pAssets->GetAsset("Shaders/dx_ps_normal.hlsl");
+        m_vsLightShader = pAssets->GetAsset("Shaders/dx_vs_light.hlsl");
+        m_psLightShader = pAssets->GetAsset("Shaders/dx_ps_light.hlsl");
 
         m_pWindow = new GraphicsWindow();
         if (!m_pWindow->Initialize())
@@ -350,13 +357,16 @@ namespace alpha
 
         auto renderables = renderSet->GetRenderables();
 
+        auto vsShader = renderSet->emitsLight ? m_vsLightShader : m_vsDefaultShader;
+        auto psShader = renderSet->emitsLight ? m_psLightShader : m_psDefaultShader;
+
         for (Renderable * renderable : renderables)
         {
             // create vertex shader
             ID3DBlob* pVSBlob = nullptr;
             if (renderable->m_pVertexShader == nullptr)
             {
-                renderable->m_pVertexShader = this->CreateVertexShaderFromAsset(m_vsDefaultShader, "VS", &pVSBlob);
+                renderable->m_pVertexShader = this->CreateVertexShaderFromAsset(vsShader, "VS", &pVSBlob);
             }
 
             // vertex input layout
@@ -369,7 +379,7 @@ namespace alpha
             // pixel shader
             if (renderable->m_pPixelShader == nullptr)
             {
-                renderable->m_pPixelShader = this->CreatePixelShaderFromAsset(m_psDefaultShader, renderSet->m_psEntryPoint);
+                renderable->m_pPixelShader = this->CreatePixelShaderFromAsset(psShader, renderSet->m_psEntryPoint);
             }
 
             // vertex buffer
@@ -453,7 +463,6 @@ namespace alpha
             m_pImmediateContext->IASetVertexBuffers(0, 1, &renderable->m_pVertexBuffer, &stride, &offset);
 
             // Set index buffer
-            //m_pImmediateContext->IASetIndexBuffer(renderable->m_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
             m_pImmediateContext->IASetIndexBuffer(renderable->m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
             // Set primitive topology
