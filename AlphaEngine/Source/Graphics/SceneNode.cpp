@@ -25,6 +25,7 @@ limitations under the License.
 #include "Entities/EntityComponent.h"
 #include "Math/Matrix.h"
 #include "Math/Vector3.h"
+#include "Math/Vector4.h"
 
 namespace alpha
 {
@@ -106,5 +107,16 @@ namespace alpha
     Light * SceneNode::GetLight() const
     {
         return m_pLight;
+    }
+
+
+    /** Get teh objects base color */
+    Vector4 SceneNode::GetColor() const
+    {
+        if (m_pSceneComponent != nullptr)
+        {
+            return m_pSceneComponent->GetColor();
+        }
+        return Vector4();
     }
 }

@@ -21,6 +21,7 @@ limitations under the License.
 #include <vector>
 
 #include "Math/Matrix.h"
+#include "Math/Vector4.h"
 
 namespace alpha
 {
@@ -45,6 +46,9 @@ namespace alpha
 
         /** Render set is a light */
         bool emitsLight;
+
+        /** The objects base color */
+        Vector4 color;
     };
 }
 

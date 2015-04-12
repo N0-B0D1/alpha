@@ -127,8 +127,9 @@ namespace alpha
 
         /** Does the visible object in the scene absorb or emit light. */
         bool m_bLightEmitter;
+
         /** The objects default, unskinned, color.  Which effects how it emits light. */
-        Vector4 m_vLightColor;
+        Vector4 m_vColor;
     };
 }
 

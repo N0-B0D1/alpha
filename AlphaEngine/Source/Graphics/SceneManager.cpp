@@ -176,14 +176,15 @@ namespace alpha
         for (auto iter : nodes)
         {
             // check this node
+            auto node = iter.second;
             
             // prep the world transform for this node
-            Matrix world_transform = iter.second->GetWorldTransform();
+            Matrix world_transform = node->GetWorldTransform();
 
-            Light * pLight = iter.second->GetLight();
+            Light * pLight = node->GetLight();
 
             // make render data for this node
-            if (RenderSet * rs = iter.second->GetRenderSet())
+            if (RenderSet * rs = node->GetRenderSet())
             {
                 rs->worldTransform = world_transform;
 
@@ -191,6 +192,9 @@ namespace alpha
                 // then it emits light and should use a different
                 // shader
                 rs->emitsLight = (pLight != nullptr);
+
+                // set base color for this renderable set object
+                rs->color = node->GetColor();
 
                 renderables.push_back(rs);
             }
@@ -203,7 +207,7 @@ namespace alpha
             }
 
             // recurse each child node
-            this->BuildRenderData(entity_id, iter.second->GetChildren(), renderables, lights);
+            this->BuildRenderData(entity_id, node->GetChildren(), renderables, lights);
         }
     }
 }

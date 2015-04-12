@@ -115,13 +115,13 @@ namespace alpha
         }
 
         // get light color value
-        auto light_color_table = std::dynamic_pointer_cast<LuaTable>(data_table->Get("light_color"));
-        if (light_color_table != nullptr)
+        auto color_table = std::dynamic_pointer_cast<LuaTable>(data_table->Get("color"));
+        if (color_table != nullptr)
         {
-            this->GetTableVarValue(light_color_table, "r", &m_vLightColor.x);
-            this->GetTableVarValue(light_color_table, "g", &m_vLightColor.y);
-            this->GetTableVarValue(light_color_table, "b", &m_vLightColor.z);
-            this->GetTableVarValue(light_color_table, "z", &m_vLightColor.w);
+            this->GetTableVarValue(color_table, "r", &m_vColor.x);
+            this->GetTableVarValue(color_table, "g", &m_vColor.y);
+            this->GetTableVarValue(color_table, "b", &m_vColor.z);
+            this->GetTableVarValue(color_table, "z", &m_vColor.w);
         }
     }
 
@@ -184,7 +184,7 @@ namespace alpha
 
     Vector4 SceneComponent::GetColor() const
     {
-        return m_vLightColor;
+        return m_vColor;
     }
 
     void SceneComponent::GetTableVarValue(std::shared_ptr<LuaTable> table, const std::string key, float * const out)

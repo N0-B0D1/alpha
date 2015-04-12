@@ -252,6 +252,8 @@ namespace alpha
             break;
         }
 
+        Vector4 objectColor = renderSet->color;
+
         for (Renderable * renderable : renderables)
         {
             // set shader program
@@ -271,8 +273,7 @@ namespace alpha
 
             // XXX set test light color
             GLuint objectColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "objectColor");
-            glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
-
+            glUniform3f(objectColorLoc, objectColor.x, objectColor.y, objectColor.z);
             if (!renderSet->emitsLight)
             {
                 // set light colors

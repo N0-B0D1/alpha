@@ -23,6 +23,6 @@ components = {
 			scale = { x = 0.25, y = 0.25, z = 0.25 }
 		},
         light_emitter = true,
-        light_color = { r = 0.9, g = 0.9, b = 0.9, a = 1.0 }
+        color = { r = 1.0, g = 1.0, b = 0.5, a = 1.0 },
 	}
 }
