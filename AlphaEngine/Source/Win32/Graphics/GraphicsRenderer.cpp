@@ -478,7 +478,7 @@ namespace alpha
             cb.vLightColor[0] = vLightColors[0];
             cb.vLightColor[1] = vLightColors[1];
             cb.ambient = Vector4(0.2f, 0.2f, 0.2f, 1.0f);
-            cb.vOutputColor = Vector4(1.f, 0.5f, 0.31f, 1.0f);
+            cb.vOutputColor = renderSet->color;
             m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
             // render object
