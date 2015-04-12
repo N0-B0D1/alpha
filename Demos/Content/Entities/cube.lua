@@ -26,5 +26,6 @@ components = {
 			scale = { x = 1.0, y = 1.0, z = 1.0 }
 		},
 		model = "Models/cube.am",
+        color = { r = 1.0, g = 0.5, b = 0.31, a = 1.0 },
 	}
 }

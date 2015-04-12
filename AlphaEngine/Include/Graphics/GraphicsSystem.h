@@ -54,9 +54,6 @@ namespace alpha
         /** Retrieve subscriber for SetActiveCamera */
         std::shared_ptr<AEventDataSubscriber> GetSetActiveCameraSubscriber() const;
 
-        /** Helper method for loading shader asset files */
-        std::shared_ptr<Asset> LoadShaderFile(const std::string & name);
-
         /** Allow other systems to subscribe to new threading tasks from this system */
         void SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
 

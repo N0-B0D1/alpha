@@ -21,7 +21,7 @@ limitations under the License.
 #include <string>
 #include <vector>
 
-#include<GL/glx.h>
+#include <GL/glx.h>
 
 namespace alpha
 {
@@ -29,24 +29,20 @@ namespace alpha
     class RenderSet;
     class Camera;
     class Asset;
+    class AssetSystem;
     class Light;
 
     class GraphicsRenderer
     {
     public:
-        static const std::string sk_shader_extension;
-
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
-        bool Initialize();
+        bool Initialize(std::shared_ptr<AssetSystem> pAssets);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
         void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
-
-        /** Set basic GLSL shaders for default usage */
-        void SetBasicShaders(std::shared_ptr<Asset> psShader, std::shared_ptr<Asset> vsShader);
 
     private:
         /** Initializes the OpenGL device with GLFW */
@@ -63,6 +59,8 @@ namespace alpha
 
         std::shared_ptr<Asset> m_vsDefaultShader;
         std::shared_ptr<Asset> m_psDefaultShader;
+        std::shared_ptr<Asset> m_vsLightShader;
+        std::shared_ptr<Asset> m_psLightShader;
         
         const GLubyte *m_pRendererInfo;
         const GLubyte *m_pVersionInfo;

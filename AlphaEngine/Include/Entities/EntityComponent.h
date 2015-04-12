@@ -23,6 +23,7 @@ limitations under the License.
 
 #include "Math/Matrix.h"
 #include "Math/Vector3.h"
+#include "Math/Vector4.h"
 #include "Math/Quaternion.h"
 
 namespace alpha
@@ -102,6 +103,10 @@ namespace alpha
         void SetScale(const Vector3 & scale);
         void SetRotation(const Quaternion & rotation);
 
+        // Light getters
+        bool EmitsLight() const;
+        Vector4 GetColor() const;
+
     protected:
         /** Helper function for retrieving x, y, or z vars from script tables */
         void GetTableVarValue(std::shared_ptr<LuaTable> table, const std::string axis, float * const out);
@@ -110,12 +115,21 @@ namespace alpha
         void UpdateTransform();
 
     private:
-        /** This components relative transform */
+        /** This components relative position in relation to its parent. */
         Vector3 m_vPosition;
+        /** This components relative scale in relation to its parent. */
         Vector3 m_vScale;
+        /** This components relative rotation in relation to its parent. */
         Quaternion m_qRotation;
 
+        /** This components combined rotation, scale, and position. */
         Matrix m_mTransform;
+
+        /** Does the visible object in the scene absorb or emit light. */
+        bool m_bLightEmitter;
+
+        /** The objects default, unskinned, color.  Which effects how it emits light. */
+        Vector4 m_vColor;
     };
 }
 

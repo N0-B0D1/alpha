@@ -84,3 +84,17 @@ add_library(AlphaEngine ${HEADER_FILES} ${SOURCE_FILES})
 # TODO fix install solution to be more extensible
 install(TARGETS AlphaEngine DESTINATION lib/Release CONFIGURATIONS Release)
 install(TARGETS AlphaEngine DESTINATION lib/Debug CONFIGURATIONS Debug)
+
+# Copy engine content to debug content directory
+if (MSVC)
+    set(WORKING_DIR /bin/Debug/Content)
+    set(SHADER_EXT hlsl)
+else ()
+    set(WORKING_DIR /bin/Content)
+    set(SHADER_EXT glsl)
+endif (MSVC)
+
+
+# copy shader content files
+file(GLOB CONTENT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/*.${SHADER_EXT}")
+file(COPY ${CONTENT_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Shaders/")

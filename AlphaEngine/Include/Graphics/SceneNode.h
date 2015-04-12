@@ -57,6 +57,9 @@ namespace alpha
         void SetLight(Light * pLight);
         Light * GetLight() const;
 
+        /** Get teh objects base color */
+        Vector4 GetColor() const;
+
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */
         SceneNode * m_parent;

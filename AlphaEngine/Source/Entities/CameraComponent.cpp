@@ -35,11 +35,7 @@ namespace alpha
         m_near = this->ParseFloatVar(table->Get("near"), 0.1f);
         m_far = this->ParseFloatVar(table->Get("far"), 100.f);
 
-        std::shared_ptr<LuaVar> transform = table->Get("transform");
-        if (transform != nullptr)
-        {
-            SceneComponent::VInitialize(transform);
-        }
+        SceneComponent::VInitialize(var);
     }
 
     bool CameraComponent::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)

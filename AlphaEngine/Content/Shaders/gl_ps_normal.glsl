@@ -30,7 +30,7 @@ void main ()
     float specularStrength = 0.5f;
 
     // apply global ambient light first
-    vec3 finalColor;
+    vec3 finalColor = vec3(0.0f);
 
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
