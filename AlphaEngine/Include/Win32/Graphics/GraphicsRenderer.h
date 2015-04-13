@@ -23,7 +23,7 @@ limitations under the License.
 #include <string>
 #include <memory>
 
-//#include "AlphaSystem.h"
+#include "Graphics/IRenderer.h"
 
 namespace alpha
 {
@@ -34,10 +34,9 @@ namespace alpha
     class AssetSystem;
     class Camera;
 
-    class GraphicsRenderer
+    class GraphicsRenderer : public IRenderer
     {
     public:
-        static const std::string sk_shader_extension;
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 

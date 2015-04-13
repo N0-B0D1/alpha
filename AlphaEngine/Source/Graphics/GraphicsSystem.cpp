@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "Graphics/GraphicsSystem.h"
+#include "Graphics/IRenderer.h"
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/SceneManager.h"
 #include "Graphics/Light.h"
