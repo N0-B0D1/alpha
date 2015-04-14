@@ -23,6 +23,8 @@ limitations under the License.
 
 #include <GL/glx.h>
 
+#include "Graphics/IRenderer.h"
+
 namespace alpha
 {
 	class RenderWindow;
@@ -32,7 +34,7 @@ namespace alpha
     class AssetSystem;
     class Light;
 
-    class GraphicsRenderer
+    class GraphicsRenderer : public IRenderer
     {
     public:
         GraphicsRenderer();
