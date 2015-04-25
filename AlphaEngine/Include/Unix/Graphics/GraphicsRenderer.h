@@ -45,7 +45,6 @@ namespace alpha
         bool Shutdown();
 
         /** PreRender takes a list of data that will be rendered, and preps it rendering. */
-        //void PreRender(std::vector<RenderSet *> renderables)
         void PreRender(RenderSet * renderSet);
         void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
 

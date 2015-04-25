@@ -104,6 +104,79 @@ namespace alpha
         return m_pWindow->Update(currentTime, elapsedTime);
     }
 
+    void GraphicsRenderer::PreRender(RenderSet * renderSet)
+    {
+        HRESULT hr = S_OK;
+
+        auto renderables = renderSet->GetRenderables();
+
+        auto vsShader = renderSet->emitsLight ? m_vsLightShader : m_vsDefaultShader;
+        auto psShader = renderSet->emitsLight ? m_psLightShader : m_psDefaultShader;
+
+        for (Renderable * renderable : renderables)
+        {
+            // create vertex shader
+            ID3DBlob* pVSBlob = nullptr;
+            if (renderable->m_pVertexShader == nullptr)
+            {
+                renderable->m_pVertexShader = this->CreateVertexShaderFromAsset(vsShader, "VS", &pVSBlob);
+            }
+
+            // vertex input layout
+            if (renderable->m_pInputLayout == nullptr && pVSBlob != nullptr)
+            {
+                renderable->m_pInputLayout = this->CreateInputLayoutFromVSBlob(&pVSBlob);
+                pVSBlob->Release();
+            }
+
+            // pixel shader
+            if (renderable->m_pPixelShader == nullptr)
+            {
+                renderable->m_pPixelShader = this->CreatePixelShaderFromAsset(psShader, renderSet->m_psEntryPoint);
+            }
+
+            // vertex buffer
+            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr)
+            {
+                D3D11_BUFFER_DESC bd;
+                D3D11_SUBRESOURCE_DATA InitData;
+
+                ZeroMemory(&bd, sizeof(bd));
+                bd.Usage = D3D11_USAGE_DEFAULT;
+                bd.ByteWidth = sizeof(Vertex) * renderable->vertices.size();
+                bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+                bd.CPUAccessFlags = 0;
+                ZeroMemory(&InitData, sizeof(InitData));
+                InitData.pSysMem = &renderable->vertices[0];
+                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pVertexBuffer);
+                //if (FAILED(hr))
+                //    return hr;
+
+                // index buffer
+                ZeroMemory(&bd, sizeof(bd));
+                bd.Usage = D3D11_USAGE_DEFAULT;
+                bd.ByteWidth = sizeof(unsigned int) * renderable->indices.size();
+                bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+                bd.CPUAccessFlags = 0;
+                ZeroMemory(&InitData, sizeof(InitData));
+                InitData.pSysMem = &renderable->indices[0];
+                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pIndexBuffer);
+                //if (FAILED(hr))
+                //    return hr;
+
+                // constant buffer
+                ZeroMemory(&bd, sizeof(bd));
+                bd.Usage = D3D11_USAGE_DEFAULT;
+                bd.ByteWidth = sizeof(ConstantBuffer);
+                bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+                bd.CPUAccessFlags = 0;
+                hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &renderable->m_pConstantBuffer);
+                //if (FAILED(hr))
+                //    return hr;
+            }
+        }
+    }
+
     void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights)
     {
         // 1. pre-render
@@ -336,90 +409,6 @@ namespace alpha
         if (m_pImmediateContext) m_pImmediateContext->Release();
         if (m_pd3dDevice1) m_pd3dDevice1->Release();
         if (m_pd3dDevice) m_pd3dDevice->Release();
-    }
-
-    void GraphicsRenderer::PreRender(std::vector<RenderSet *> renderSets)
-    {
-        for (RenderSet * rs : renderSets)
-        {
-            // XXX should determine the set of lights that will affect this render object set
-
-            // 
-            this->PrepRenderable(rs);
-        }
-    }
-
-    void GraphicsRenderer::PrepRenderable(RenderSet * renderSet)
-    {
-        HRESULT hr = S_OK;
-
-        auto renderables = renderSet->GetRenderables();
-
-        auto vsShader = renderSet->emitsLight ? m_vsLightShader : m_vsDefaultShader;
-        auto psShader = renderSet->emitsLight ? m_psLightShader : m_psDefaultShader;
-
-        for (Renderable * renderable : renderables)
-        {
-            // create vertex shader
-            ID3DBlob* pVSBlob = nullptr;
-            if (renderable->m_pVertexShader == nullptr)
-            {
-                renderable->m_pVertexShader = this->CreateVertexShaderFromAsset(vsShader, "VS", &pVSBlob);
-            }
-
-            // vertex input layout
-            if (renderable->m_pInputLayout == nullptr && pVSBlob != nullptr)
-            {
-                renderable->m_pInputLayout = this->CreateInputLayoutFromVSBlob(&pVSBlob);
-                pVSBlob->Release();
-            }
-
-            // pixel shader
-            if (renderable->m_pPixelShader == nullptr)
-            {
-                renderable->m_pPixelShader = this->CreatePixelShaderFromAsset(psShader, renderSet->m_psEntryPoint);
-            }
-
-            // vertex buffer
-            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr)
-            {
-                D3D11_BUFFER_DESC bd;
-                D3D11_SUBRESOURCE_DATA InitData;
-
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(Vertex) * renderable->vertices.size();
-                bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-                bd.CPUAccessFlags = 0;
-                ZeroMemory(&InitData, sizeof(InitData));
-                InitData.pSysMem = &renderable->vertices[0];
-                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pVertexBuffer);
-                //if (FAILED(hr))
-                //    return hr;
-
-                // index buffer
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(unsigned int) * renderable->indices.size();
-                bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-                bd.CPUAccessFlags = 0;
-                ZeroMemory(&InitData, sizeof(InitData));
-                InitData.pSysMem = &renderable->indices[0];
-                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pIndexBuffer);
-                //if (FAILED(hr))
-                //    return hr;
-
-                // constant buffer
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(ConstantBuffer);
-                bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-                bd.CPUAccessFlags = 0;
-                hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &renderable->m_pConstantBuffer);
-                //if (FAILED(hr))
-                //    return hr;
-            }
-        }
     }
 
     void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)
