@@ -82,8 +82,14 @@ namespace alpha
         m_pCamera->Update(800, 600);
 
         // XXX TODO - pass camera into scene manager so the renderables can be frustum culled ... maybe ?
-        std::vector<RenderSet *> renderables = m_pSceneManager->GetRenderData();
-        std::vector<Light *> lights = m_pSceneManager->GetLightData();
+        const std::vector<RenderSet *> renderables = m_pSceneManager->GetRenderData();
+        const std::vector<Light *> lights = m_pSceneManager->GetLightData();
+
+        // Prep current set of renderables
+        for (auto rs : renderables)
+        {
+            m_pRenderer->PreRender(rs);
+        }
 
         // Render the array of renderables from the given camera viewpoint
         m_pRenderer->Render(m_pCamera, renderables, lights);
@@ -101,8 +107,19 @@ namespace alpha
         // remove and destroyed entities from the scene.
         this->ReadSubscriptions();
 
-        // udpate scene manager
+        // udpate scene manager, produces the current
+        // set of objects that should be rendered in the
+        // scene.
         m_pSceneManager->Update(currentTime, elapsedTime);
+
+        // Prep current set of renderables, make sure that
+        // the objects to be rendered are ready, and contain
+        // and renderer specific data variables
+        const std::vector<RenderSet *> renderables = m_pSceneManager->GetRenderData();
+        for (auto rs : renderables)
+        {
+            m_pRenderer->PreRender(rs);
+        }
 
         return m_pRenderer->Update(currentTime, elapsedTime);
     }

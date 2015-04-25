@@ -80,60 +80,7 @@ namespace alpha
 		return true;
 	}
 
-    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets, std::vector<Light *> lights)
-    {
-        this->PreRender(render_sets);
-
-        auto window = m_pWindow->GetWindow();
-
-        // prep viewport for rendering
-        glViewport(0, 0, 800, 600);
-
-        // draw some stuff, like a cube or some shit.
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        for (auto rs : render_sets)
-        {
-            this->SetRender(pCamera, rs, lights);
-        }
-
-        // swap buffer to display cool new render objects.
-        glfwSwapBuffers(window);
-    }
-
-    bool GraphicsRenderer::InitializeDevice()
-    {
-        glewExperimental = GL_TRUE;
-        if (glewInit() != GLEW_OK)
-        {
-            LOG_ERR("Failed to initialize GLEW.");
-            return false;
-        }
-
-        // store renderer and gl version ... for debug info?
-        m_pRendererInfo = glGetString(GL_RENDERER);
-        m_pVersionInfo = glGetString(GL_VERSION);
-        LOG("OpenGL Renderer = ", m_pRendererInfo);
-        LOG("OpenGL Version = ", m_pVersionInfo);
-         
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-
-        // wireframe mode!
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        return true;
-    }
-
-    void GraphicsRenderer::PreRender(std::vector<RenderSet *> render_sets)
-    {
-        for (auto rs : render_sets)
-        {
-            this->PreRenderSet(rs);
-        }
-    }
-
-    void GraphicsRenderer::PreRenderSet(RenderSet * renderSet)
+    void GraphicsRenderer::PreRender(RenderSet * renderSet)
     {
         auto renderables = renderSet->GetRenderables();
 
@@ -201,6 +148,47 @@ namespace alpha
                 glDeleteShader(vs);
             }
         }
+    }
+
+    void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets, std::vector<Light *> lights)
+    {
+        auto window = m_pWindow->GetWindow();
+
+        // prep viewport for rendering
+        glViewport(0, 0, 800, 600);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        for (auto rs : render_sets)
+        {
+            this->SetRender(pCamera, rs, lights);
+        }
+
+        // swap buffer to display cool new render objects.
+        glfwSwapBuffers(window);
+    }
+
+    bool GraphicsRenderer::InitializeDevice()
+    {
+        glewExperimental = GL_TRUE;
+        if (glewInit() != GLEW_OK)
+        {
+            LOG_ERR("Failed to initialize GLEW.");
+            return false;
+        }
+
+        // store renderer and gl version ... for debug info?
+        m_pRendererInfo = glGetString(GL_RENDERER);
+        m_pVersionInfo = glGetString(GL_VERSION);
+        LOG("OpenGL Renderer = ", m_pRendererInfo);
+        LOG("OpenGL Version = ", m_pVersionInfo);
+         
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+
+        // wireframe mode!
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        return true;
     }
 
     void GraphicsRenderer::SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)

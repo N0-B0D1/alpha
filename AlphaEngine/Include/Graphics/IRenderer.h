@@ -17,6 +17,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+
 namespace alpha
 {
     class AssetSystem;
@@ -32,6 +34,9 @@ namespace alpha
         virtual bool Initialize(std::shared_ptr<AssetSystem> pAssets) = 0;
         virtual bool Update(double currentTime, double elapsedTime) = 0;
         virtual bool Shutdown() = 0;
+
+        // rendering
+        virtual void PreRender(RenderSet * renderSet) = 0;
         virtual void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights) = 0;
     };
 }
