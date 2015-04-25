@@ -77,13 +77,13 @@ namespace alpha
         return true;
     }
 
-    std::vector<RenderSet *> & SceneManager::GetRenderData()
+    const std::vector<RenderSet *> & SceneManager::GetRenderData()
     {
         // get the latest set of render data to be rendered.
         return m_vRenderData;
     }
 
-    std::vector<Light *> & SceneManager::GetLightData()
+    const std::vector<Light *> & SceneManager::GetLightData()
     {
         return m_vLightData;
     }

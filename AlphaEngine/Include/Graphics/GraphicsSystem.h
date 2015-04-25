@@ -29,7 +29,7 @@ limitations under the License.
 
 namespace alpha
 {
-    class GraphicsRenderer;
+    class IRenderer;
     class SceneManager;
     class RenderData;
     class Camera;
@@ -65,7 +65,7 @@ namespace alpha
         /** A handle to the main asset system. */
         std::shared_ptr<AssetSystem> m_pAssets;
         /** Renderer implementation (e.g.: DirectX, OpenGL) */
-        GraphicsRenderer *m_pRenderer;
+        IRenderer *m_pRenderer;
         /** SceneManager for tracking logic and propagation of renderable objects in the Scene */
         SceneManager * m_pSceneManager;
         /** Track the current camera that is viewing the scene */

@@ -23,7 +23,7 @@ limitations under the License.
 #include <string>
 #include <memory>
 
-//#include "AlphaSystem.h"
+#include "Graphics/IRenderer.h"
 
 namespace alpha
 {
@@ -34,10 +34,9 @@ namespace alpha
     class AssetSystem;
     class Camera;
 
-    class GraphicsRenderer
+    class GraphicsRenderer : public IRenderer
     {
     public:
-        static const std::string sk_shader_extension;
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
@@ -45,6 +44,8 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
+        /** PreRender takes a list of data that will be rendered, and preps it rendering. */
+        void PreRender(RenderSet * renderSet);
         void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
 
         // for each object to be rendered
@@ -73,8 +74,6 @@ namespace alpha
         std::shared_ptr<Asset> m_vsLightShader;
         std::shared_ptr<Asset> m_psLightShader;
 
-        /** PreRender takes a list of data that will be rendered, and preps it rendering. */
-        void PreRender(std::vector<RenderSet *> renderSets);
         void PrepRenderable(RenderSet * renderSet);
         void RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights);
 

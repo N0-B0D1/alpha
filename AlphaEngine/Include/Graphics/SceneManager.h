@@ -48,12 +48,12 @@ namespace alpha
         /**
          * \brief Constructs and array of data to be rendered on the next render call.
          */
-        std::vector<RenderSet *> & GetRenderData();
+        const std::vector<RenderSet *> & GetRenderData();
 
         /**
          * \brief Retrieve the lastest list of lights that is ready to be rendered.
          */
-        std::vector<Light *> & GetLightData();
+        const std::vector<Light *> & GetLightData();
 
         /**
          * \brief Add an entity to the scene.

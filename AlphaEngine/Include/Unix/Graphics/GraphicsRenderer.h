@@ -23,6 +23,8 @@ limitations under the License.
 
 #include <GL/glx.h>
 
+#include "Graphics/IRenderer.h"
+
 namespace alpha
 {
 	class RenderWindow;
@@ -32,7 +34,7 @@ namespace alpha
     class AssetSystem;
     class Light;
 
-    class GraphicsRenderer
+    class GraphicsRenderer : public IRenderer
     {
     public:
         GraphicsRenderer();
@@ -42,16 +44,16 @@ namespace alpha
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
+        /** PreRender takes a list of data that will be rendered, and preps it rendering. */
+        void PreRender(RenderSet * renderSet);
         void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
 
     private:
         /** Initializes the OpenGL device with GLFW */
         bool InitializeDevice();
 
-        /** PreRender takes a list of data that will be rendered, and preps it rendering. */
-        void PreRender(std::vector<RenderSet *> renderables);
         /** Pre-render a set of Renderables */
-        void PreRenderSet(RenderSet * renderSet);
+
         /** Render a set of renderables */
         void SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights);
 
