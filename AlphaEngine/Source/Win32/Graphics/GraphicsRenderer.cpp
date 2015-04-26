@@ -179,9 +179,6 @@ namespace alpha
 
     void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights)
     {
-        // 1. pre-render
-        this->PreRender(renderables);
-
         // clear ... zap!
         m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
         m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -209,9 +206,9 @@ namespace alpha
         UINT height = rc.bottom - rc.top;
 
         UINT createDeviceFlags = 0;
-#ifdef ALPHA_DEBUG
-        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
+//#ifdef ALPHA_DEBUG
+//        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+//#endif
 
         D3D_DRIVER_TYPE driverTypes[] =
         {
