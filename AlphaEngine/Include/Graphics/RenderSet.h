@@ -20,6 +20,7 @@ limitations under the License.
 #include <string>
 #include <vector>
 
+#include "Graphics/Material.h"
 #include "Math/Matrix.h"
 #include "Math/Vector4.h"
 
@@ -44,11 +45,14 @@ namespace alpha
 
         Matrix worldTransform;
 
-        /** Render set is a light */
+        /** This set of renderables emits light */
         bool emitsLight;
 
         /** The objects base color */
         Vector4 color;
+
+        /** The material to apply to this set of renderables */
+        Material material;
     };
 }
 

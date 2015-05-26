@@ -435,6 +435,7 @@ namespace alpha
         }
 
         auto renderables = renderSet->GetRenderables();
+        auto material = renderSet->material;
 
         for (auto renderable : renderables)
         {
@@ -457,12 +458,18 @@ namespace alpha
             cb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(renderSet->worldTransform));
             cb.mView = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetView()));
             cb.mProjection = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetProjection()));
+
             cb.vLightDir[0] = vLightDirs[0];
             cb.vLightDir[1] = vLightDirs[1];
             cb.vLightColor[0] = vLightColors[0];
             cb.vLightColor[1] = vLightColors[1];
-            cb.ambient = Vector4(0.2f, 0.2f, 0.2f, 1.0f);
+
+            cb.ambient = material.GetAmbient();
+            cb.diffuse = material.GetDiffuse();
+            cb.specular = material.GetSpecular();
+            //cb.shininess = material.GetShininess();
             cb.vOutputColor = renderSet->color;
+
             m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
             // render object

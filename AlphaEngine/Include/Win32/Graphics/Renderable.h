@@ -41,6 +41,9 @@ namespace alpha
         Vector4 vLightDir[2];
         Vector4 vLightColor[2];
         Vector4 ambient;
+        Vector4 diffuse;
+        Vector4 specular;
+        //float shininess;
         Vector4 vOutputColor;
     } ConstantBuffer;
 

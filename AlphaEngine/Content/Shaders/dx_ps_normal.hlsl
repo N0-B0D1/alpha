@@ -21,6 +21,9 @@ cbuffer ConstantBuffer : register( b0 )
 	float4 vLightDir[2];
 	float4 vLightColor[2];
 	float4 ambient;
+	float4 diffuse;
+	float4 specular;
+	//float shininess;
 	float4 vOutputColor;
 }
 
@@ -52,29 +55,22 @@ float4 PS( PS_INPUT input) : SV_Target
     for(int i = 0; i < 2; i++)
     {
 		// ambient
-		float4 ambientColor = ambientStrength * vLightColor[i];
+		float4 ambientColor = vLightColor[i] * ambient;
 		
 		// diffuse
 		float4 lightDirection = normalize(vLightDir[i] * input.Pos);
 		float diff = max( dot(norm, lightDirection), 0.0);
-		float4 diffuse = diff * vLightColor[i];
+		float4 diffuseColor = (diff * diffuse) * vLightColor[i];
 		
 		// specular
 		float3 reflectDirection = reflect(-lightDirection.xyz, norm.xyz);
-		float spec = pow(max(dot(viewDir.xyz, reflectDirection), 0.0), 32);
-		float4 specular = specularStrength * spec * vLightColor[i];
+		float spec = pow(max(dot(viewDir.xyz, reflectDirection), 0.0), 32.0f);
+		float4 specularColor = specularStrength * (spec * specular) * vLightColor[i];
 		
-		finalColor += (ambientColor + diffuse + specular);
+		finalColor += (ambientColor + diffuseColor + specularColor);
     }
 	
-	finalColor *= vOutputColor;
+	//finalColor *= vOutputColor;
     finalColor.a = 1;
     return finalColor;
-}
-
-
-// Solid Pixel Shader
-float4 PSSolid( PS_INPUT input) : SV_Target
-{
-    return vOutputColor;
 }

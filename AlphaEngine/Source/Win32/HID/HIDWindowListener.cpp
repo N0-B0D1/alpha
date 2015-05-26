@@ -92,11 +92,14 @@ namespace alpha
             break;
 
         case WM_MOUSEMOVE:
+            /*
+            // Track mouse, and make it dissappear when over window
             if (!m_mouseTracking)
             {
                 m_mouseTracking = true;
                 while (ShowCursor(false) >= 0);
             }
+            */
 
             // set the mouse positions absolute values
             m_mousePosition.xAbsolutePos = LOWORD(lParam);
@@ -105,7 +108,7 @@ namespace alpha
             break;
 
         case WM_NCMOUSELEAVE:
-            m_mouseTracking = false;
+            //m_mouseTracking = false;
             while (ShowCursor(true) < 0);
             break;
         }

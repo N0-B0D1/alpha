@@ -21,6 +21,9 @@ cbuffer ConstantBuffer : register( b0 )
 	float4 vLightDir[2];
 	float4 vLightColor[2];
 	float4 ambient;
+	float4 diffuse;
+	float4 specular;
+	//float shininess;
 	float4 vOutputColor;
 }
 
@@ -39,6 +42,8 @@ struct PS_INPUT
 // Pixel Shader
 float4 PS( PS_INPUT input) : SV_Target
 {
-	float ambientStrength = 1.0f;
-    return vOutputColor * ambientStrength;
+	//float ambientStrength = 1.0f;
+    //return vOutputColor * ambientStrength;
+	
+    return vOutputColor;
 }
