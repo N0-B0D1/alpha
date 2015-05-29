@@ -85,6 +85,22 @@ namespace alpha
         ID3D11PixelShader * CreatePixelShaderFromAsset(std::shared_ptr<Asset> psAsset, const std::string & sEntryPoint);
         /** Creates and returns a Vertx Shader Layout from the given blobl data */
         ID3D11InputLayout * CreateInputLayoutFromVSBlob(ID3DBlob ** const pVSBlob);
+        /** Create a d3d buffer object */
+        void CreateBuffer(unsigned int byte_width, unsigned int bind_flags, const void * object_memory, ID3D11Buffer ** buffer);
+
+        /** DirectX 11 variables */
+        D3D_DRIVER_TYPE m_driverType;
+        D3D_FEATURE_LEVEL m_featureLevel;
+        ID3D11Device* m_pd3dDevice;
+        ID3D11Device1* m_pd3dDevice1;
+        ID3D11DeviceContext* m_pImmediateContext;
+        ID3D11DeviceContext1* m_pImmediateContext1;
+        IDXGISwapChain* m_pSwapChain;
+        IDXGISwapChain1* m_pSwapChain1;
+        ID3D11RenderTargetView* m_pRenderTargetView;
+        ID3D11Texture2D* m_pDepthStencil;
+        ID3D11DepthStencilView* m_pDepthStencilView;
+        ID3D11RasterizerState* m_pWireFrame;
     };
 }
 

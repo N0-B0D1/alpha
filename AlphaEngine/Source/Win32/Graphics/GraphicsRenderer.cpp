@@ -41,24 +41,23 @@ using namespace DirectX;
 
 namespace alpha
 {
-    D3D_DRIVER_TYPE         m_driverType = D3D_DRIVER_TYPE_NULL;
-    D3D_FEATURE_LEVEL       m_featureLevel = D3D_FEATURE_LEVEL_11_1;
-    ID3D11Device*           m_pd3dDevice = nullptr;
-    ID3D11Device1*          m_pd3dDevice1 = nullptr;
-    ID3D11DeviceContext*    m_pImmediateContext = nullptr;
-    ID3D11DeviceContext1*   m_pImmediateContext1 = nullptr;
-    IDXGISwapChain*         m_pSwapChain = nullptr;
-    IDXGISwapChain1*        m_pSwapChain1 = nullptr;
-    ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
-    ID3D11Texture2D*        m_pDepthStencil = nullptr;
-    ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
-    ID3D11RasterizerState*  m_pWireFrame = nullptr;
-
     GraphicsRenderer::GraphicsRenderer()
         : m_vsDefaultShader(nullptr)
         , m_psDefaultShader(nullptr)
         , m_vsLightShader(nullptr)
         , m_psLightShader(nullptr)
+        , m_driverType(D3D_DRIVER_TYPE_NULL)
+        , m_featureLevel(D3D_FEATURE_LEVEL_11_1)
+        , m_pd3dDevice(nullptr)
+        , m_pd3dDevice1(nullptr)
+        , m_pImmediateContext(nullptr)
+        , m_pImmediateContext1(nullptr)
+        , m_pSwapChain(nullptr)
+        , m_pSwapChain1(nullptr)
+        , m_pRenderTargetView(nullptr)
+        , m_pDepthStencil(nullptr)
+        , m_pDepthStencilView(nullptr)
+        , m_pWireFrame(nullptr)
     { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
@@ -106,7 +105,7 @@ namespace alpha
 
     void GraphicsRenderer::PreRender(RenderSet * renderSet)
     {
-        HRESULT hr = S_OK;
+        //HRESULT hr = S_OK;
 
         auto renderables = renderSet->GetRenderables();
 
@@ -138,41 +137,9 @@ namespace alpha
             // vertex buffer
             if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr)
             {
-                D3D11_BUFFER_DESC bd;
-                D3D11_SUBRESOURCE_DATA InitData;
-
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(Vertex) * renderable->vertices.size();
-                bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-                bd.CPUAccessFlags = 0;
-                ZeroMemory(&InitData, sizeof(InitData));
-                InitData.pSysMem = &renderable->vertices[0];
-                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pVertexBuffer);
-                //if (FAILED(hr))
-                //    return hr;
-
-                // index buffer
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(unsigned int) * renderable->indices.size();
-                bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-                bd.CPUAccessFlags = 0;
-                ZeroMemory(&InitData, sizeof(InitData));
-                InitData.pSysMem = &renderable->indices[0];
-                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pIndexBuffer);
-                //if (FAILED(hr))
-                //    return hr;
-
-                // constant buffer
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(ConstantBuffer);
-                bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-                bd.CPUAccessFlags = 0;
-                hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &renderable->m_pConstantBuffer);
-                //if (FAILED(hr))
-                //    return hr;
+                this->CreateBuffer(sizeof(Vertex) * renderable->vertices.size(), D3D11_BIND_VERTEX_BUFFER, &renderable->vertices[0], &renderable->m_pVertexBuffer);
+                this->CreateBuffer(sizeof(unsigned int) * renderable->indices.size(), D3D11_BIND_INDEX_BUFFER, &renderable->indices[0], &renderable->m_pIndexBuffer);
+                this->CreateBuffer(sizeof(ConstantBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pConstantBuffer);
             }
         }
     }
@@ -206,9 +173,9 @@ namespace alpha
         UINT height = rc.bottom - rc.top;
 
         UINT createDeviceFlags = 0;
-//#ifdef ALPHA_DEBUG
-//        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-//#endif
+        //#ifdef ALPHA_DEBUG
+        //        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+        //#endif
 
         D3D_DRIVER_TYPE driverTypes[] =
         {
@@ -358,7 +325,9 @@ namespace alpha
         descDepth.MiscFlags = 0;
         hr = m_pd3dDevice->CreateTexture2D(&descDepth, nullptr, &m_pDepthStencil);
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         // Create the depth stencil view
         D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
@@ -368,7 +337,9 @@ namespace alpha
         descDSV.Texture2D.MipSlice = 0;
         hr = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 
@@ -600,5 +571,29 @@ namespace alpha
         }
 
         return vsLayout;
+    }
+
+    void GraphicsRenderer::CreateBuffer(unsigned int byte_width, unsigned int bind_flags, const void * object_memory, ID3D11Buffer ** buffer)
+    {
+        HRESULT hr;
+        D3D11_BUFFER_DESC bd;
+        D3D11_SUBRESOURCE_DATA InitData;
+
+        ZeroMemory(&bd, sizeof(bd));
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.CPUAccessFlags = 0;
+        bd.ByteWidth = byte_width; // sizeof(Vertex) * renderable->vertices.size();
+        bd.BindFlags = bind_flags; // D3D11_BIND_VERTEX_BUFFER;
+
+        if (object_memory) 
+        {
+            ZeroMemory(&InitData, sizeof(InitData));
+            InitData.pSysMem = object_memory; // &renderable->vertices[0];
+            hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, buffer); // &renderable->m_pVertexBuffer);
+        }
+        else
+        {
+            hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, buffer); // &renderable->m_pVertexBuffer);
+        }
     }
 }
