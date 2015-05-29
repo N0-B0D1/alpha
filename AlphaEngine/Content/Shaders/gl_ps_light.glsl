@@ -23,6 +23,7 @@ uniform vec3 objectColor;
 void main ()
 {
     // static vars
-    float ambientStrength = 0.9f;
-    color = vec4(objectColor * ambientStrength, 1.0f);
+    //float ambientStrength = 0.9f;
+    //color = vec4(objectColor * ambientStrength, 1.0f);
+    color = vec4(objectColor, 1.0f);
 }

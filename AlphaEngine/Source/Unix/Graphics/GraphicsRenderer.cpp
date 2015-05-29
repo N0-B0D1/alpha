@@ -241,6 +241,9 @@ namespace alpha
         }
 
         Vector4 objectColor = renderSet->color;
+        auto ambient = renderSet->material.GetAmbient();
+        auto diffuse = renderSet->material.GetDiffuse();
+        auto specular = renderSet->material.GetSpecular();
 
         for (Renderable * renderable : renderables)
         {
@@ -272,9 +275,22 @@ namespace alpha
                 GLuint lightPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightPos");
                 glUniform3fv(lightPosLoc, 6, vLightDirs);
 
-                // set specular lighting variables
+                // set view position variable
                 GLuint viewPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "viewPos");
                 glUniform3f(viewPosLoc, viewPosition.x, viewPosition.y, viewPosition.z);
+
+                // set ambient lighting variable
+                GLuint ambientLoc = glGetUniformLocation(renderable->m_shaderProgram, "ambient");
+                glUniform3f(ambientLoc, ambient.x, ambient.y, ambient.z);
+
+                // set diffuse lighting variable
+                GLuint diffuseLoc = glGetUniformLocation(renderable->m_shaderProgram, "diffuse");
+                glUniform3f(diffuseLoc, diffuse.x, diffuse.y, diffuse.z);
+
+                // set specular lighting variable
+                GLuint specularLoc = glGetUniformLocation(renderable->m_shaderProgram, "specular");
+                glUniform3f(specularLoc, specular.x, specular.y, specular.z);
+
             }
 
             // bind vertices to array object
