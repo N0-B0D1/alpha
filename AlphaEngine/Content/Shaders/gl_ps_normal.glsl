@@ -25,6 +25,7 @@ uniform vec3 lightPos[2];
 uniform vec3 ambient;
 uniform vec3 diffuse;
 uniform vec3 specular;
+uniform float shininess;
 
 void main ()
 {
@@ -50,7 +51,7 @@ void main ()
 
         // calculate Specular
         vec3 reflectDirection = reflect(-lightDirection, norm);
-        float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
+        float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), shininess);
         vec3 specularColor = specularStrength * (spec * specular) * lightColor[i];
 
         finalColor += (ambientColor + diffuseColor + specularColor);

@@ -244,6 +244,7 @@ namespace alpha
         auto ambient = renderSet->material.GetAmbient();
         auto diffuse = renderSet->material.GetDiffuse();
         auto specular = renderSet->material.GetSpecular();
+        auto shininess = renderSet->material.GetShininess();
 
         for (Renderable * renderable : renderables)
         {
@@ -291,6 +292,9 @@ namespace alpha
                 GLuint specularLoc = glGetUniformLocation(renderable->m_shaderProgram, "specular");
                 glUniform3f(specularLoc, specular.x, specular.y, specular.z);
 
+                // set specular lighting variable
+                GLuint shininessLoc = glGetUniformLocation(renderable->m_shaderProgram, "shininess");
+                glUniform1f(shininessLoc, shininess);
             }
 
             // bind vertices to array object
