@@ -204,13 +204,19 @@ namespace alpha
         auto renderables = renderSet->GetRenderables();
 
         // Setup our lighting parameters
-        float vLightDirs[6] =
-        {
+        float vLightPos[6] = {
             0.f, 0.f, 0.f,
             0.f, 0.f, 0.f
         };
-        float vLightColors[6] =
-        {
+        float vLightAmbient[6] = {
+            0.f, 0.f, 0.f,
+            0.f, 0.f, 0.f
+        };
+        float vLightDiffuse[6] = {
+            0.f, 0.f, 0.f,
+            0.f, 0.f, 0.f
+        };
+        float vLightSpecular[6] = {
             0.f, 0.f, 0.f,
             0.f, 0.f, 0.f
         };
@@ -220,22 +226,38 @@ namespace alpha
         {
         case 2:
             lightPos = lights[1]->worldTransform.Position();
-            vLightDirs[3] = lightPos.x;
-            vLightDirs[4] = lightPos.y;
-            vLightDirs[5] = lightPos.z;
+            vLightPos[3] = lightPos.x;
+            vLightPos[4] = lightPos.y;
+            vLightPos[5] = lightPos.z;
 
-            vLightColors[3] = lights[1]->m_color.x;
-            vLightColors[4] = lights[1]->m_color.y;
-            vLightColors[5] = lights[1]->m_color.z;
+            vLightDiffuse[3] = lights[1]->m_color.x * 0.5f;
+            vLightDiffuse[4] = lights[1]->m_color.y * 0.5f;
+            vLightDiffuse[5] = lights[1]->m_color.z * 0.5f;
+
+            vLightAmbient[3] = vLightDiffuse[3] * 0.2f;
+            vLightAmbient[4] = vLightDiffuse[4] * 0.2f;
+            vLightAmbient[5] = vLightDiffuse[5] * 0.2f;
+
+            vLightSpecular[3] = 1.f;
+            vLightSpecular[4] = 1.f;
+            vLightSpecular[5] = 1.f;
         case 1:
             lightPos = lights[0]->worldTransform.Position();
-            vLightDirs[0] = lightPos.x;
-            vLightDirs[1] = lightPos.y;
-            vLightDirs[2] = lightPos.z;
+            vLightPos[0] = lightPos.x;
+            vLightPos[1] = lightPos.y;
+            vLightPos[2] = lightPos.z;
 
-            vLightColors[0] = lights[0]->m_color.x;
-            vLightColors[1] = lights[0]->m_color.y;
-            vLightColors[2] = lights[0]->m_color.z;
+            vLightDiffuse[0] = lights[0]->m_color.x * 0.5f;
+            vLightDiffuse[1] = lights[0]->m_color.y * 0.5f;
+            vLightDiffuse[2] = lights[0]->m_color.z * 0.5f;
+
+            vLightAmbient[0] = vLightDiffuse[0] * 0.2f;
+            vLightAmbient[1] = vLightDiffuse[1] * 0.2f;
+            vLightAmbient[2] = vLightDiffuse[2] * 0.2f;
+
+            vLightSpecular[0] = 1.f;
+            vLightSpecular[1] = 1.f;
+            vLightSpecular[2] = 1.f;
         default:
             break;
         }
@@ -268,13 +290,21 @@ namespace alpha
             glUniform3f(objectColorLoc, objectColor.x, objectColor.y, objectColor.z);
             if (!renderSet->emitsLight)
             {
-                // set light colors
-                GLuint lightColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightColor");
-                glUniform3fv(lightColorLoc, 6, vLightColors);
-
                 // set light positions
                 GLuint lightPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightPos");
-                glUniform3fv(lightPosLoc, 6, vLightDirs);
+                glUniform3fv(lightPosLoc, 6, vLightPos);
+
+                // set light colors
+                GLuint lightAmbientLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightAmbient");
+                glUniform3fv(lightAmbientLoc, 6, vLightAmbient);
+
+                // set light colors
+                GLuint lightDiffuseLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightDiffuse");
+                glUniform3fv(lightDiffuseLoc, 6, vLightDiffuse);
+
+                // set light colors
+                GLuint lightSpecularLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightSpecular");
+                glUniform3fv(lightSpecularLoc, 6, vLightSpecular);
 
                 // set view position variable
                 GLuint viewPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "viewPos");

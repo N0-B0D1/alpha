@@ -20,8 +20,10 @@ in vec3 Normal;
 
 uniform vec3 viewPos;
 uniform vec3 objectColor;
-uniform vec3 lightColor[2];
 uniform vec3 lightPos[2];
+uniform vec3 lightAmbient[2];
+uniform vec3 lightDiffuse[2];
+uniform vec3 lightSpecular[2];
 uniform vec3 ambient;
 uniform vec3 diffuse;
 uniform vec3 specular;
@@ -29,35 +31,29 @@ uniform float shininess;
 
 void main ()
 {
-    // static vars
-    float ambientStrength = 0.1f;
-    float specularStrength = 0.5f;
-
     // apply global ambient light first
     vec3 finalColor = vec3(0.0f);
 
     vec3 norm = normalize(Normal);
     vec3 viewDirection = normalize(viewPos - FragPos);
 
-    for (int i = 0; i < lightColor.length(); i++)
+    for (int i = 0; i < 2; i++)
     {
         // calculate Ambient
-        vec3 ambientColor = lightColor[i] * ambient;
+        vec3 ambientColor = lightAmbient[i] * ambient;
 
         // calculate Diffuse
-        vec3 lightDirection = normalize(lightPos[i] - FragPos);
+        vec3 lightDirection = -normalize(FragPos - lightPos[i]);
         float diff = max(dot(norm, lightDirection), 0.0);
-        vec3 diffuseColor = (diff * diffuse) * lightColor[i];
+        vec3 diffuseColor = lightDiffuse[i] * (diff * diffuse);
 
         // calculate Specular
-        vec3 reflectDirection = reflect(-lightDirection, norm);
+        vec3 reflectDirection = reflect(lightDirection, norm);
         float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), shininess);
-        vec3 specularColor = specularStrength * (spec * specular) * lightColor[i];
+        vec3 specularColor = lightSpecular[i] * (spec * specular);
 
         finalColor += (ambientColor + diffuseColor + specularColor);
     }
 
-    // finally apply object color and set result
-    //finalColor *= objectColor;
     color = vec4(finalColor, 1.0f);
 }
