@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Constant Buffer
-cbuffer ConstantBuffer : register( b0 )
+// Constant Buffers
+// matrix buffer
+cbuffer MatrixBuffer : register(b0)
 {
 	matrix World;
 	matrix View;
 	matrix Projection;
-	float4 vLightDir[2];
-	float4 vLightColor[2];
-	float4 ambient;
-	float4 diffuse;
-	float4 specular;
-	//float shininess;
-	float4 vOutputColor;
+}
+
+// camera buffer
+cbuffer CameraBuffer : register(b1)
+{
+	float3 cameraPosition;
+	float _spacer;
 }
 
 // Typedef input/output

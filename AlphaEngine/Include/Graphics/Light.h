@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "Math/Matrix.h"
 #include "Math/Vector4.h"
+#include "Graphics/Material.h"
 
 namespace alpha
 {
@@ -36,6 +37,8 @@ namespace alpha
         Matrix worldTransform;
 
         Vector4 m_color;
+
+        Material material;
     };
 }
 

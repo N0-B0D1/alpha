@@ -13,41 +13,55 @@
 // limitations under the License.
 
 // Constant Buffer
-cbuffer ConstantBuffer : register( b0 )
+
+// matrix buffer
+cbuffer MatrixBuffer : register(b0)
 {
 	matrix World;
 	matrix View;
 	matrix Projection;
-	float4 vLightDir[2];
-	float4 vLightColor[2];
-	float4 ambient;
-	float4 diffuse;
-	float4 specular;
-	//float shininess;
-	float4 vOutputColor;
+}
+
+// camera buffer
+cbuffer CameraBuffer : register(b1)
+{
+	float3 cameraPosition;
+	float _spacer;
 }
 
 // Typedef input/output
 struct VS_INPUT
 {
-    float4 Pos : POSITION;
-    float3 Norm : NORMAL;
+	float4 Pos : POSITION;
+	float3 Norm : NORMAL;
 };
 
 struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
     float3 Norm : NORMAL;
+	float3 WorldPos : TEXCOORD0;
+	float3 ViewDir : TEXCOORD1;
 };
 
 // Vertex Shader
 PS_INPUT VS( VS_INPUT input )
 {
     PS_INPUT output = (PS_INPUT)0;
-    output.Pos = mul( input.Pos, World );
-    output.Pos = mul( output.Pos, View );
-    output.Pos = mul( output.Pos, Projection );
+	
+	input.Pos.w = 1.0f;
+	
+	float4 posWorld = mul(input.Pos, World);
+
+    output.Pos = posWorld;
+    output.Pos = mul(output.Pos, View);
+    output.Pos = mul(output.Pos, Projection);
+
     output.Norm = mul( float4( input.Norm, 1 ), World ).xyz;
-    
+	output.Norm = normalize(output.Norm);
+
+	output.WorldPos = posWorld;
+	output.ViewDir = normalize(cameraPosition - posWorld.xyz);
+
     return output;
 }

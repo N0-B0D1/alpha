@@ -135,11 +135,13 @@ namespace alpha
             }
 
             // vertex buffer
-            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr)
+            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr || renderable->m_pMatrixBuffer == nullptr)
             {
                 this->CreateBuffer(sizeof(Vertex) * renderable->vertices.size(), D3D11_BIND_VERTEX_BUFFER, &renderable->vertices[0], &renderable->m_pVertexBuffer);
                 this->CreateBuffer(sizeof(unsigned int) * renderable->indices.size(), D3D11_BIND_INDEX_BUFFER, &renderable->indices[0], &renderable->m_pIndexBuffer);
+                this->CreateBuffer(sizeof(MatrixBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pMatrixBuffer);
                 this->CreateBuffer(sizeof(ConstantBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pConstantBuffer);
+                this->CreateBuffer(sizeof(CameraBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pCameraBuffer);
             }
         }
     }
@@ -173,9 +175,9 @@ namespace alpha
         UINT height = rc.bottom - rc.top;
 
         UINT createDeviceFlags = 0;
-        //#ifdef ALPHA_DEBUG
-        //        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-        //#endif
+        #ifdef ALPHA_DEBUG
+                createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+        #endif
 
         D3D_DRIVER_TYPE driverTypes[] =
         {
@@ -382,13 +384,19 @@ namespace alpha
     void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)
     {
         // Setup our lighting parameters
-        Vector4 vLightDirs[2] =
-        {
+        Vector4 vLightPosition[2] = {
             Vector4(0.f, 0.f, 0.f, 1.0f),
             Vector4(0.f, 0.f, 0.f, 1.0f),
         };
-        Vector4 vLightColors[2] =
-        {
+        Vector4 vLightAmbient[2] = {
+            Vector4(0.f, 0.f, 0.f, 1.f),
+            Vector4(0.f, 0.f, 0.f, 1.f)
+        };
+        Vector4 vLightDiffuse[2] = {
+            Vector4(0.f, 0.f, 0.f, 1.f),
+            Vector4(0.f, 0.f, 0.f, 1.f)
+        };
+        Vector4 vLightSpecular[2] = {
             Vector4(0.f, 0.f, 0.f, 1.f),
             Vector4(0.f, 0.f, 0.f, 1.f)
         };
@@ -396,11 +404,15 @@ namespace alpha
         switch (lights.size())
         {
         case 2:
-            vLightDirs[1] = Vector4(lights[1]->worldTransform.Position(), 1.f);
-            vLightColors[1] = lights[1]->m_color;
+            vLightPosition[1] = Vector4(lights[1]->worldTransform.Position(), 1.f);
+            vLightDiffuse[1] = lights[1]->m_color * 0.5f;
+            vLightAmbient[1] = vLightDiffuse[1] * 0.2f;
+            vLightSpecular[1] = Vector4(1.f, 1.f, 1.f, 1.f);
         case 1:
-            vLightDirs[0] = Vector4(lights[0]->worldTransform.Position(), 1.f);
-            vLightColors[0] = lights[0]->m_color;
+            vLightPosition[0] = Vector4(lights[0]->worldTransform.Position(), 1.f);
+            vLightDiffuse[0] = lights[0]->m_color * 0.5f;
+            vLightAmbient[0] = vLightDiffuse[0] * 0.2f;
+            vLightSpecular[0] = Vector4(1.f, 1.f, 1.f, 1.f);
         default:
             break;
         }
@@ -424,30 +436,40 @@ namespace alpha
             // Set primitive topology
             m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            // update constant buffer
+            // update constant buffers
+            MatrixBuffer mb;
+            mb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(renderSet->worldTransform));
+            mb.mView = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetView()));
+            mb.mProjection = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetProjection()));
+            m_pImmediateContext->UpdateSubresource(renderable->m_pMatrixBuffer, 0, nullptr, &mb, 0, 0);
+
             ConstantBuffer cb;
-            cb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(renderSet->worldTransform));
-            cb.mView = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetView()));
-            cb.mProjection = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetProjection()));
-
-            cb.vLightDir[0] = vLightDirs[0];
-            cb.vLightDir[1] = vLightDirs[1];
-            cb.vLightColor[0] = vLightColors[0];
-            cb.vLightColor[1] = vLightColors[1];
-
+            cb.vLightPosition[0] = vLightPosition[0];
+            cb.vLightPosition[1] = vLightPosition[1];
+            cb.vLightAmbient[0] = vLightAmbient[0];
+            cb.vLightAmbient[1] = vLightAmbient[1];
+            cb.vLightDiffuse[0] = vLightDiffuse[0];
+            cb.vLightDiffuse[1] = vLightDiffuse[1];
+            cb.vLightSpecular[0] = vLightSpecular[0];
+            cb.vLightSpecular[1] = vLightSpecular[1];
             cb.ambient = material.GetAmbient();
             cb.diffuse = material.GetDiffuse();
             cb.specular = material.GetSpecular();
-            //cb.shininess = material.GetShininess();
+            cb.shininess = material.GetShininess();
             cb.vOutputColor = renderSet->color;
-
             m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+            CameraBuffer camera_buffer;
+            camera_buffer.cameraPosition = pCamera->GetView().Position();
+            m_pImmediateContext->UpdateSubresource(renderable->m_pCameraBuffer, 0, nullptr, &camera_buffer, 0, 0);
 
             // render object
             m_pImmediateContext->VSSetShader(renderable->m_pVertexShader, nullptr, 0);
-            m_pImmediateContext->VSSetConstantBuffers(0, 1, &renderable->m_pConstantBuffer);
+            m_pImmediateContext->VSSetConstantBuffers(0, 1, &renderable->m_pMatrixBuffer);
+            m_pImmediateContext->VSSetConstantBuffers(1, 1, &renderable->m_pCameraBuffer);
             m_pImmediateContext->PSSetShader(renderable->m_pPixelShader, nullptr, 0);
-            m_pImmediateContext->PSSetConstantBuffers(0, 1, &renderable->m_pConstantBuffer);
+            m_pImmediateContext->PSSetConstantBuffers(0, 1, &renderable->m_pMatrixBuffer);
+            m_pImmediateContext->PSSetConstantBuffers(1, 1, &renderable->m_pConstantBuffer);
 
             m_pImmediateContext->DrawIndexed(renderable->indices.size(), 0, 0);
         }
@@ -575,7 +597,7 @@ namespace alpha
 
     void GraphicsRenderer::CreateBuffer(unsigned int byte_width, unsigned int bind_flags, const void * object_memory, ID3D11Buffer ** buffer)
     {
-        HRESULT hr;
+        HRESULT hr = S_OK;
         D3D11_BUFFER_DESC bd;
         D3D11_SUBRESOURCE_DATA InitData;
 
