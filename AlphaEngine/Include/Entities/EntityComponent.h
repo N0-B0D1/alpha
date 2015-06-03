@@ -30,6 +30,7 @@ namespace alpha
 {
     class LuaVar;
     class LuaTable;
+    class Material;
 
     /**
      * \brief Abstract base class for all entity components. 
@@ -98,14 +99,11 @@ namespace alpha
         const Vector3 & GetScale() const;
         const Quaternion & GetRotation() const;
         Matrix GetTransform() const;
+        std::string GetMaterialPath() const;
 
         void SetPosition(const Vector3 & position);
         void SetScale(const Vector3 & scale);
         void SetRotation(const Quaternion & rotation);
-
-        // Light getters
-        bool EmitsLight() const;
-        Vector4 GetColor() const;
 
     protected:
         /** Helper function for retrieving x, y, or z vars from script tables */
@@ -125,11 +123,8 @@ namespace alpha
         /** This components combined rotation, scale, and position. */
         Matrix m_mTransform;
 
-        /** Does the visible object in the scene absorb or emit light. */
-        bool m_bLightEmitter;
-
-        /** The objects default, unskinned, color.  Which effects how it emits light. */
-        Vector4 m_vColor;
+        /** The file name for an object material, every visible object has a material that describes its look and feel */
+        std::string m_sMaterial;
     };
 }
 

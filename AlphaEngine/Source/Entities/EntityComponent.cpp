@@ -106,22 +106,9 @@ namespace alpha
             this->UpdateTransform();
         }
 
-        // get light emitter state
-        m_bLightEmitter = false;
-        auto emitter_var = std::dynamic_pointer_cast<LuaStatic<bool>>(data_table->Get("light_emitter"));
-        if (emitter_var != nullptr)
+        if (auto material_var = std::dynamic_pointer_cast<LuaStatic<std::string>>(data_table->Get("material")))
         {
-            m_bLightEmitter = emitter_var->GetValue();
-        }
-
-        // get light color value
-        auto color_table = std::dynamic_pointer_cast<LuaTable>(data_table->Get("color"));
-        if (color_table != nullptr)
-        {
-            this->GetTableVarValue(color_table, "r", &m_vColor.x);
-            this->GetTableVarValue(color_table, "g", &m_vColor.y);
-            this->GetTableVarValue(color_table, "b", &m_vColor.z);
-            this->GetTableVarValue(color_table, "z", &m_vColor.w);
+            m_sMaterial = material_var->GetValue();
         }
     }
 
@@ -150,6 +137,11 @@ namespace alpha
         return m_mTransform;
     }
 
+    std::string SceneComponent::GetMaterialPath() const
+    {
+        return m_sMaterial;
+    }
+
     void SceneComponent::SetPosition(const Vector3 & position)
     {
         m_vPosition.x = position.x;
@@ -175,16 +167,6 @@ namespace alpha
         m_qRotation.w = rotation.w;
 
         this->UpdateTransform();
-    }
-
-    bool SceneComponent::EmitsLight() const
-    {
-        return m_bLightEmitter;
-    }
-
-    Vector4 SceneComponent::GetColor() const
-    {
-        return m_vColor;
     }
 
     void SceneComponent::GetTableVarValue(std::shared_ptr<LuaTable> table, const std::string key, float * const out)

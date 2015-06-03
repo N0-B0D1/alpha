@@ -405,20 +405,20 @@ namespace alpha
         {
         case 2:
             vLightPosition[1] = Vector4(lights[1]->worldTransform.Position(), 1.f);
-            vLightDiffuse[1] = lights[1]->m_color * 0.5f;
-            vLightAmbient[1] = vLightDiffuse[1] * 0.2f;
-            vLightSpecular[1] = Vector4(1.f, 1.f, 1.f, 1.f);
+            vLightDiffuse[1] = lights[1]->GetDiffuseLight();
+            vLightAmbient[1] = lights[1]->GetAmbientLight();
+            vLightSpecular[1] = lights[1]->GetSpecularLight();
         case 1:
             vLightPosition[0] = Vector4(lights[0]->worldTransform.Position(), 1.f);
-            vLightDiffuse[0] = lights[0]->m_color * 0.5f;
-            vLightAmbient[0] = vLightDiffuse[0] * 0.2f;
-            vLightSpecular[0] = Vector4(1.f, 1.f, 1.f, 1.f);
+            vLightDiffuse[0] = lights[0]->GetDiffuseLight();
+            vLightAmbient[0] = lights[0]->GetAmbientLight();
+            vLightSpecular[0] = lights[0]->GetSpecularLight();
         default:
             break;
         }
 
         auto renderables = renderSet->GetRenderables();
-        auto material = renderSet->material;
+        auto material = renderSet->material.lock();
 
         for (auto renderable : renderables)
         {
@@ -452,11 +452,11 @@ namespace alpha
             cb.vLightDiffuse[1] = vLightDiffuse[1];
             cb.vLightSpecular[0] = vLightSpecular[0];
             cb.vLightSpecular[1] = vLightSpecular[1];
-            cb.ambient = material.GetAmbient();
-            cb.diffuse = material.GetDiffuse();
-            cb.specular = material.GetSpecular();
-            cb.shininess = material.GetShininess();
-            cb.vOutputColor = renderSet->color;
+            cb.ambient = material->GetAmbient();
+            cb.diffuse = material->GetDiffuse();
+            cb.specular = material->GetSpecular();
+            cb.shininess = material->GetShininess();
+            cb.vOutputColor = material->GetColor(); // renderSet->color;
             m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
             CameraBuffer camera_buffer;

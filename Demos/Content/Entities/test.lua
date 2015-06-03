@@ -26,6 +26,7 @@ components = {
 			rotation = { x = 0.0, y = 0.0, z = 0.0 },
 			scale = { x = 0.5, y = 0.5, z = 0.5 }
 		},
+		material = "Materials/bronze.lua",
 		components = {
 			-- components can exist inside other components
 			primitive_internal1 = {
@@ -36,6 +37,7 @@ components = {
 					rotation = { x = 0.0, y = 0.0, z = 0.0 },
 					scale = { x = 1.0, y = 1.5, z = 1.0 }
 				},
+				material = "Materials/bronze.lua",
 			},
 			primitive_internal2 = {
 				type = "mesh",
@@ -45,6 +47,7 @@ components = {
 					rotation = { x = 0.0, y = 0.0, z = 0.0 },
 					scale = { x = 1.0, y = 0.5, z = 1.0 }
 				},
+				material = "Materials/bronze.lua",
 			}
 		}
 	}

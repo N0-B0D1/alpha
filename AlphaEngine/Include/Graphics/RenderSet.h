@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -52,7 +53,7 @@ namespace alpha
         Vector4 color;
 
         /** The material to apply to this set of renderables */
-        Material material;
+        std::weak_ptr<Material> material;
     };
 }
 

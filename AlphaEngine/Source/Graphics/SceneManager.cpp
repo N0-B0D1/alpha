@@ -22,6 +22,7 @@ limitations under the License.
 #include "Entities/Entity.h"
 #include "Entities/EntityComponent.h"
 #include "Entities/MeshComponent.h"
+#include "Entities/LightComponent.h"
 #include "Events/EventDataPublisher.h"
 #include "Events/EventData_ThreadTaskCreated.h"
 #include "Toolbox/Logger.h"
@@ -150,11 +151,23 @@ namespace alpha
                 }
             }
 
-            //if (auto light_component = std::dynamic_pointer_cast<LightComponent>(scene_component))
-            if (scene_component->EmitsLight())
+            // get the material path, load as an asset, and set it on the node.
+            auto material_path = scene_component->GetMaterialPath();
+            std::shared_ptr<Material> pMaterial;
+            if (auto pAssets = m_pAssets.lock())
+            {
+                auto pAsset = pAssets->GetAsset(material_path.c_str());
+
+                // XXX TODO - pass asset through a material manager, so that only one
+                // material every exists for a given material script.
+                pMaterial = std::make_shared<Material>(pAsset);
+                node->SetMaterial(pMaterial);
+            }
+
+            if (auto light_component = std::dynamic_pointer_cast<LightComponent>(scene_component))
             {
                 // create a light and set it on the scene noce
-                Light * pLight = new Light(scene_component->GetColor());
+                Light * pLight = new Light(pMaterial->GetColor(), light_component->GetIntensity(), light_component->GetAmbientIntensity());
                 node->SetLight(pLight);
             }
 
@@ -170,7 +183,7 @@ namespace alpha
 
     void SceneManager::BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderSet *> & renderables, std::vector<Light *> & lights) const
     {
-        // XXX not sure if the entity id is neede at this point ... refactor as needed.
+        // XXX not sure if the entity id is needed at this point ... refactor as needed.
 
         // for each node
         for (auto iter : nodes)
@@ -191,10 +204,10 @@ namespace alpha
                 // if this renderable has a light attached
                 // then it emits light and should use a different
                 // shader
-                rs->emitsLight = (pLight != nullptr);
+                rs->emitsLight = node->EmitsLight();
 
-                // set base color for this renderable set object
-                rs->color = node->GetColor();
+                // set the render sets material
+                rs->material = node->GetMaterial();
 
                 renderables.push_back(rs);
             }

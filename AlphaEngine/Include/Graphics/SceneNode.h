@@ -57,8 +57,16 @@ namespace alpha
         void SetLight(Light * pLight);
         Light * GetLight() const;
 
-        /** Get teh objects base color */
-        Vector4 GetColor() const;
+        /** Set the material for this node */
+        void SetMaterial(std::shared_ptr<Material> pMaterial);
+        /** Retrieve material */
+        std::weak_ptr<Material> GetMaterial() const;
+
+        /**
+         * Does this node emit light.
+         * A node emits light if it or any ancestor has a Light object.
+         */
+        bool EmitsLight() const;
 
     private:
         /** Pointer to this nodes parent node, nullptr if this is the root node. */
@@ -81,6 +89,9 @@ namespace alpha
 
         /** Light information for this node */
         Light * m_pLight;
+
+        /** Material script describing the look and feel of this node */
+        std::shared_ptr<Material> m_pMaterial;
     };
 }
 
