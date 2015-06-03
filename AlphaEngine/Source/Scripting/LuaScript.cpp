@@ -81,6 +81,33 @@ namespace alpha
         }
     }
 
+    void LuaScript::GetTableFloatValue(std::shared_ptr<LuaTable> table, const std::string key, float * const out)
+    {
+        auto var = std::dynamic_pointer_cast<LuaStatic<double>>(table->Get(key));
+        if (var != nullptr && out != nullptr)
+        {
+            *out = static_cast<float>(var->GetValue());
+        }
+    }
+
+    void LuaScript::GetTableStringValue(std::shared_ptr<LuaTable> table, const std::string key, std::string * const out)
+    {
+        auto var = std::dynamic_pointer_cast<LuaStatic<std::string>>(table->Get(key));
+        if (var != nullptr && out != nullptr)
+        {
+            *out = var->GetValue();
+        }
+    }
+
+    void LuaScript::GetTableBoolValue(std::shared_ptr<LuaTable> table, const std::string key, bool * const out)
+    {
+        auto var = std::dynamic_pointer_cast<LuaStatic<bool>>(table->Get(key));
+        if (var != nullptr && out != nullptr)
+        {
+            *out = var->GetValue();
+        }
+    }
+
     /**
      * Recursively traverses a global table and creates LuaVar representations for each key/value pair.
      */

@@ -33,16 +33,34 @@ namespace alpha
         Vector3 normal;
     };
 
-    typedef struct ConstantBuffer
+    typedef struct MatrixBuffer
     {
         DirectX::XMMATRIX mWorld;
         DirectX::XMMATRIX mView;
         DirectX::XMMATRIX mProjection;
-        Vector4 vLightDir[2];
-        Vector4 vLightColor[2];
+    } MatrixBuffer;
+
+    typedef struct ConstantBuffer
+    {
+        Vector4 vLightPosition[2];
+        Vector4 vLightAmbient[2];
+        Vector4 vLightDiffuse[2];
+        Vector4 vLightSpecular[2];
         Vector4 ambient;
+        Vector4 diffuse;
+        Vector4 specular;
+        float shininess;
+        float _spacer1;
+        float _spacer2;
+        float _spacer3; // buffer size has to be a multiple of 16 bytes
         Vector4 vOutputColor;
     } ConstantBuffer;
+
+    typedef struct CameraBuffer
+    {
+        Vector3 cameraPosition;
+        float _spacer;
+    } CameraBuffer;
 
     /**
      * The Renderable object represents the smallest subset of data
@@ -67,9 +85,13 @@ namespace alpha
         ID3D11VertexShader * m_pVertexShader;
         ID3D11InputLayout * m_pInputLayout;
         ID3D11PixelShader * m_pPixelShader;
+
         ID3D11Buffer * m_pVertexBuffer;
         ID3D11Buffer * m_pIndexBuffer;
+
+        ID3D11Buffer * m_pMatrixBuffer;
         ID3D11Buffer * m_pConstantBuffer;
+        ID3D11Buffer * m_pCameraBuffer;
     };
 }
 

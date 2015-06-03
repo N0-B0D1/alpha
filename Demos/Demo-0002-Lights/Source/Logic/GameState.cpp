@@ -49,23 +49,36 @@ bool GameState::VInitialize()
     }
 
     // move the light up and back
-    if (auto pLightComp = std::dynamic_pointer_cast<alpha::MeshComponent>(m_pLight->Get("root")))
+    if (auto pLightComp = std::dynamic_pointer_cast<alpha::SceneComponent>(m_pLight->Get("root")))
     {
         pLightComp->SetPosition(alpha::Vector3(2.f, 2.f, 2.f));
     }
 
     // move second light forward and left
-    if (auto pLightComp = std::dynamic_pointer_cast<alpha::MeshComponent>(m_pLight2->Get("root")))
+    if (auto pLightComp = std::dynamic_pointer_cast<alpha::SceneComponent>(m_pLight2->Get("root")))
     {
-        pLightComp->SetPosition(alpha::Vector3(0.f, 0.f, -4.f));
+        pLightComp->SetPosition(alpha::Vector3(0.f, -1.f, -4.f));
     }
 
     return true;
 }
 
-bool GameState::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
+bool GameState::VUpdate(double currentTime, double /*elapsedTime*/)
 {
-    // Update the state, move actors, shoot bullets
+    // rotate the light in a circle around the origin about the y axis
+    if (auto pLightComp = std::dynamic_pointer_cast<alpha::SceneComponent>(m_pLight2->Get("root")))
+    {
+        float degrees = static_cast<float>(currentTime * 10);
+        float radians = static_cast<float>(degrees * (3.14 / 180));
+
+        alpha::Quaternion rotation = alpha::Quaternion::RotationFromAxisAngle(alpha::Vector3(0, 1, 0), radians);
+        alpha::Matrix matRotation = alpha::Matrix::Rotate(rotation);
+        alpha::Matrix matPosition = alpha::Matrix::Translate(alpha::Vector3(0.f, -1.f, -4.f));
+        alpha::Matrix matFinal = matPosition * matRotation;
+
+        pLightComp->SetRotation(rotation);
+        pLightComp->SetPosition(matFinal.Position());
+    }
 
     return true;
 }

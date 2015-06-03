@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "Math/Matrix.h"
 #include "Math/Vector4.h"
+#include "Graphics/Material.h"
 
 namespace alpha
 {
@@ -30,12 +31,24 @@ namespace alpha
     {
     public:
         Light();
-        explicit Light(Vector4 color);
+        explicit Light(Vector4 color, float intensity, float ambient_intensity);
         virtual ~Light();
+
+        Vector4 GetAmbientLight() const;
+        Vector4 GetDiffuseLight() const;
+        Vector4 GetSpecularLight() const;
 
         Matrix worldTransform;
 
+    private:
+        /** calculate material settings based on color an dintensity of light */
+        void GenerateMaterial();
+
         Vector4 m_color;
+        float m_fIntensity;
+        float m_fAmbientIntensity;
+
+        Material m_material;
     };
 }
 

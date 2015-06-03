@@ -26,11 +26,13 @@ namespace alpha
         , m_pPixelShader(nullptr)
         , m_pVertexBuffer(nullptr)
         , m_pIndexBuffer(nullptr)
+        , m_pMatrixBuffer(nullptr)
         , m_pConstantBuffer(nullptr)
     { }
     Renderable::~Renderable()
     {
         if (m_pConstantBuffer) m_pConstantBuffer->Release();
+        if (m_pMatrixBuffer) m_pMatrixBuffer->Release();
         if (m_pVertexBuffer) m_pVertexBuffer->Release();
         if (m_pIndexBuffer) m_pIndexBuffer->Release();
         if (m_pInputLayout) m_pInputLayout->Release();

@@ -12,22 +12,10 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- component data table
-components = {
-	root = {
-        -- by setting the root node like this, and having all other
-        -- scene components exist as children of the root node, we
-        -- can set the root nodes transform, and that will become the
-        -- Entities transform in the world.
-		type = "camera",
-        fov = 45.0,
-        near = 0.1,
-        far = 100.0,
-		transform = {
-			position = { x = 0.0, y = 0.0, z = 0.0 },
-			rotation = { x = 0.0, y = 0.0, z = 0.0 },
-			scale = { x = 1.0, y = 1.0, z = 1.0 }
-		},
-		material = "Materials/bronze.lua",
-	}
+-- Materials data table
+material = {
+	color = { r = 1.0, g = 0.5, b = 0.31, a = 1.0 },
+	roughness = 0.5,
+	metallic = 0.0,
+	specular = 0.5,
 }

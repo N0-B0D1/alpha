@@ -35,9 +35,15 @@ namespace alpha
         virtual ~LuaScript();
 
         void Add(std::shared_ptr<Asset> asset);
-
         void Load();
         void Run();
+
+        /** Helper function for retrieving float var from script tables */
+        void GetTableFloatValue(std::shared_ptr<LuaTable> table, const std::string key, float * const out);
+        /** Helper function for retrieving std::string var from script tables */
+        void GetTableStringValue(std::shared_ptr<LuaTable> table, const std::string key, std::string * const out);
+        /** Helper function for retrieving boolean var from script tables */
+        void GetTableBoolValue(std::shared_ptr<LuaTable> table, const std::string key, bool * const out);
 
     protected:
         std::shared_ptr<LuaTable> GetGlobalTable(const std::string & key);

@@ -74,3 +74,7 @@ file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Media/")
 # copy model files
 file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Models/*.am")
 file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Models/")
+	
+# copy material scripts
+file(GLOB MEDIA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Materials/*.lua")
+file(COPY ${MEDIA_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Materials/")

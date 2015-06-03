@@ -13,14 +13,29 @@
 // limitations under the License.
 
 // Constant Buffer
-cbuffer ConstantBuffer : register( b0 )
+
+// matrix buffer
+cbuffer MatrixBuffer : register(b0)
 {
 	matrix World;
 	matrix View;
 	matrix Projection;
+}
+
+// lighting buffer
+cbuffer ConstantBuffer : register(b1)
+{
 	float4 vLightDir[2];
-	float4 vLightColor[2];
+	float4 vLightAmbient[2];
+	float4 vLightDiffuse[2];
+	float4 vLightSpecular[2];
 	float4 ambient;
+	float4 diffuse;
+	float4 specular;
+	float shininess;
+	float _spacer1;
+	float _spacer2;
+	float _spacer3;
 	float4 vOutputColor;
 }
 
@@ -39,6 +54,5 @@ struct PS_INPUT
 // Pixel Shader
 float4 PS( PS_INPUT input) : SV_Target
 {
-	float ambientStrength = 1.0f;
-    return vOutputColor * ambientStrength;
+    return vOutputColor;
 }

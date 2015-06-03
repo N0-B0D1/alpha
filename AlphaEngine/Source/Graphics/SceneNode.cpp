@@ -34,6 +34,7 @@ namespace alpha
         , m_pSceneComponent(component)
         , m_pRenderSet(nullptr)
         , m_pLight(nullptr)
+        , m_pMaterial(nullptr)
     { }
     SceneNode::~SceneNode()
     {
@@ -109,14 +110,37 @@ namespace alpha
         return m_pLight;
     }
 
-
-    /** Get teh objects base color */
-    Vector4 SceneNode::GetColor() const
+    void SceneNode::SetMaterial(std::shared_ptr<Material> pMaterial)
     {
-        if (m_pSceneComponent != nullptr)
+        m_pMaterial = pMaterial;
+    }
+
+    std::weak_ptr<Material> SceneNode::GetMaterial() const
+    {
+        if (m_pMaterial != nullptr)
         {
-            return m_pSceneComponent->GetColor();
+            return m_pMaterial;
         }
-        return Vector4();
+        // XXX should probably find a better default for materials?
+        return std::weak_ptr<Material>();
+    }
+
+    bool SceneNode::EmitsLight() const
+    {
+        if (m_pLight == nullptr)
+        {
+            if (m_parent != nullptr)
+            {
+                // This node has no light, but has a parent that might emit light
+                // so check the parent and inherit its value.
+                return m_parent->EmitsLight();
+            }
+
+            // This node has no light, and is a root node, nothing in the chain emits light.
+            return false;
+        }
+
+        // this node has a light, so auto return true;
+        return true;
     }
 }

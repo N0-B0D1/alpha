@@ -20,10 +20,40 @@ namespace alpha
 {
     Light::Light()
         : m_color(1.f, 1.f, 1.f, 1.f)
-    { }
-    Light::Light(Vector4 color)
+        , m_fIntensity(0.5f)
+        , m_fAmbientIntensity(0.2f)
     {
-        m_color = color;
+        GenerateMaterial();
+    }
+    Light::Light(Vector4 color, float intensity, float ambient_intensity)
+        : m_color(color)
+        , m_fIntensity(intensity)
+        , m_fAmbientIntensity(ambient_intensity)
+    {
+        GenerateMaterial();
     }
     Light::~Light() { }
+
+    Vector4 Light::GetAmbientLight() const
+    {
+        return m_material.GetAmbient();
+    }
+
+    Vector4 Light::GetDiffuseLight() const
+    {
+        return m_material.GetDiffuse();
+    }
+
+    Vector4 Light::GetSpecularLight() const
+    {
+        return m_material.GetSpecular();
+    }
+
+    void Light::GenerateMaterial()
+    {
+        auto diffuse = m_color * m_fIntensity;
+        auto ambient = diffuse * m_fAmbientIntensity;
+        auto specular = Vector4(1.f, 1.f, 1.f, 1.f);
+        m_material = Material(ambient, diffuse, specular, 32.f);
+    }
 }

@@ -41,24 +41,23 @@ using namespace DirectX;
 
 namespace alpha
 {
-    D3D_DRIVER_TYPE         m_driverType = D3D_DRIVER_TYPE_NULL;
-    D3D_FEATURE_LEVEL       m_featureLevel = D3D_FEATURE_LEVEL_11_1;
-    ID3D11Device*           m_pd3dDevice = nullptr;
-    ID3D11Device1*          m_pd3dDevice1 = nullptr;
-    ID3D11DeviceContext*    m_pImmediateContext = nullptr;
-    ID3D11DeviceContext1*   m_pImmediateContext1 = nullptr;
-    IDXGISwapChain*         m_pSwapChain = nullptr;
-    IDXGISwapChain1*        m_pSwapChain1 = nullptr;
-    ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
-    ID3D11Texture2D*        m_pDepthStencil = nullptr;
-    ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
-    ID3D11RasterizerState*  m_pWireFrame = nullptr;
-
     GraphicsRenderer::GraphicsRenderer()
         : m_vsDefaultShader(nullptr)
         , m_psDefaultShader(nullptr)
         , m_vsLightShader(nullptr)
         , m_psLightShader(nullptr)
+        , m_driverType(D3D_DRIVER_TYPE_NULL)
+        , m_featureLevel(D3D_FEATURE_LEVEL_11_1)
+        , m_pd3dDevice(nullptr)
+        , m_pd3dDevice1(nullptr)
+        , m_pImmediateContext(nullptr)
+        , m_pImmediateContext1(nullptr)
+        , m_pSwapChain(nullptr)
+        , m_pSwapChain1(nullptr)
+        , m_pRenderTargetView(nullptr)
+        , m_pDepthStencil(nullptr)
+        , m_pDepthStencilView(nullptr)
+        , m_pWireFrame(nullptr)
     { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
@@ -106,7 +105,7 @@ namespace alpha
 
     void GraphicsRenderer::PreRender(RenderSet * renderSet)
     {
-        HRESULT hr = S_OK;
+        //HRESULT hr = S_OK;
 
         auto renderables = renderSet->GetRenderables();
 
@@ -136,43 +135,13 @@ namespace alpha
             }
 
             // vertex buffer
-            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr)
+            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr || renderable->m_pMatrixBuffer == nullptr)
             {
-                D3D11_BUFFER_DESC bd;
-                D3D11_SUBRESOURCE_DATA InitData;
-
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(Vertex) * renderable->vertices.size();
-                bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-                bd.CPUAccessFlags = 0;
-                ZeroMemory(&InitData, sizeof(InitData));
-                InitData.pSysMem = &renderable->vertices[0];
-                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pVertexBuffer);
-                //if (FAILED(hr))
-                //    return hr;
-
-                // index buffer
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(unsigned int) * renderable->indices.size();
-                bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-                bd.CPUAccessFlags = 0;
-                ZeroMemory(&InitData, sizeof(InitData));
-                InitData.pSysMem = &renderable->indices[0];
-                hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &renderable->m_pIndexBuffer);
-                //if (FAILED(hr))
-                //    return hr;
-
-                // constant buffer
-                ZeroMemory(&bd, sizeof(bd));
-                bd.Usage = D3D11_USAGE_DEFAULT;
-                bd.ByteWidth = sizeof(ConstantBuffer);
-                bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-                bd.CPUAccessFlags = 0;
-                hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &renderable->m_pConstantBuffer);
-                //if (FAILED(hr))
-                //    return hr;
+                this->CreateBuffer(sizeof(Vertex) * renderable->vertices.size(), D3D11_BIND_VERTEX_BUFFER, &renderable->vertices[0], &renderable->m_pVertexBuffer);
+                this->CreateBuffer(sizeof(unsigned int) * renderable->indices.size(), D3D11_BIND_INDEX_BUFFER, &renderable->indices[0], &renderable->m_pIndexBuffer);
+                this->CreateBuffer(sizeof(MatrixBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pMatrixBuffer);
+                this->CreateBuffer(sizeof(ConstantBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pConstantBuffer);
+                this->CreateBuffer(sizeof(CameraBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pCameraBuffer);
             }
         }
     }
@@ -206,9 +175,9 @@ namespace alpha
         UINT height = rc.bottom - rc.top;
 
         UINT createDeviceFlags = 0;
-//#ifdef ALPHA_DEBUG
-//        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-//#endif
+        #ifdef ALPHA_DEBUG
+                createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+        #endif
 
         D3D_DRIVER_TYPE driverTypes[] =
         {
@@ -358,7 +327,9 @@ namespace alpha
         descDepth.MiscFlags = 0;
         hr = m_pd3dDevice->CreateTexture2D(&descDepth, nullptr, &m_pDepthStencil);
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         // Create the depth stencil view
         D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
@@ -368,7 +339,9 @@ namespace alpha
         descDSV.Texture2D.MipSlice = 0;
         hr = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
         if (FAILED(hr))
+        {
             return hr;
+        }
 
         m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 
@@ -411,13 +384,19 @@ namespace alpha
     void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)
     {
         // Setup our lighting parameters
-        Vector4 vLightDirs[2] =
-        {
+        Vector4 vLightPosition[2] = {
             Vector4(0.f, 0.f, 0.f, 1.0f),
             Vector4(0.f, 0.f, 0.f, 1.0f),
         };
-        Vector4 vLightColors[2] =
-        {
+        Vector4 vLightAmbient[2] = {
+            Vector4(0.f, 0.f, 0.f, 1.f),
+            Vector4(0.f, 0.f, 0.f, 1.f)
+        };
+        Vector4 vLightDiffuse[2] = {
+            Vector4(0.f, 0.f, 0.f, 1.f),
+            Vector4(0.f, 0.f, 0.f, 1.f)
+        };
+        Vector4 vLightSpecular[2] = {
             Vector4(0.f, 0.f, 0.f, 1.f),
             Vector4(0.f, 0.f, 0.f, 1.f)
         };
@@ -425,16 +404,21 @@ namespace alpha
         switch (lights.size())
         {
         case 2:
-            vLightDirs[1] = Vector4(lights[1]->worldTransform.Position(), 1.f);
-            vLightColors[1] = lights[1]->m_color;
+            vLightPosition[1] = Vector4(lights[1]->worldTransform.Position(), 1.f);
+            vLightDiffuse[1] = lights[1]->GetDiffuseLight();
+            vLightAmbient[1] = lights[1]->GetAmbientLight();
+            vLightSpecular[1] = lights[1]->GetSpecularLight();
         case 1:
-            vLightDirs[0] = Vector4(lights[0]->worldTransform.Position(), 1.f);
-            vLightColors[0] = lights[0]->m_color;
+            vLightPosition[0] = Vector4(lights[0]->worldTransform.Position(), 1.f);
+            vLightDiffuse[0] = lights[0]->GetDiffuseLight();
+            vLightAmbient[0] = lights[0]->GetAmbientLight();
+            vLightSpecular[0] = lights[0]->GetSpecularLight();
         default:
             break;
         }
 
         auto renderables = renderSet->GetRenderables();
+        auto material = renderSet->material.lock();
 
         for (auto renderable : renderables)
         {
@@ -452,24 +436,40 @@ namespace alpha
             // Set primitive topology
             m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            // update constant buffer
+            // update constant buffers
+            MatrixBuffer mb;
+            mb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(renderSet->worldTransform));
+            mb.mView = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetView()));
+            mb.mProjection = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetProjection()));
+            m_pImmediateContext->UpdateSubresource(renderable->m_pMatrixBuffer, 0, nullptr, &mb, 0, 0);
+
             ConstantBuffer cb;
-            cb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(renderSet->worldTransform));
-            cb.mView = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetView()));
-            cb.mProjection = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetProjection()));
-            cb.vLightDir[0] = vLightDirs[0];
-            cb.vLightDir[1] = vLightDirs[1];
-            cb.vLightColor[0] = vLightColors[0];
-            cb.vLightColor[1] = vLightColors[1];
-            cb.ambient = Vector4(0.2f, 0.2f, 0.2f, 1.0f);
-            cb.vOutputColor = renderSet->color;
+            cb.vLightPosition[0] = vLightPosition[0];
+            cb.vLightPosition[1] = vLightPosition[1];
+            cb.vLightAmbient[0] = vLightAmbient[0];
+            cb.vLightAmbient[1] = vLightAmbient[1];
+            cb.vLightDiffuse[0] = vLightDiffuse[0];
+            cb.vLightDiffuse[1] = vLightDiffuse[1];
+            cb.vLightSpecular[0] = vLightSpecular[0];
+            cb.vLightSpecular[1] = vLightSpecular[1];
+            cb.ambient = material->GetAmbient();
+            cb.diffuse = material->GetDiffuse();
+            cb.specular = material->GetSpecular();
+            cb.shininess = material->GetShininess();
+            cb.vOutputColor = material->GetColor(); // renderSet->color;
             m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+            CameraBuffer camera_buffer;
+            camera_buffer.cameraPosition = pCamera->GetView().Position();
+            m_pImmediateContext->UpdateSubresource(renderable->m_pCameraBuffer, 0, nullptr, &camera_buffer, 0, 0);
 
             // render object
             m_pImmediateContext->VSSetShader(renderable->m_pVertexShader, nullptr, 0);
-            m_pImmediateContext->VSSetConstantBuffers(0, 1, &renderable->m_pConstantBuffer);
+            m_pImmediateContext->VSSetConstantBuffers(0, 1, &renderable->m_pMatrixBuffer);
+            m_pImmediateContext->VSSetConstantBuffers(1, 1, &renderable->m_pCameraBuffer);
             m_pImmediateContext->PSSetShader(renderable->m_pPixelShader, nullptr, 0);
-            m_pImmediateContext->PSSetConstantBuffers(0, 1, &renderable->m_pConstantBuffer);
+            m_pImmediateContext->PSSetConstantBuffers(0, 1, &renderable->m_pMatrixBuffer);
+            m_pImmediateContext->PSSetConstantBuffers(1, 1, &renderable->m_pConstantBuffer);
 
             m_pImmediateContext->DrawIndexed(renderable->indices.size(), 0, 0);
         }
@@ -593,5 +593,29 @@ namespace alpha
         }
 
         return vsLayout;
+    }
+
+    void GraphicsRenderer::CreateBuffer(unsigned int byte_width, unsigned int bind_flags, const void * object_memory, ID3D11Buffer ** buffer)
+    {
+        HRESULT hr = S_OK;
+        D3D11_BUFFER_DESC bd;
+        D3D11_SUBRESOURCE_DATA InitData;
+
+        ZeroMemory(&bd, sizeof(bd));
+        bd.Usage = D3D11_USAGE_DEFAULT;
+        bd.CPUAccessFlags = 0;
+        bd.ByteWidth = byte_width; // sizeof(Vertex) * renderable->vertices.size();
+        bd.BindFlags = bind_flags; // D3D11_BIND_VERTEX_BUFFER;
+
+        if (object_memory) 
+        {
+            ZeroMemory(&InitData, sizeof(InitData));
+            InitData.pSysMem = object_memory; // &renderable->vertices[0];
+            hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, buffer); // &renderable->m_pVertexBuffer);
+        }
+        else
+        {
+            hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, buffer); // &renderable->m_pVertexBuffer);
+        }
     }
 }

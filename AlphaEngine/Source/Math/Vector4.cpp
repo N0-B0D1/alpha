@@ -44,4 +44,52 @@ namespace alpha
         this->w = right.w;
         return *this;
     }
+
+    Vector4 operator+(const Vector4 & left, const Vector4 & right)
+    {
+        return Vector4(left.x + right.x,
+                       left.y + right.y,
+                       left.z + right.z,
+                       left.w + right.w);
+    }
+
+    Vector4 operator-(const Vector4 & left, const Vector4 & right)
+    {
+        return Vector4(left.x - right.x,
+                       left.y - right.y,
+                       left.z - right.z,
+                       left.w - right.w);
+    }
+
+    Vector4 operator*(const Vector4 & left, const Vector4 & right)
+    {
+        return Vector4(left.x * right.x,
+                       left.y * right.y,
+                       left.z * right.z,
+                       left.w * right.w);
+    }
+
+    Vector4 operator*(const Vector4 & left, float right)
+    {
+        return Vector4(left.x * right,
+                       left.y * right,
+                       left.z * right,
+                       left.w * right);
+    }
+
+    Vector4 operator/(const Vector4 & left, const Vector4 & right)
+    {
+        return Vector4(left.x / right.x,
+                       left.y / right.y,
+                       left.z / right.z,
+                       left.w / right.w);
+    }
+
+    Vector4 operator*(float left, const Vector4 & right)
+    {
+        return Vector4(left * right.x,
+                       left * right.y,
+                       left * right.z,
+                       left * right.w);
+    }
 }

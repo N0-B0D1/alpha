@@ -15,14 +15,27 @@
 -- component data table
 components = {
 	root = {
-		type = "mesh",
-		model = "Models/cube.am",
+		type = "light",
 		transform = {
 			position = { x = 0.0, y = 0.0, z = 0.0 },
 			rotation = { x = 0.0, y = 0.0, z = 0.0 },
-			scale = { x = 0.25, y = 0.25, z = 0.25 }
+			scale = { x = 1.0, y = 1.0, z = 1.0 }
 		},
-        light_emitter = true,
-        color = { r = 1.0, g = 1.0, b = 0.5, a = 1.0 },
+		material = "Materials/lightyellow.lua",
+		intensity = 0.5,
+		ambient_intensity = 0.2,
+		components = {
+			-- components can exist inside other components
+			visible_mesh = {
+				type = "mesh",
+		        model = "Models/cube.am",
+				transform = {
+					position = { x = 0.0, y = 0.0, z = 0.0 },
+					rotation = { x = 0.0, y = 0.0, z = 0.0 },
+					scale = { x = 0.25, y = 0.25, z = 0.25 }
+				},
+				material = "Materials/lightyellow.lua",
+			},
+		}
 	}
 }

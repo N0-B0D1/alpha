@@ -32,6 +32,13 @@ namespace alpha
 
         Vector4 & operator=(const Vector4 & right);
     };
+
+    Vector4 operator+(const Vector4 & left, const Vector4 & right);
+    Vector4 operator-(const Vector4 & left, const Vector4 & right);
+    Vector4 operator*(const Vector4 & left, const Vector4 & right);
+    Vector4 operator*(const Vector4 & left, float right);
+    Vector4 operator/(const Vector4 & left, const Vector4 & right);
+    Vector4 operator*(float left, const Vector4 & right);
 }
 
 #endif // VECTOR_4_H
