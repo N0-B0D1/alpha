@@ -222,6 +222,10 @@ namespace alpha
         };
 
         Vector3 lightPos;
+        Vector4 ambient;
+        Vector4 diffuse;
+        Vector4 specular;
+
         switch (lights.size())
         {
         case 2:
@@ -230,43 +234,51 @@ namespace alpha
             vLightPos[4] = lightPos.y;
             vLightPos[5] = lightPos.z;
 
-            vLightDiffuse[3] = lights[1]->m_color.x * 0.5f;
-            vLightDiffuse[4] = lights[1]->m_color.y * 0.5f;
-            vLightDiffuse[5] = lights[1]->m_color.z * 0.5f;
+            diffuse = lights[1]->GetDiffuseLight();
+            vLightDiffuse[3] = diffuse.x;
+            vLightDiffuse[4] = diffuse.y;
+            vLightDiffuse[5] = diffuse.z;
 
-            vLightAmbient[3] = vLightDiffuse[3] * 0.2f;
-            vLightAmbient[4] = vLightDiffuse[4] * 0.2f;
-            vLightAmbient[5] = vLightDiffuse[5] * 0.2f;
+            ambient = lights[1]->GetAmbientLight();
+            vLightAmbient[3] = ambient.x;
+            vLightAmbient[4] = ambient.y;
+            vLightAmbient[5] = ambient.z;
 
-            vLightSpecular[3] = 1.f;
-            vLightSpecular[4] = 1.f;
-            vLightSpecular[5] = 1.f;
+            specular = lights[1]->GetSpecularLight();
+            vLightSpecular[3] = specular.x;
+            vLightSpecular[4] = specular.y;
+            vLightSpecular[5] = specular.z;
         case 1:
             lightPos = lights[0]->worldTransform.Position();
             vLightPos[0] = lightPos.x;
             vLightPos[1] = lightPos.y;
             vLightPos[2] = lightPos.z;
 
-            vLightDiffuse[0] = lights[0]->m_color.x * 0.5f;
-            vLightDiffuse[1] = lights[0]->m_color.y * 0.5f;
-            vLightDiffuse[2] = lights[0]->m_color.z * 0.5f;
+            diffuse = lights[0]->GetDiffuseLight();
+            vLightDiffuse[0] = diffuse.x;
+            vLightDiffuse[1] = diffuse.y;
+            vLightDiffuse[2] = diffuse.z;
 
-            vLightAmbient[0] = vLightDiffuse[0] * 0.2f;
-            vLightAmbient[1] = vLightDiffuse[1] * 0.2f;
-            vLightAmbient[2] = vLightDiffuse[2] * 0.2f;
+            ambient = lights[0]->GetAmbientLight();
+            vLightAmbient[0] = ambient.x;
+            vLightAmbient[1] = ambient.y;
+            vLightAmbient[2] = ambient.z;
 
-            vLightSpecular[0] = 1.f;
-            vLightSpecular[1] = 1.f;
-            vLightSpecular[2] = 1.f;
+            specular = lights[0]->GetSpecularLight();
+            vLightSpecular[0] = specular.x;
+            vLightSpecular[1] = specular.y;
+            vLightSpecular[2] = specular.z;
         default:
             break;
         }
 
-        Vector4 objectColor = renderSet->color;
-        auto ambient = renderSet->material.GetAmbient();
-        auto diffuse = renderSet->material.GetDiffuse();
-        auto specular = renderSet->material.GetSpecular();
-        auto shininess = renderSet->material.GetShininess();
+        auto material = renderSet->material.lock();
+
+        ambient = material->GetAmbient();
+        diffuse = material->GetDiffuse();
+        specular = material->GetSpecular();
+        auto shininess = material->GetShininess();
+        Vector4 objectColor = material->GetColor();
 
         for (Renderable * renderable : renderables)
         {
