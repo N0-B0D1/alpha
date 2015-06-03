@@ -24,19 +24,6 @@ components = {
 		material = "Materials/lightyellow.lua",
 		intensity = 0.5,
 		ambient_intensity = 0.2,
-        light_type = "point",
-		components = {
-			-- components can exist inside other components
-			visible_mesh = {
-				type = "mesh",
-		        model = "Models/cube.am",
-				transform = {
-					position = { x = 0.0, y = 0.0, z = 0.0 },
-					rotation = { x = 0.0, y = 0.0, z = 0.0 },
-					scale = { x = 0.25, y = 0.25, z = 0.25 }
-				},
-				material = "Materials/lightyellow.lua",
-			},
-		}
+        light_type = "directional",
 	}
 }

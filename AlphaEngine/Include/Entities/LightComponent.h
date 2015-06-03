@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "Entities/EntityComponent.h"
 #include "Math/Vector4.h"
+#include "Graphics/Light.h"
 
 namespace alpha
 {
@@ -35,10 +36,12 @@ namespace alpha
 
         float GetIntensity() const;
         float GetAmbientIntensity() const;
+        LightType GetLightType() const;
 
     private:
         float m_fIntensity;
         float m_fAmbientIntensity;
+        LightType m_eLightType;
     };
 }
 

@@ -45,6 +45,25 @@ namespace alpha
             m_fAmbientIntensity = static_cast<float>(ambient->GetValue());
         }
 
+        // get the type of light this component represents
+        if (auto light_type_var = std::dynamic_pointer_cast<LuaStatic<std::string>>(table->Get("light_type")))
+        {
+            std::string light_type = light_type_var->GetValue();
+            
+            if (light_type == "directional")
+            {
+                m_eLightType = LightType::DIRECTIONAL;
+            }
+            else if (light_type == "point")
+            {
+                m_eLightType = LightType::POINT;
+            }
+            else
+            {
+                m_eLightType = LightType::DIRECTIONAL;
+            }
+        }
+
         // init base scene component
         SceneComponent::VInitialize(var);
     }
@@ -67,5 +86,10 @@ namespace alpha
     float LightComponent::GetAmbientIntensity() const
     {
         return m_fAmbientIntensity;
+    }
+
+    LightType LightComponent::GetLightType() const
+    {
+        return m_eLightType;
     }
 }

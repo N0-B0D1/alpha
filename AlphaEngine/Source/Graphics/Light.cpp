@@ -19,14 +19,14 @@ limitations under the License.
 namespace alpha
 {
     Light::Light()
-        : m_color(1.f, 1.f, 1.f, 1.f)
+        : m_vBaseColor(1.f, 1.f, 1.f, 1.f)
         , m_fIntensity(0.5f)
         , m_fAmbientIntensity(0.2f)
     {
         GenerateMaterial();
     }
     Light::Light(Vector4 color, float intensity, float ambient_intensity)
-        : m_color(color)
+        : m_vBaseColor(color)
         , m_fIntensity(intensity)
         , m_fAmbientIntensity(ambient_intensity)
     {
@@ -36,24 +36,28 @@ namespace alpha
 
     Vector4 Light::GetAmbientLight() const
     {
-        return m_material.GetAmbient();
+        return m_vAmbient;
     }
 
     Vector4 Light::GetDiffuseLight() const
     {
-        return m_material.GetDiffuse();
+        return m_vDiffuse;
     }
 
     Vector4 Light::GetSpecularLight() const
     {
-        return m_material.GetSpecular();
+        return m_vSpecular;
     }
 
     void Light::GenerateMaterial()
     {
-        auto diffuse = m_color * m_fIntensity;
-        auto ambient = diffuse * m_fAmbientIntensity;
-        auto specular = Vector4(1.f, 1.f, 1.f, 1.f);
-        m_material = Material(ambient, diffuse, specular, 32.f);
+        m_vDiffuse = m_vBaseColor * m_fIntensity;
+        m_vAmbient = m_vDiffuse * m_fAmbientIntensity;
+        m_vSpecular = Vector4(1.f, 1.f, 1.f, 1.f);
+    }
+
+    LightType Light::GetLightType() const
+    {
+        return m_eLightType;
     }
 }
