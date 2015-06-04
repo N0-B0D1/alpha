@@ -23,6 +23,8 @@ limitations under the License.
 
 namespace alpha
 {
+    class LightComponent;
+
     typedef enum LightType
     {
         DIRECTIONAL,
@@ -36,8 +38,7 @@ namespace alpha
     class Light
     {
     public:
-        Light();
-        explicit Light(Vector4 color, float intensity, float ambient_intensity);
+        explicit Light(std::shared_ptr<LightComponent> light_component);
         virtual ~Light();
 
         Vector4 GetAmbientLight() const;

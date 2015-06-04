@@ -34,14 +34,18 @@ namespace alpha
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
         virtual std::string VGetName() const;
 
+        LightType GetLightType() const;
+        Vector4 GetLightColor() const;
         float GetIntensity() const;
         float GetAmbientIntensity() const;
-        LightType GetLightType() const;
+        Vector3 GetLightDirection() const;
 
     private:
+        LightType m_eLightType;
+        Vector4 m_vLightColor;
         float m_fIntensity;
         float m_fAmbientIntensity;
-        LightType m_eLightType;
+        Vector3 m_vDirection;
     };
 }
 

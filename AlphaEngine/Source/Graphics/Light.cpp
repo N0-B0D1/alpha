@@ -15,23 +15,21 @@ limitations under the License.
 */
 
 #include "Graphics/Light.h"
+#include "Entities/LightComponent.h"
 
 namespace alpha
 {
-    Light::Light()
-        : m_vBaseColor(1.f, 1.f, 1.f, 1.f)
-        , m_fIntensity(0.5f)
-        , m_fAmbientIntensity(0.2f)
+    Light::Light(std::shared_ptr<LightComponent> light_component)
     {
+        m_eLightType = light_component->GetLightType();
+        m_vBaseColor = light_component->GetLightColor();
+        m_fIntensity = light_component->GetIntensity();
+        m_fAmbientIntensity = light_component->GetAmbientIntensity();
+        m_vDirection = light_component->GetLightDirection();
+
         GenerateMaterial();
     }
-    Light::Light(Vector4 color, float intensity, float ambient_intensity)
-        : m_vBaseColor(color)
-        , m_fIntensity(intensity)
-        , m_fAmbientIntensity(ambient_intensity)
-    {
-        GenerateMaterial();
-    }
+
     Light::~Light() { }
 
     Vector4 Light::GetAmbientLight() const

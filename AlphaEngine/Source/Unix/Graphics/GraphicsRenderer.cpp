@@ -230,41 +230,43 @@ namespace alpha
         {
         case 2:
             lightPos = lights[1]->worldTransform.Position();
+            diffuse = lights[1]->GetDiffuseLight();
+            ambient = lights[1]->GetAmbientLight();
+            specular = lights[1]->GetSpecularLight();
+
             vLightPos[3] = lightPos.x;
             vLightPos[4] = lightPos.y;
             vLightPos[5] = lightPos.z;
 
-            diffuse = lights[1]->GetDiffuseLight();
             vLightDiffuse[3] = diffuse.x;
             vLightDiffuse[4] = diffuse.y;
             vLightDiffuse[5] = diffuse.z;
 
-            ambient = lights[1]->GetAmbientLight();
             vLightAmbient[3] = ambient.x;
             vLightAmbient[4] = ambient.y;
             vLightAmbient[5] = ambient.z;
 
-            specular = lights[1]->GetSpecularLight();
             vLightSpecular[3] = specular.x;
             vLightSpecular[4] = specular.y;
             vLightSpecular[5] = specular.z;
         case 1:
             lightPos = lights[0]->worldTransform.Position();
+            ambient = lights[0]->GetAmbientLight();
+            diffuse = lights[0]->GetDiffuseLight();
+            specular = lights[0]->GetSpecularLight();
+
             vLightPos[0] = lightPos.x;
             vLightPos[1] = lightPos.y;
             vLightPos[2] = lightPos.z;
 
-            diffuse = lights[0]->GetDiffuseLight();
             vLightDiffuse[0] = diffuse.x;
             vLightDiffuse[1] = diffuse.y;
             vLightDiffuse[2] = diffuse.z;
 
-            ambient = lights[0]->GetAmbientLight();
             vLightAmbient[0] = ambient.x;
             vLightAmbient[1] = ambient.y;
             vLightAmbient[2] = ambient.z;
 
-            specular = lights[0]->GetSpecularLight();
             vLightSpecular[0] = specular.x;
             vLightSpecular[1] = specular.y;
             vLightSpecular[2] = specular.z;
