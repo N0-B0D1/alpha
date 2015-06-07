@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Constant Buffer
+// Constant Buffers
 
 // matrix buffer
 cbuffer MatrixBuffer : register(b0)
@@ -25,10 +25,6 @@ cbuffer MatrixBuffer : register(b0)
 // lighting buffer
 cbuffer ConstantBuffer : register(b1)
 {
-	float4 vLightPosition[2];
-	float4 vLightAmbient[2];
-	float4 vLightDiffuse[2];
-	float4 vLightSpecular[2];
 	float4 ambient;
 	float4 diffuse;
 	float4 specular;
@@ -37,6 +33,22 @@ cbuffer ConstantBuffer : register(b1)
 	float _spacer2;
 	float _spacer3;
 	float4 vOutputColor;
+
+	struct PointLight
+	{
+		float4 position;
+		float4 ambient;
+		float4 diffuse;
+		float4 specular;
+	} pointLight[2];
+	
+	struct DirectionalLight
+	{
+		float4 direction;
+		float4 ambient;
+		float4 diffuse;
+		float4 specular;
+	} directionalLight;
 }
 
 struct VS_INPUT
@@ -53,29 +65,46 @@ struct PS_INPUT
 	float3 ViewDir : TEXCOORD1;
 };
 
+float4 calculateLighting(PS_INPUT input, float4 light_ambient, float4 light_diffuse, float4 light_specular, float3 light_direction)
+{
+	float3 norm = normalize(input.Norm);
+	
+	// ambient
+	float4 ambientColor = light_ambient * ambient;
+	
+	// diffuse
+	float diff = saturate(dot(input.Norm, -light_direction));
+	float4 diffuseColor = saturate(light_diffuse * (diff * diffuse));
+	
+	// specular
+	float3 reflectDirection = reflect(-light_direction, input.Norm);
+	float spec = pow(saturate(dot(reflectDirection, input.ViewDir)), shininess);
+	float4 specularColor = light_specular * (spec * specular);
+	
+	return (ambientColor + diffuseColor + specularColor);
+}
+
+// calculate pixel color based on point lighting
+float4 calculatePointLighting(int index, PS_INPUT input)
+{
+	float3 lightDirection = normalize(input.WorldPos - pointLight[index].position);
+	return calculateLighting(input, pointLight[index].ambient, pointLight[index].diffuse, pointLight[index].specular, lightDirection);
+}
+
+// calculate pixel color based on point lighting
+float4 calculateDirectionalLighting(PS_INPUT input)
+{
+	return calculateLighting(input, directionalLight.ambient, directionalLight.diffuse, directionalLight.specular, directionalLight.direction.xyz);
+}
+
 // Pixel Shader
 float4 PS( PS_INPUT input) : SV_Target
 {
-	float4 finalColor = {0, 0, 0, 0};
-	
-	float3 norm = normalize(input.Norm);
+	float4 finalColor = calculateDirectionalLighting(input);
     
     for(int i = 0; i < 2; i++)
     {
-		// ambient
-		float4 ambientColor = vLightAmbient[i] * ambient;
-		
-		// diffuse
-		float3 lightDirection = normalize(input.WorldPos - vLightPosition[i]);
-		float diff = saturate(dot(input.Norm, -lightDirection));
-		float4 diffuseColor = saturate(vLightDiffuse[i] * (diff * diffuse));
-		
-		// specular
-		float3 reflectDirection = reflect(-lightDirection, input.Norm);
-		float spec = pow(saturate(dot(reflectDirection, input.ViewDir)), shininess);
-		float4 specularColor = vLightSpecular[i] * (spec * specular);
-		
-		finalColor += (ambientColor + diffuseColor + specularColor);
+		finalColor += calculatePointLighting(i, input);
     }
 	
     finalColor.a = 1;

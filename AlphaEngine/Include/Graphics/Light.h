@@ -44,6 +44,7 @@ namespace alpha
         Vector4 GetAmbientLight() const;
         Vector4 GetDiffuseLight() const;
         Vector4 GetSpecularLight() const;
+        Vector3 GetLightDirection() const;
 
         LightType GetLightType() const;
 

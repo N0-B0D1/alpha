@@ -33,6 +33,24 @@ namespace alpha
         Vector3 normal;
     };
 
+    typedef struct DirectionalLight
+    {
+        Vector4 direction;
+
+        Vector4 ambient;
+        Vector4 diffuse;
+        Vector4 specular;
+    } DirectionalLight;
+
+    typedef struct PointLight
+    {
+        Vector4 position;
+
+        Vector4 ambient;
+        Vector4 diffuse;
+        Vector4 specular;
+    } PointLight;
+
     typedef struct MatrixBuffer
     {
         DirectX::XMMATRIX mWorld;
@@ -42,10 +60,6 @@ namespace alpha
 
     typedef struct ConstantBuffer
     {
-        Vector4 vLightPosition[2];
-        Vector4 vLightAmbient[2];
-        Vector4 vLightDiffuse[2];
-        Vector4 vLightSpecular[2];
         Vector4 ambient;
         Vector4 diffuse;
         Vector4 specular;
@@ -54,6 +68,9 @@ namespace alpha
         float _spacer2;
         float _spacer3; // buffer size has to be a multiple of 16 bytes
         Vector4 vOutputColor;
+
+        PointLight pointLight[2];
+        DirectionalLight directionalLight;
     } ConstantBuffer;
 
     typedef struct CameraBuffer

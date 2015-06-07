@@ -54,6 +54,11 @@ namespace alpha
         m_vSpecular = Vector4(1.f, 1.f, 1.f, 1.f);
     }
 
+    Vector3 Light::GetLightDirection() const
+    {
+        return m_vDirection;
+    }
+
     LightType Light::GetLightType() const
     {
         return m_eLightType;
