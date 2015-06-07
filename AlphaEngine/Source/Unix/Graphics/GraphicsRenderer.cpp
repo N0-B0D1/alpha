@@ -158,9 +158,11 @@ namespace alpha
         glViewport(0, 0, 800, 600);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        CreateLightBufferData(lights);
+
         for (auto rs : render_sets)
         {
-            this->SetRender(pCamera, rs, lights);
+            this->SetRender(pCamera, rs);
         }
 
         // swap buffer to display cool new render objects.
@@ -191,8 +193,28 @@ namespace alpha
         return true;
     }
 
-    void GraphicsRenderer::SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)
+    void GraphicsRenderer::SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet)
     {
+        switch (m_directionalLights.size())
+        {
+        case 0:
+            m_directionalLights.push_back(DirectionalLight());
+            break;
+        }
+
+        switch (m_pointLights.size())
+        {
+        case 1:
+            m_pointLights.push_back(PointLight());
+            break;
+
+        case 0:
+            for (int i = 0; i < 2; i++)
+            {
+                m_pointLights.push_back(PointLight());
+            }
+            break;
+        }
 
         // get/make view and projection matrix
         // view matrix
@@ -202,143 +224,54 @@ namespace alpha
         Matrix proj = pCamera->GetProjection();
         
         auto renderables = renderSet->GetRenderables();
-
-        // Setup our lighting parameters
-        float vLightPos[6] = {
-            0.f, 0.f, 0.f,
-            0.f, 0.f, 0.f
-        };
-        float vLightAmbient[6] = {
-            0.f, 0.f, 0.f,
-            0.f, 0.f, 0.f
-        };
-        float vLightDiffuse[6] = {
-            0.f, 0.f, 0.f,
-            0.f, 0.f, 0.f
-        };
-        float vLightSpecular[6] = {
-            0.f, 0.f, 0.f,
-            0.f, 0.f, 0.f
-        };
-
-        Vector3 lightPos;
-        Vector4 ambient;
-        Vector4 diffuse;
-        Vector4 specular;
-
-        switch (lights.size())
-        {
-        case 2:
-            lightPos = lights[1]->worldTransform.Position();
-            diffuse = lights[1]->GetDiffuseLight();
-            ambient = lights[1]->GetAmbientLight();
-            specular = lights[1]->GetSpecularLight();
-
-            vLightPos[3] = lightPos.x;
-            vLightPos[4] = lightPos.y;
-            vLightPos[5] = lightPos.z;
-
-            vLightDiffuse[3] = diffuse.x;
-            vLightDiffuse[4] = diffuse.y;
-            vLightDiffuse[5] = diffuse.z;
-
-            vLightAmbient[3] = ambient.x;
-            vLightAmbient[4] = ambient.y;
-            vLightAmbient[5] = ambient.z;
-
-            vLightSpecular[3] = specular.x;
-            vLightSpecular[4] = specular.y;
-            vLightSpecular[5] = specular.z;
-        case 1:
-            lightPos = lights[0]->worldTransform.Position();
-            ambient = lights[0]->GetAmbientLight();
-            diffuse = lights[0]->GetDiffuseLight();
-            specular = lights[0]->GetSpecularLight();
-
-            vLightPos[0] = lightPos.x;
-            vLightPos[1] = lightPos.y;
-            vLightPos[2] = lightPos.z;
-
-            vLightDiffuse[0] = diffuse.x;
-            vLightDiffuse[1] = diffuse.y;
-            vLightDiffuse[2] = diffuse.z;
-
-            vLightAmbient[0] = ambient.x;
-            vLightAmbient[1] = ambient.y;
-            vLightAmbient[2] = ambient.z;
-
-            vLightSpecular[0] = specular.x;
-            vLightSpecular[1] = specular.y;
-            vLightSpecular[2] = specular.z;
-        default:
-            break;
-        }
-
         auto material = renderSet->material.lock();
 
-        ambient = material->GetAmbient();
-        diffuse = material->GetDiffuse();
-        specular = material->GetSpecular();
+        auto ambient = material->GetAmbient();
+        auto diffuse = material->GetDiffuse();
+        auto specular = material->GetSpecular();
         auto shininess = material->GetShininess();
-        Vector4 objectColor = material->GetColor();
+        auto objectColor = material->GetColor();
 
         for (Renderable * renderable : renderables)
         {
             // set shader program
             glUseProgram(renderable->m_shaderProgram);
 
-            // attach model world matrix to shader
-            GLuint modelLoc = glGetUniformLocation(renderable->m_shaderProgram, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &renderSet->worldTransform.m_11);
-
-            // attach view matrix to shader
-            GLuint viewLoc = glGetUniformLocation(renderable->m_shaderProgram, "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view.m_11);
-
-            // attach projection matrix to shader
-            GLuint projLoc = glGetUniformLocation(renderable->m_shaderProgram, "projection");
-            glUniformMatrix4fv(projLoc, 1, GL_FALSE, &proj.m_11);
+            // attach object matrix values
+            glUniformMatrix4fv(glGetUniformLocation(renderable->m_shaderProgram, "model"), 1, GL_FALSE, &renderSet->worldTransform.m_11);
+            glUniformMatrix4fv(glGetUniformLocation(renderable->m_shaderProgram, "view"), 1, GL_FALSE, &view.m_11);
+            glUniformMatrix4fv(glGetUniformLocation(renderable->m_shaderProgram, "projection"), 1, GL_FALSE, &proj.m_11);
 
             // XXX set test light color
-            GLuint objectColorLoc = glGetUniformLocation(renderable->m_shaderProgram, "objectColor");
-            glUniform3f(objectColorLoc, objectColor.x, objectColor.y, objectColor.z);
+            glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "objectColor"), objectColor.x, objectColor.y, objectColor.z);
             if (!renderSet->emitsLight)
             {
                 // set light positions
-                GLuint lightPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightPos");
-                glUniform3fv(lightPosLoc, 6, vLightPos);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].position"), m_pointLights[0].position.x, m_pointLights[0].position.y, m_pointLights[0].position.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].ambient"), m_pointLights[0].ambient.x, m_pointLights[0].ambient.y, m_pointLights[0].ambient.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].diffuse"), m_pointLights[0].diffuse.x, m_pointLights[0].diffuse.y, m_pointLights[0].diffuse.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].specular"), m_pointLights[0].specular.x, m_pointLights[0].specular.y, m_pointLights[0].specular.z);
 
-                // set light colors
-                GLuint lightAmbientLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightAmbient");
-                glUniform3fv(lightAmbientLoc, 6, vLightAmbient);
+                // light #2
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].position"), m_pointLights[1].position.x, m_pointLights[1].position.y, m_pointLights[1].position.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].ambient"), m_pointLights[1].ambient.x, m_pointLights[1].ambient.y, m_pointLights[1].ambient.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].diffuse"), m_pointLights[1].diffuse.x, m_pointLights[1].diffuse.y, m_pointLights[1].diffuse.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].specular"), m_pointLights[1].specular.x, m_pointLights[1].specular.y, m_pointLights[1].specular.z);
 
-                // set light colors
-                GLuint lightDiffuseLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightDiffuse");
-                glUniform3fv(lightDiffuseLoc, 6, vLightDiffuse);
-
-                // set light colors
-                GLuint lightSpecularLoc = glGetUniformLocation(renderable->m_shaderProgram, "lightSpecular");
-                glUniform3fv(lightSpecularLoc, 6, vLightSpecular);
+                // directional light
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "directionalLight.direction"), m_directionalLights[0].direction.x, m_directionalLights[0].direction.y, m_directionalLights[0].direction.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "directionalLight.ambient"), m_directionalLights[0].ambient.x, m_directionalLights[0].ambient.y, m_directionalLights[0].ambient.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "directionalLight.diffuse"), m_directionalLights[0].diffuse.x, m_directionalLights[0].diffuse.y, m_directionalLights[0].diffuse.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "directionalLight.specular"), m_directionalLights[0].specular.x, m_directionalLights[0].specular.y, m_directionalLights[0].specular.z);
 
                 // set view position variable
-                GLuint viewPosLoc = glGetUniformLocation(renderable->m_shaderProgram, "viewPos");
-                glUniform3f(viewPosLoc, viewPosition.x, viewPosition.y, viewPosition.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "viewPos"), viewPosition.x, viewPosition.y, viewPosition.z);
 
-                // set ambient lighting variable
-                GLuint ambientLoc = glGetUniformLocation(renderable->m_shaderProgram, "ambient");
-                glUniform3f(ambientLoc, ambient.x, ambient.y, ambient.z);
-
-                // set diffuse lighting variable
-                GLuint diffuseLoc = glGetUniformLocation(renderable->m_shaderProgram, "diffuse");
-                glUniform3f(diffuseLoc, diffuse.x, diffuse.y, diffuse.z);
-
-                // set specular lighting variable
-                GLuint specularLoc = glGetUniformLocation(renderable->m_shaderProgram, "specular");
-                glUniform3f(specularLoc, specular.x, specular.y, specular.z);
-
-                // set specular lighting variable
-                GLuint shininessLoc = glGetUniformLocation(renderable->m_shaderProgram, "shininess");
-                glUniform1f(shininessLoc, shininess);
+                // set object light colors
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "ambient"), ambient.x, ambient.y, ambient.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "diffuse"), diffuse.x, diffuse.y, diffuse.z);
+                glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "specular"), specular.x, specular.y, specular.z);
+                glUniform1f(glGetUniformLocation(renderable->m_shaderProgram, "shininess"), shininess);
             }
 
             // bind vertices to array object
@@ -398,5 +331,39 @@ namespace alpha
         LOG("GraphicsRenderer > Pixel Shader compilation result: ", &VertexShaderErrorMessage[0]);
 
         return ps;
+    }
+
+    void GraphicsRenderer::CreateLightBufferData(const std::vector<Light *> & lights)
+    {
+        m_pointLights.clear();
+        m_directionalLights.clear();
+
+        for (auto light : lights)
+        {
+            switch(light->GetLightType())
+            {
+            case LightType::DIRECTIONAL:
+                m_directionalLights.push_back(DirectionalLight());
+
+                m_directionalLights[m_directionalLights.size() - 1].direction = Vector4(light->GetLightDirection(), 1.f);
+                m_directionalLights[m_directionalLights.size() - 1].ambient = light->GetAmbientLight();
+                m_directionalLights[m_directionalLights.size() - 1].diffuse = light->GetDiffuseLight();
+                m_directionalLights[m_directionalLights.size() - 1].specular = light->GetSpecularLight();
+                break;
+
+            case LightType::POINT:
+                m_pointLights.push_back(PointLight());
+
+                m_pointLights[m_pointLights.size() - 1].position = Vector4(light->worldTransform.Position(), 1.f);
+                m_pointLights[m_pointLights.size() - 1].ambient = light->GetAmbientLight();
+                m_pointLights[m_pointLights.size() - 1].diffuse = light->GetDiffuseLight();
+                m_pointLights[m_pointLights.size() - 1].specular = light->GetSpecularLight();
+                break;
+
+            default:
+                LOG_WARN("Unknown light type, unable to render: ", light->GetLightType());
+                break;
+            }
+        }
     }
 }

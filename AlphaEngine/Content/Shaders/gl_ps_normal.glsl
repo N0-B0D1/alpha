@@ -18,41 +18,72 @@ out vec4 color;
 in vec3 FragPos;
 in vec3 Normal;
 
+struct PointLight
+{
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+struct DirectionalLight
+{
+    vec3 direction;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
 uniform vec3 viewPos;
 uniform vec3 objectColor;
-uniform vec3 lightPos[2];
-uniform vec3 lightAmbient[2];
-uniform vec3 lightDiffuse[2];
-uniform vec3 lightSpecular[2];
+
+uniform PointLight pointLight[2];
+uniform DirectionalLight directionalLight;
+
 uniform vec3 ambient;
 uniform vec3 diffuse;
 uniform vec3 specular;
 uniform float shininess;
 
-void main ()
+vec3 calculateLight(vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3 light_direction)
 {
-    // apply global ambient light first
-    vec3 finalColor = vec3(0.0f);
-
     vec3 norm = normalize(Normal);
     vec3 viewDirection = normalize(viewPos - FragPos);
 
+    // calculate Ambient
+    vec3 ambientColor = light_ambient * ambient;
+
+    // calculate Diffuse
+    float diff = max(dot(norm, light_direction), 0.0);
+    vec3 diffuseColor = light_diffuse * (diff * diffuse);
+
+    // calculate Specular
+    vec3 reflectDirection = reflect(light_direction, norm);
+    float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), shininess);
+    vec3 specularColor = light_specular * (spec * specular);
+
+    return (ambientColor + diffuseColor + specularColor);
+}
+
+vec3 calculatePointLight(PointLight light)
+{
+    vec3 lightDirection = -normalize(FragPos - light.position);
+    return calculateLight(light.ambient, light.diffuse, light.specular, lightDirection);
+}
+
+vec3 calculateDirectionalLight(DirectionalLight light)
+{
+    vec3 lightDirection = -normalize(light.direction);
+    return calculateLight(light.ambient, light.diffuse, light.specular, lightDirection);
+}
+
+void main ()
+{
+    vec3 finalColor = calculateDirectionalLight(directionalLight);
+
     for (int i = 0; i < 2; i++)
     {
-        // calculate Ambient
-        vec3 ambientColor = lightAmbient[i] * ambient;
-
-        // calculate Diffuse
-        vec3 lightDirection = -normalize(FragPos - lightPos[i]);
-        float diff = max(dot(norm, lightDirection), 0.0);
-        vec3 diffuseColor = lightDiffuse[i] * (diff * diffuse);
-
-        // calculate Specular
-        vec3 reflectDirection = reflect(lightDirection, norm);
-        float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), shininess);
-        vec3 specularColor = lightSpecular[i] * (spec * specular);
-
-        finalColor += (ambientColor + diffuseColor + specularColor);
+        finalColor += calculatePointLight(pointLight[i]);
     }
 
     color = vec4(finalColor, 1.0f);

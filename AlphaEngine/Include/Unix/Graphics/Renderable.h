@@ -22,6 +22,7 @@ limitations under the License.
 #include <GL/gl.h>
 
 #include "Math/Vector3.h"
+#include "Math/Vector4.h"
 
 namespace alpha
 {
@@ -30,6 +31,22 @@ namespace alpha
         Vector3 position;
         Vector3 normal;
     };
+
+    typedef struct PointLight
+    {
+        Vector4 position;
+        Vector4 ambient;
+        Vector4 diffuse;
+        Vector4 specular;
+    } PointLight;
+
+    typedef struct DirectionalLight
+    {
+        Vector4 direction;
+        Vector4 ambient;
+        Vector4 diffuse;
+        Vector4 specular;
+    } DirectionalLight;
 
     /**
      * The Renderable object represents the smallest subset of data
