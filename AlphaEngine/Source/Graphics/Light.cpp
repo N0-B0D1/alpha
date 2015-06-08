@@ -26,6 +26,7 @@ namespace alpha
         m_fIntensity = light_component->GetIntensity();
         m_fAmbientIntensity = light_component->GetAmbientIntensity();
         m_vDirection = light_component->GetLightDirection();
+        m_fMaxDistance = light_component->GetLightDistance();
 
         CalculateLighting();
     }

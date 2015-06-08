@@ -17,6 +17,7 @@ limitations under the License.
 #include "Entities/LightComponent.h"
 #include "Scripting/LuaVar.h"
 #include "Graphics/Material.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -27,10 +28,11 @@ namespace alpha
     //! Provides logic for how to initialize a transform component from Lua script data
     void LightComponent::VInitialize(std::shared_ptr<LuaVar> var)
     {
-        std::shared_ptr<LuaTable> table = std::dynamic_pointer_cast<LuaTable>(var);
+        std::shared_ptr<LuaTable> component_table = std::dynamic_pointer_cast<LuaTable>(var);
+        std::shared_ptr<LuaTable> table = std::dynamic_pointer_cast<LuaTable>(component_table->Get("light"));
 
         // get the type of light this component represents
-        if (auto light_type_var = std::dynamic_pointer_cast<LuaStatic<std::string>>(table->Get("light_type")))
+        if (auto light_type_var = std::dynamic_pointer_cast<LuaStatic<std::string>>(table->Get("type")))
         {
             std::string light_type = light_type_var->GetValue();
             
@@ -49,7 +51,7 @@ namespace alpha
         }
 
         // get the light color, or default to black(none)
-        if (auto light_color = std::dynamic_pointer_cast<LuaTable>(table->Get("light_color")))
+        if (auto light_color = std::dynamic_pointer_cast<LuaTable>(table->Get("color")))
         {
             this->GetTableVarValue(light_color, "r", &m_vLightColor.x);
             this->GetTableVarValue(light_color, "g", &m_vLightColor.y);
@@ -82,6 +84,14 @@ namespace alpha
             this->GetTableVarValue(light_direction, "z", &m_vDirection.z);
         }
 
+        // get the max illumination distance of the light
+        // only valid for point lights
+        m_fLightDistance = 100.f;
+        if (auto light_distance = std::dynamic_pointer_cast<LuaStatic<double>>(table->Get("distance")))
+        {
+            m_fLightDistance = static_cast<float>(light_distance->GetValue());
+        }
+
         // init base scene component
         SceneComponent::VInitialize(var);
     }
@@ -104,6 +114,11 @@ namespace alpha
     Vector4 LightComponent::GetLightColor() const
     {
         return m_vLightColor;
+    }
+
+    float LightComponent::GetLightDistance() const
+    {
+        return m_fLightDistance;
     }
 
     float LightComponent::GetIntensity() const

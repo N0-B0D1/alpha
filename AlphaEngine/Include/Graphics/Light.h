@@ -85,6 +85,7 @@ namespace alpha
         Vector3 m_vDirection;
 
         /** point light calculated attenuation values */
+        float m_fMaxDistance;
         float m_fConstant;
         float m_fLinear;
         float m_fQuadratic;

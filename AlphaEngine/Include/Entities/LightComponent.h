@@ -36,6 +36,7 @@ namespace alpha
 
         LightType GetLightType() const;
         Vector4 GetLightColor() const;
+        float GetLightDistance() const;
         float GetIntensity() const;
         float GetAmbientIntensity() const;
         Vector3 GetLightDirection() const;
@@ -43,6 +44,7 @@ namespace alpha
     private:
         LightType m_eLightType;
         Vector4 m_vLightColor;
+        float m_fLightDistance;
         float m_fIntensity;
         float m_fAmbientIntensity;
         Vector3 m_vDirection;
