@@ -21,9 +21,14 @@ in vec3 Normal;
 struct PointLight
 {
     vec3 position;
+
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 struct DirectionalLight
@@ -45,36 +50,53 @@ uniform vec3 diffuse;
 uniform vec3 specular;
 uniform float shininess;
 
-vec3 calculateLight(vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3 light_direction)
+vec3 calcAmbient(vec3 light_ambient)
+{
+    return (light_ambient * ambient);
+}
+
+vec3 calcDiffuse(vec3 light_diffuse, vec3 light_direction)
+{
+    vec3 norm = normalize(Normal);
+
+    float diff = max(dot(norm, light_direction), 0.0);
+    return (light_diffuse * (diff * diffuse));
+}
+
+vec3 calcSpecular(vec3 light_specular, vec3 light_direction)
 {
     vec3 norm = normalize(Normal);
     vec3 viewDirection = normalize(viewPos - FragPos);
 
-    // calculate Ambient
-    vec3 ambientColor = light_ambient * ambient;
-
-    // calculate Diffuse
-    float diff = max(dot(norm, light_direction), 0.0);
-    vec3 diffuseColor = light_diffuse * (diff * diffuse);
-
-    // calculate Specular
     vec3 reflectDirection = reflect(light_direction, norm);
     float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), shininess);
-    vec3 specularColor = light_specular * (spec * specular);
-
-    return (ambientColor + diffuseColor + specularColor);
+    return (light_specular * (spec * specular));
 }
 
 vec3 calculatePointLight(PointLight light)
 {
     vec3 lightDirection = -normalize(FragPos - light.position);
-    return calculateLight(light.ambient, light.diffuse, light.specular, lightDirection);
+
+    vec3 norm = normalize(Normal);
+    float distance = length(light.position - FragPos);
+    float attenuation = 1.0f / (light.constant + (light.linear * distance) + (light.quadratic * (distance * distance)));
+
+    vec3 ambientColor = calcAmbient(light.ambient) * attenuation;
+    vec3 diffuseColor = calcDiffuse(light.diffuse, lightDirection) * attenuation;
+    vec3 specularColor = calcSpecular(light.specular, lightDirection) * attenuation;
+
+    return (ambientColor + diffuseColor + specularColor);
 }
 
 vec3 calculateDirectionalLight(DirectionalLight light)
 {
     vec3 lightDirection = -normalize(light.direction);
-    return calculateLight(light.ambient, light.diffuse, light.specular, lightDirection);
+
+    vec3 ambientColor = calcAmbient(light.ambient);
+    vec3 diffuseColor = calcDiffuse(light.diffuse, lightDirection);
+    vec3 specularColor = calcSpecular(light.specular, lightDirection);
+
+    return (ambientColor + diffuseColor + specularColor);
 }
 
 void main ()

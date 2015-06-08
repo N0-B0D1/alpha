@@ -48,11 +48,15 @@ namespace alpha
 
         LightType GetLightType() const;
 
+        float GetAttenuationConstant() const;
+        float GetAttenuationLinear() const;
+        float GetAttenuationQuadratic() const;
+
         Matrix worldTransform;
 
     private:
-        /** calculate material settings based on color an dintensity of light */
-        void GenerateMaterial();
+        /** calculate lighting based on color and intensity */
+        void CalculateLighting();
 
         /** Base color emitted by the light */
         Vector4 m_vBaseColor;
@@ -79,6 +83,11 @@ namespace alpha
 
         /** The direction of a directional light. */
         Vector3 m_vDirection;
+
+        /** point light calculated attenuation values */
+        float m_fConstant;
+        float m_fLinear;
+        float m_fQuadratic;
     };
 }
 

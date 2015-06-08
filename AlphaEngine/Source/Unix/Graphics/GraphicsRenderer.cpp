@@ -206,6 +206,11 @@ namespace alpha
         {
         case 1:
             m_pointLights.push_back(PointLight());
+            
+            m_pointLights[m_pointLights.size() - 1].constant = 1.f;
+            m_pointLights[m_pointLights.size() - 1].linear = 0.045f;
+            m_pointLights[m_pointLights.size() - 1].quadratic = 0.0075f;
+
             break;
 
         case 0:
@@ -251,12 +256,18 @@ namespace alpha
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].ambient"), m_pointLights[0].ambient.x, m_pointLights[0].ambient.y, m_pointLights[0].ambient.z);
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].diffuse"), m_pointLights[0].diffuse.x, m_pointLights[0].diffuse.y, m_pointLights[0].diffuse.z);
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].specular"), m_pointLights[0].specular.x, m_pointLights[0].specular.y, m_pointLights[0].specular.z);
+                glUniform1f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].constant"), m_pointLights[0].constant);
+                glUniform1f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].linear"), m_pointLights[0].linear);
+                glUniform1f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[0].quadratic"), m_pointLights[0].quadratic);
 
                 // light #2
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].position"), m_pointLights[1].position.x, m_pointLights[1].position.y, m_pointLights[1].position.z);
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].ambient"), m_pointLights[1].ambient.x, m_pointLights[1].ambient.y, m_pointLights[1].ambient.z);
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].diffuse"), m_pointLights[1].diffuse.x, m_pointLights[1].diffuse.y, m_pointLights[1].diffuse.z);
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].specular"), m_pointLights[1].specular.x, m_pointLights[1].specular.y, m_pointLights[1].specular.z);
+                glUniform1f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].constant"), m_pointLights[1].constant);
+                glUniform1f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].linear"), m_pointLights[1].linear);
+                glUniform1f(glGetUniformLocation(renderable->m_shaderProgram, "pointLight[1].quadratic"), m_pointLights[1].quadratic);
 
                 // directional light
                 glUniform3f(glGetUniformLocation(renderable->m_shaderProgram, "directionalLight.direction"), m_directionalLights[0].direction.x, m_directionalLights[0].direction.y, m_directionalLights[0].direction.z);
@@ -354,10 +365,15 @@ namespace alpha
             case LightType::POINT:
                 m_pointLights.push_back(PointLight());
 
+                //LOG_ERR(light->GetAttenuationConstant(), ", ", light->GetAttenuationLinear(), ", ", light->GetAttenuationQuadratic());
+
                 m_pointLights[m_pointLights.size() - 1].position = Vector4(light->worldTransform.Position(), 1.f);
                 m_pointLights[m_pointLights.size() - 1].ambient = light->GetAmbientLight();
                 m_pointLights[m_pointLights.size() - 1].diffuse = light->GetDiffuseLight();
                 m_pointLights[m_pointLights.size() - 1].specular = light->GetSpecularLight();
+                m_pointLights[m_pointLights.size() - 1].constant = light->GetAttenuationConstant();
+                m_pointLights[m_pointLights.size() - 1].linear = light->GetAttenuationLinear();
+                m_pointLights[m_pointLights.size() - 1].quadratic = light->GetAttenuationQuadratic();
                 break;
 
             default:

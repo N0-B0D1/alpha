@@ -35,14 +35,20 @@ namespace alpha
     typedef struct PointLight
     {
         Vector4 position;
+
         Vector4 ambient;
         Vector4 diffuse;
         Vector4 specular;
+
+        float constant;
+        float linear;
+        float quadratic;
     } PointLight;
 
     typedef struct DirectionalLight
     {
         Vector4 direction;
+
         Vector4 ambient;
         Vector4 diffuse;
         Vector4 specular;

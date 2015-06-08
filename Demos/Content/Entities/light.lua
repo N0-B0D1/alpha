@@ -23,7 +23,7 @@ components = {
 		},
         light_type = "point",
         light_color = { r = 1.0, g = 1.0, b = 0.5, a = 1.0 },
-		intensity = 0.5,
+		intensity = 0.8,
 		ambient_intensity = 0.2,
 		components = {
 			-- components can exist inside other components

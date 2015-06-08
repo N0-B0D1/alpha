@@ -27,7 +27,7 @@ namespace alpha
         m_fAmbientIntensity = light_component->GetAmbientIntensity();
         m_vDirection = light_component->GetLightDirection();
 
-        GenerateMaterial();
+        CalculateLighting();
     }
 
     Light::~Light() { }
@@ -47,11 +47,16 @@ namespace alpha
         return m_vSpecular;
     }
 
-    void Light::GenerateMaterial()
+    void Light::CalculateLighting()
     {
         m_vDiffuse = m_vBaseColor * m_fIntensity;
         m_vAmbient = m_vDiffuse * m_fAmbientIntensity;
         m_vSpecular = Vector4(1.f, 1.f, 1.f, 1.f);
+
+        // XXX insert the magic here ...
+        m_fConstant = 1.f;
+        m_fLinear = 0.045f;
+        m_fQuadratic = 0.0075f;
     }
 
     Vector3 Light::GetLightDirection() const
@@ -62,5 +67,20 @@ namespace alpha
     LightType Light::GetLightType() const
     {
         return m_eLightType;
+    }
+
+    float Light::GetAttenuationConstant() const
+    {
+        return m_fConstant;
+    }
+
+    float Light::GetAttenuationLinear() const
+    {
+        return m_fLinear;
+    }
+
+    float Light::GetAttenuationQuadratic() const
+    {
+        return m_fQuadratic;
     }
 }
