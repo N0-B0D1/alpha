@@ -55,6 +55,13 @@ namespace alpha
         m_vSpecular = Vector4(1.f, 1.f, 1.f, 1.f);
 
         // XXX insert the magic here ...
+        /**
+         *                   I
+         * Atten. = ---------------------
+         *           C + L * D + Q * D^2
+         *
+         * So how do you calculate values for C, L, and Q as the X distance changes ...
+         */
         m_fConstant = 1.f;
         m_fLinear = 0.045f;
         m_fQuadratic = 0.0075f;
