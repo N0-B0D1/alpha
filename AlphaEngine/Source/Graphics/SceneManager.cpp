@@ -166,8 +166,8 @@ namespace alpha
 
             if (auto light_component = std::dynamic_pointer_cast<LightComponent>(scene_component))
             {
-                // create a light and set it on the scene noce
-                Light * pLight = new Light(pMaterial->GetColor(), light_component->GetIntensity(), light_component->GetAmbientIntensity());
+                // create a light based on the light component and set it on the scene node
+                Light * pLight = new Light(light_component);
                 node->SetLight(pLight);
             }
 

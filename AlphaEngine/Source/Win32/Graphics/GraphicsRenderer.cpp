@@ -155,9 +155,12 @@ namespace alpha
         // sets wireframe mode
         //m_pImmediateContext->RSSetState(m_pWireFrame);
 
+        // prep lights for rendering
+        CreateLightBufferData(lights);
+
         for (RenderSet * render_set : renderables)
         {
-            this->RenderRenderable(pCamera, render_set, lights);
+            this->RenderRenderable(pCamera, render_set);
         }
 
         // swap buffer that we just drew to.
@@ -381,39 +384,36 @@ namespace alpha
         if (m_pd3dDevice) m_pd3dDevice->Release();
     }
 
-    void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights)
+    void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet)
     {
-        // Setup our lighting parameters
-        Vector4 vLightPosition[2] = {
-            Vector4(0.f, 0.f, 0.f, 1.0f),
-            Vector4(0.f, 0.f, 0.f, 1.0f),
-        };
-        Vector4 vLightAmbient[2] = {
-            Vector4(0.f, 0.f, 0.f, 1.f),
-            Vector4(0.f, 0.f, 0.f, 1.f)
-        };
-        Vector4 vLightDiffuse[2] = {
-            Vector4(0.f, 0.f, 0.f, 1.f),
-            Vector4(0.f, 0.f, 0.f, 1.f)
-        };
-        Vector4 vLightSpecular[2] = {
-            Vector4(0.f, 0.f, 0.f, 1.f),
-            Vector4(0.f, 0.f, 0.f, 1.f)
-        };
-
-        switch (lights.size())
+        switch (m_directionalLights.size())
         {
-        case 2:
-            vLightPosition[1] = Vector4(lights[1]->worldTransform.Position(), 1.f);
-            vLightDiffuse[1] = lights[1]->GetDiffuseLight();
-            vLightAmbient[1] = lights[1]->GetAmbientLight();
-            vLightSpecular[1] = lights[1]->GetSpecularLight();
+        case 0:
+            // XXX add at least one directional light
+            m_directionalLights.push_back(DirectionalLight());
+            break;
+        }
+
+        switch (m_pointLights.size())
+        {
         case 1:
-            vLightPosition[0] = Vector4(lights[0]->worldTransform.Position(), 1.f);
-            vLightDiffuse[0] = lights[0]->GetDiffuseLight();
-            vLightAmbient[0] = lights[0]->GetAmbientLight();
-            vLightSpecular[0] = lights[0]->GetSpecularLight();
-        default:
+            // XXX add second black light so the shader doesn't need to be smart
+            //PointLight pl;
+            m_pointLights.push_back(PointLight());
+            m_pointLights[m_pointLights.size() - 1].attenuationConstant = 1.f;
+            m_pointLights[m_pointLights.size() - 1].attenuationLinear = 0.045f;
+            m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = 0.0075f;
+            break;
+        case 0:
+            // XXX add two lights
+            for (int i = 0; i < 2; i++)
+            {
+                m_pointLights.push_back(PointLight());
+                m_pointLights[m_pointLights.size() - 1].attenuationConstant = 1.f;
+                m_pointLights[m_pointLights.size() - 1].attenuationLinear = 0.045f;
+                m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = 0.0075f;
+            }
+            break;
             break;
         }
 
@@ -444,19 +444,18 @@ namespace alpha
             m_pImmediateContext->UpdateSubresource(renderable->m_pMatrixBuffer, 0, nullptr, &mb, 0, 0);
 
             ConstantBuffer cb;
-            cb.vLightPosition[0] = vLightPosition[0];
-            cb.vLightPosition[1] = vLightPosition[1];
-            cb.vLightAmbient[0] = vLightAmbient[0];
-            cb.vLightAmbient[1] = vLightAmbient[1];
-            cb.vLightDiffuse[0] = vLightDiffuse[0];
-            cb.vLightDiffuse[1] = vLightDiffuse[1];
-            cb.vLightSpecular[0] = vLightSpecular[0];
-            cb.vLightSpecular[1] = vLightSpecular[1];
+            // light 1
+            cb.pointLight[0] = m_pointLights[0];
+            // light 2
+            cb.pointLight[1] = m_pointLights[1];
+            // direction light
+            cb.directionalLight = m_directionalLights[0];
+            // object
             cb.ambient = material->GetAmbient();
             cb.diffuse = material->GetDiffuse();
             cb.specular = material->GetSpecular();
             cb.shininess = material->GetShininess();
-            cb.vOutputColor = material->GetColor(); // renderSet->color;
+            cb.vOutputColor = material->GetColor();
             m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
 
             CameraBuffer camera_buffer;
@@ -616,6 +615,43 @@ namespace alpha
         else
         {
             hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, buffer); // &renderable->m_pVertexBuffer);
+        }
+    }
+
+    void GraphicsRenderer::CreateLightBufferData(const std::vector<Light *> & lights)
+    {
+        m_pointLights.clear();
+        m_directionalLights.clear();
+
+        for (auto light : lights)
+        {
+            switch (light->GetLightType())
+            {
+            case LightType::DIRECTIONAL:
+                m_directionalLights.push_back(DirectionalLight());
+
+                m_directionalLights[m_directionalLights.size() - 1].direction = Vector4(light->GetLightDirection(), 1.f);
+                m_directionalLights[m_directionalLights.size() - 1].ambient = light->GetAmbientLight();
+                m_directionalLights[m_directionalLights.size() - 1].diffuse = light->GetDiffuseLight();
+                m_directionalLights[m_directionalLights.size() - 1].specular = light->GetSpecularLight();
+                break;
+
+            case LightType::POINT:
+                m_pointLights.push_back(PointLight());
+
+                m_pointLights[m_pointLights.size() - 1].position = Vector4(light->worldTransform.Position(), 1.f);
+                m_pointLights[m_pointLights.size() - 1].ambient = light->GetAmbientLight();
+                m_pointLights[m_pointLights.size() - 1].diffuse = light->GetDiffuseLight();
+                m_pointLights[m_pointLights.size() - 1].specular = light->GetSpecularLight();
+                m_pointLights[m_pointLights.size() - 1].attenuationConstant = light->GetAttenuationConstant();
+                m_pointLights[m_pointLights.size() - 1].attenuationLinear = light->GetAttenuationLinear();
+                m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = light->GetAttenuationQuadratic();
+                break;
+
+            default:
+                LOG_WARN("Unkown light type, unable to render: ", light->GetLightType());
+                break;
+            }
         }
     }
 }

@@ -25,10 +25,6 @@ cbuffer MatrixBuffer : register(b0)
 // lighting buffer
 cbuffer ConstantBuffer : register(b1)
 {
-	float4 vLightDir[2];
-	float4 vLightAmbient[2];
-	float4 vLightDiffuse[2];
-	float4 vLightSpecular[2];
 	float4 ambient;
 	float4 diffuse;
 	float4 specular;
@@ -37,6 +33,24 @@ cbuffer ConstantBuffer : register(b1)
 	float _spacer2;
 	float _spacer3;
 	float4 vOutputColor;
+
+	struct PointLight
+	{
+		float4 position;
+		
+		float4 ambient;
+		float4 diffuse;
+		float4 specular;
+	} pointLight[2];
+	
+	struct DirectionalLight
+	{
+		float4 direction;
+		
+		float4 ambient;
+		float4 diffuse;
+		float4 specular;
+	} directionalLight;
 }
 
 struct VS_INPUT

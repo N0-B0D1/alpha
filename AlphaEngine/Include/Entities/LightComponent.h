@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "Entities/EntityComponent.h"
 #include "Math/Vector4.h"
+#include "Graphics/Light.h"
 
 namespace alpha
 {
@@ -33,12 +34,20 @@ namespace alpha
         virtual bool VUpdate(float fCurrentTime, float fElapsedTime);
         virtual std::string VGetName() const;
 
+        LightType GetLightType() const;
+        Vector4 GetLightColor() const;
+        float GetLightDistance() const;
         float GetIntensity() const;
         float GetAmbientIntensity() const;
+        Vector3 GetLightDirection() const;
 
     private:
+        LightType m_eLightType;
+        Vector4 m_vLightColor;
+        float m_fLightDistance;
         float m_fIntensity;
         float m_fAmbientIntensity;
+        Vector3 m_vDirection;
     };
 }
 

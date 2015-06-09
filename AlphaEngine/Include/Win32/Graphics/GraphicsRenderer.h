@@ -34,6 +34,9 @@ namespace alpha
     class AssetSystem;
     class Camera;
 
+    struct PointLight;
+    struct DirectionalLight;
+
     class GraphicsRenderer : public IRenderer
     {
     public:
@@ -48,21 +51,6 @@ namespace alpha
         void PreRender(RenderSet * renderSet);
         void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
 
-        // for each object to be rendered
-        //
-        // -- pre render -<<-------------------------------------------|
-        // calculate world transform matrix                            |
-        // get or compile/load vertex/pixel shader                     |
-        // define vertext layout (maybe once statically?)              |
-        // get/fill vertex buffer                                      |
-        // get/fill index buffer                                       |
-        // -- render                                                   |
-        // create constant buffer (can do during pre-render stage?)    |
-        // set vertex buffer with constant buffer                      |
-        // set pixel shader with constant buffer                       |
-        // draw indexed                                                |
-        // -- pre-render ->>-------------------------------------------|
-
     private:
         HRESULT InitializeDevice();
         void CleanupDevice();
@@ -75,7 +63,7 @@ namespace alpha
         std::shared_ptr<Asset> m_psLightShader;
 
         void PrepRenderable(RenderSet * renderSet);
-        void RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet, std::vector<Light *> lights);
+        void RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet);
 
         /** Compile a shader from a given asset file, which is presumably an hlsl file. */
         bool CompileShaderFromAsset(std::shared_ptr<Asset> asset, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
@@ -87,6 +75,9 @@ namespace alpha
         ID3D11InputLayout * CreateInputLayoutFromVSBlob(ID3DBlob ** const pVSBlob);
         /** Create a d3d buffer object */
         void CreateBuffer(unsigned int byte_width, unsigned int bind_flags, const void * object_memory, ID3D11Buffer ** buffer);
+
+        /** Create point or direction light buffer data objects for each light in the scene. */
+        void CreateLightBufferData(const std::vector<Light *> & lights);
 
         /** DirectX 11 variables */
         D3D_DRIVER_TYPE m_driverType;
@@ -101,6 +92,9 @@ namespace alpha
         ID3D11Texture2D* m_pDepthStencil;
         ID3D11DepthStencilView* m_pDepthStencilView;
         ID3D11RasterizerState* m_pWireFrame;
+
+        std::vector<PointLight> m_pointLights;
+        std::vector<DirectionalLight> m_directionalLights;
     };
 }
 

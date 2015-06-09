@@ -27,7 +27,7 @@ namespace alpha
         : x(fx), y(fy), z(fz)
     { }
 
-    Vector3::Vector3(const Vector3 &vec)
+    Vector3::Vector3(const Vector3 & vec)
     {
         this->x = vec.x;
         this->y = vec.y;

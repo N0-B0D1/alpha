@@ -17,6 +17,7 @@ limitations under the License.
 #include "Entities/LightComponent.h"
 #include "Scripting/LuaVar.h"
 #include "Graphics/Material.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -27,7 +28,36 @@ namespace alpha
     //! Provides logic for how to initialize a transform component from Lua script data
     void LightComponent::VInitialize(std::shared_ptr<LuaVar> var)
     {
-        std::shared_ptr<LuaTable> table = std::dynamic_pointer_cast<LuaTable>(var);
+        std::shared_ptr<LuaTable> component_table = std::dynamic_pointer_cast<LuaTable>(var);
+        std::shared_ptr<LuaTable> table = std::dynamic_pointer_cast<LuaTable>(component_table->Get("light"));
+
+        // get the type of light this component represents
+        if (auto light_type_var = std::dynamic_pointer_cast<LuaStatic<std::string>>(table->Get("type")))
+        {
+            std::string light_type = light_type_var->GetValue();
+            
+            if (light_type == "directional")
+            {
+                m_eLightType = LightType::DIRECTIONAL;
+            }
+            else if (light_type == "point")
+            {
+                m_eLightType = LightType::POINT;
+            }
+            else
+            {
+                m_eLightType = LightType::DIRECTIONAL;
+            }
+        }
+
+        // get the light color, or default to black(none)
+        if (auto light_color = std::dynamic_pointer_cast<LuaTable>(table->Get("color")))
+        {
+            this->GetTableVarValue(light_color, "r", &m_vLightColor.x);
+            this->GetTableVarValue(light_color, "g", &m_vLightColor.y);
+            this->GetTableVarValue(light_color, "b", &m_vLightColor.z);
+            this->GetTableVarValue(light_color, "a", &m_vLightColor.w);
+        }
 
         // get direct light intensity
         std::shared_ptr<LuaVar> intensity_var = table->Get("intensity");
@@ -45,6 +75,23 @@ namespace alpha
             m_fAmbientIntensity = static_cast<float>(ambient->GetValue());
         }
 
+        // get the direction regardless of whether the light directional or not
+        // the prameter will be ignored if it does not exist, or is not used.
+        if (auto light_direction = std::dynamic_pointer_cast<LuaTable>(table->Get("direction")))
+        {
+            this->GetTableVarValue(light_direction, "x", &m_vDirection.x);
+            this->GetTableVarValue(light_direction, "y", &m_vDirection.y);
+            this->GetTableVarValue(light_direction, "z", &m_vDirection.z);
+        }
+
+        // get the max illumination distance of the light
+        // only valid for point lights
+        m_fLightDistance = 100.f;
+        if (auto light_distance = std::dynamic_pointer_cast<LuaStatic<double>>(table->Get("distance")))
+        {
+            m_fLightDistance = static_cast<float>(light_distance->GetValue());
+        }
+
         // init base scene component
         SceneComponent::VInitialize(var);
     }
@@ -59,6 +106,21 @@ namespace alpha
         return LightComponent::sk_name;
     }
 
+    LightType LightComponent::GetLightType() const
+    {
+        return m_eLightType;
+    }
+
+    Vector4 LightComponent::GetLightColor() const
+    {
+        return m_vLightColor;
+    }
+
+    float LightComponent::GetLightDistance() const
+    {
+        return m_fLightDistance;
+    }
+
     float LightComponent::GetIntensity() const
     {
         return m_fIntensity;
@@ -67,5 +129,10 @@ namespace alpha
     float LightComponent::GetAmbientIntensity() const
     {
         return m_fAmbientIntensity;
+    }
+
+    Vector3 LightComponent::GetLightDirection() const
+    {
+        return m_vDirection;
     }
 }

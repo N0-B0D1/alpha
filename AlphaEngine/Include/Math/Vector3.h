@@ -25,7 +25,7 @@ namespace alpha
 
         Vector3();
         Vector3(float fx, float fy, float fz);
-        Vector3(const Vector3 &vec);
+        Vector3(const Vector3 & vec);
 
         void Normalize();
         float Length() const;

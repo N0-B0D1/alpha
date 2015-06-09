@@ -30,7 +30,7 @@ bool GameState::VInitialize()
     // setup the state, make actors, etc.
     m_pCube = CreateEntity("Entities/cube.lua");
     m_pCamera = CreateEntity("Entities/camera.lua");
-    m_pLight = CreateEntity("Entities/light.lua");
+    m_pLight = CreateEntity("Entities/directional_light.lua");
     m_pLight2 = CreateEntity("Entities/light.lua");
 
     // set our camera as the active camera for the scene
