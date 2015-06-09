@@ -60,11 +60,43 @@ namespace alpha
          * Atten. = ---------------------
          *           C + L * D + Q * D^2
          *
-         * So how do you calculate values for C, L, and Q as the X distance changes ...
+         *
+         * C - Constant coeficient
+         *     For our purposes this is always equal to 1.
+         *
+         *
+         * L - Linear coeficient
+         *     When Light Radius = 100, L = 0.045f
+         *     When Light Radius = 200, L = 0.022f
+         *     
+         *     L = X / LR
+         *     0.045 * 100 = 4.5
+         *     L = 4.5 / LR = 4.5 / 7 = 0.642857
+         *     L = 4.5 / LR = 4.5 / 200 = 0.0225f
+         *     L = 4.5 / LR = 4.5 / 50 = 0.09f
+         *
+         *     L = 4.5f / LR;
+         *
+         *
+         * Q - Quadratic coeficient
+         *     When Light Radius = 100, Q = 0.0075f
+         *     When Light Radius = 200, Q = 0.0019f
+         *
+         *     Q = X / LR^2
+         *     0.0075 * 10,000 = 75
+         *     Q = 75 / 7^2   = 1.53
+         *     Q = 75 / 50^2  = 0.03
+         *     Q = 75 / 200^2 = 0.001875
+         *     Q = 75 / 3250^2 = 75 / 10562500 =
+         *
+         * These calculations are most likely not completely accurate, but
+         * they are pretty dang close and will will be close enough to
+         * meet our needs to calculate the Constant, Linear, and Quadratic
+         * constants for the attenuation formula.
          */
         m_fConstant = 1.f;
-        m_fLinear = 0.045f;
-        m_fQuadratic = 0.0075f;
+        m_fLinear = 4.5f / m_fMaxDistance;
+        m_fQuadratic = 75.f / (m_fMaxDistance * m_fMaxDistance);
     }
 
     Vector3 Light::GetLightDirection() const
