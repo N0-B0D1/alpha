@@ -49,6 +49,11 @@ namespace alpha
         Vector4 ambient;
         Vector4 diffuse;
         Vector4 specular;
+
+        float attenuationConstant;
+        float attenuationLinear;
+        float attenuationQuadratic;
+        float _spacer;
     } PointLight;
 
     typedef struct MatrixBuffer

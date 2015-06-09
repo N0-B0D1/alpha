@@ -390,8 +390,7 @@ namespace alpha
         {
         case 0:
             // XXX add at least one directional light
-            DirectionalLight dl;
-            m_directionalLights.push_back(dl);
+            m_directionalLights.push_back(DirectionalLight());
             break;
         }
 
@@ -401,13 +400,18 @@ namespace alpha
             // XXX add second black light so the shader doesn't need to be smart
             //PointLight pl;
             m_pointLights.push_back(PointLight());
+            m_pointLights[m_pointLights.size() - 1].attenuationConstant = 1.f;
+            m_pointLights[m_pointLights.size() - 1].attenuationLinear = 0.045f;
+            m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = 0.0075f;
             break;
         case 0:
             // XXX add two lights
             for (int i = 0; i < 2; i++)
             {
-                PointLight pl;
-                m_pointLights.push_back(pl);
+                m_pointLights.push_back(PointLight());
+                m_pointLights[m_pointLights.size() - 1].attenuationConstant = 1.f;
+                m_pointLights[m_pointLights.size() - 1].attenuationLinear = 0.045f;
+                m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = 0.0075f;
             }
             break;
             break;
@@ -639,6 +643,9 @@ namespace alpha
                 m_pointLights[m_pointLights.size() - 1].ambient = light->GetAmbientLight();
                 m_pointLights[m_pointLights.size() - 1].diffuse = light->GetDiffuseLight();
                 m_pointLights[m_pointLights.size() - 1].specular = light->GetSpecularLight();
+                m_pointLights[m_pointLights.size() - 1].attenuationConstant = light->GetAttenuationConstant();
+                m_pointLights[m_pointLights.size() - 1].attenuationLinear = light->GetAttenuationLinear();
+                m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = light->GetAttenuationQuadratic();
                 break;
 
             default:

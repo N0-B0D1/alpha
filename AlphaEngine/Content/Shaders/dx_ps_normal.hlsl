@@ -28,10 +28,10 @@ cbuffer ConstantBuffer : register(b1)
 	float4 ambient;
 	float4 diffuse;
 	float4 specular;
-	float shininess;
-	float _spacer1;
-	float _spacer2;
-	float _spacer3;
+    float shininess;
+    float _spacer1;
+    float _spacer2;
+    float _spacer3;
 	float4 vOutputColor;
 
 	struct PointLight
@@ -40,6 +40,10 @@ cbuffer ConstantBuffer : register(b1)
 		float4 ambient;
 		float4 diffuse;
 		float4 specular;
+        float attenuationConstant;
+        float attenuationLinear;
+        float attenuationQuadratic;
+        float _spacer;
 	} pointLight[2];
 	
 	struct DirectionalLight
@@ -65,36 +69,47 @@ struct PS_INPUT
 	float3 ViewDir : TEXCOORD1;
 };
 
-float4 calculateLighting(PS_INPUT input, float4 light_ambient, float4 light_diffuse, float4 light_specular, float3 light_direction)
+float4 calcAmbient(float4 light_ambient)
 {
-	float3 norm = normalize(input.Norm);
-	
-	// ambient
-	float4 ambientColor = light_ambient * ambient;
-	
-	// diffuse
+	return (light_ambient * ambient);
+}
+
+float4 calcDiffuse(PS_INPUT input, float4 light_diffuse, float3 light_direction)
+{
 	float diff = saturate(dot(input.Norm, -light_direction));
-	float4 diffuseColor = saturate(light_diffuse * (diff * diffuse));
-	
-	// specular
+	return light_diffuse * (diff * diffuse);
+}
+
+float4 calcSpecular(PS_INPUT input, float4 light_specular, float3 light_direction)
+{
 	float3 reflectDirection = reflect(-light_direction, input.Norm);
 	float spec = pow(saturate(dot(reflectDirection, input.ViewDir)), shininess);
-	float4 specularColor = light_specular * (spec * specular);
-	
-	return (ambientColor + diffuseColor + specularColor);
+	return (light_specular * (spec * specular));
 }
 
 // calculate pixel color based on point lighting
 float4 calculatePointLighting(int index, PS_INPUT input)
 {
 	float3 lightDirection = normalize(input.WorldPos - pointLight[index].position);
-	return calculateLighting(input, pointLight[index].ambient, pointLight[index].diffuse, pointLight[index].specular, lightDirection);
+
+    float distance = length(pointLight[index].position.xyz - input.WorldPos.xyz);
+    float attenuation = 1.0f / (pointLight[index].attenuationConstant + (pointLight[index].attenuationLinear * distance) + (pointLight[index].attenuationQuadratic * (distance * distance)));
+
+    float4 ambientColor = calcAmbient(pointLight[index].ambient) * attenuation;
+    float4 diffuseColor = calcDiffuse(input, pointLight[index].diffuse, lightDirection) * attenuation;
+    float4 specularColor = calcSpecular(input, pointLight[index].specular, lightDirection) * attenuation;
+
+    return (ambientColor + diffuseColor + specularColor);
 }
 
 // calculate pixel color based on point lighting
 float4 calculateDirectionalLighting(PS_INPUT input)
 {
-	return calculateLighting(input, directionalLight.ambient, directionalLight.diffuse, directionalLight.specular, directionalLight.direction.xyz);
+    float4 ambientColor = calcAmbient(directionalLight.ambient);
+    float4 diffuseColor = calcDiffuse(input, directionalLight.diffuse, directionalLight.direction.xyz);
+    float4 specularColor = calcSpecular(input, directionalLight.specular, directionalLight.direction.xyz);
+
+    return (ambientColor + diffuseColor + specularColor);
 }
 
 // Pixel Shader
