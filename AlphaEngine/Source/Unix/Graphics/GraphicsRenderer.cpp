@@ -42,7 +42,7 @@ namespace alpha
     GraphicsRenderer::GraphicsRenderer() { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
-    bool GraphicsRenderer::Initialize(std::shared_ptr<AssetSystem> pAssets)
+    bool GraphicsRenderer::Initialize(AssetSystem * const pAssets)
     {
         // prep shader assets
         m_vsDefaultShader = pAssets->GetAsset("Shaders/gl_vs_normal.glsl");

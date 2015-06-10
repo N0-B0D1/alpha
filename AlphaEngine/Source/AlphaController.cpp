@@ -36,13 +36,12 @@ namespace alpha
         , m_pAssets(nullptr)
         , m_pAudio(nullptr)
         , m_pInput(nullptr)
-    {
-        LOG("<AlphaController> Constructed.");
-    }
+        , m_pGameStateMachine(nullptr)
+    { }
     AlphaController::~AlphaController() { }
 
 
-    void AlphaController::SetLogic(std::shared_ptr<LogicSystem> pLogic)
+    void AlphaController::SetLogic(LogicSystem * pLogic)
     {
         if (m_pLogic == nullptr)
         {
@@ -59,7 +58,7 @@ namespace alpha
         if (m_pGameStateMachine == nullptr)
         {
             state->SetLogic(m_pLogic);
-            m_pGameStateMachine = std::unique_ptr<StateMachine>(new StateMachine(state));
+            m_pGameStateMachine = new StateMachine(state);
         }
         else
         {
@@ -94,7 +93,7 @@ namespace alpha
     bool AlphaController::Initialize()
     {
         // Initialize asset repository
-        m_pAssets = std::make_shared<AssetSystem>();
+        m_pAssets = new AssetSystem();
         if (!m_pAssets->VInitialize())
         {
             LOG_ERR("<AssetSystem> Initialization failed!");
@@ -102,7 +101,7 @@ namespace alpha
         }
 
         // create graphcs
-        m_pGraphics = std::unique_ptr<GraphicsSystem>(new GraphicsSystem());
+        m_pGraphics = new GraphicsSystem();
         m_pGraphics->SetAssetSystem(m_pAssets);
         if (!m_pGraphics->VInitialize())
         {
@@ -119,7 +118,7 @@ namespace alpha
         }
 
         // create audio system
-        m_pAudio = std::make_shared<AudioSystem>();
+        m_pAudio = new AudioSystem();
         if (!m_pAudio->VInitialize())
         {
             LOG_ERR("AudioSystem > Initialization failed!");
@@ -228,8 +227,6 @@ namespace alpha
         // render after updates complete
         m_pGraphics->Render();
 
-        //loops -= 1;
-        //return loops > 0;
         return success;
     }
 
@@ -250,16 +247,19 @@ namespace alpha
         if (m_pGameStateMachine)
         {
             m_pGameStateMachine->VShutdown();
+            delete m_pGameStateMachine;
             LOG("<GameStateMachine> Disposed.");
         }
         if (m_pLogic)
         {
             m_pLogic->VShutdown();
+            delete m_pLogic;
             LOG("<LogicSystem> Disposed.");
         }
         if (m_pAudio)
         {
             m_pAudio->VShutdown();
+            delete m_pAudio;
             LOG("<AudioSystem> Disposed.");
         }
         if (m_pInput)
@@ -271,11 +271,13 @@ namespace alpha
         if (m_pGraphics)
         {
             m_pGraphics->VShutdown();
+            delete m_pGraphics;
             LOG("<GraphicsSystem> Disposed.");
         }
         if (m_pAssets)
         {
             m_pAssets->VShutdown();
+            delete m_pAssets;
             LOG("<AssetSystem> Disposed.");
         }
 

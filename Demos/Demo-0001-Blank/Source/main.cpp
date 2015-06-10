@@ -28,8 +28,8 @@ int main(int /*argc*/, char ** /*argv*/)
     alpha::AlphaController controller;
 
     // The controller will manage the logic system life-cycle, no need to delete it
-    std::shared_ptr<GameLogic> logic = std::make_shared<GameLogic>();
-    controller.SetLogic(logic);
+    GameLogic * pLogic = new GameLogic();
+    controller.SetLogic(pLogic);
 
     // set starting game state
     std::shared_ptr<GameState> state = std::make_shared<GameState>();

@@ -124,7 +124,7 @@ namespace alpha
         return m_pRenderer->Update(currentTime, elapsedTime);
     }
 
-    void GraphicsSystem::SetAssetSystem(std::shared_ptr<AssetSystem> pAssets)
+    void GraphicsSystem::SetAssetSystem(AssetSystem * const pAssets)
     {
         m_pAssets = pAssets;
     }

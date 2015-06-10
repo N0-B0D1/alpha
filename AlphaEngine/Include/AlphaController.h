@@ -33,8 +33,21 @@ namespace alpha
     class ThreadSystem;
     class HIDSystem;
 
-    /**
-     * The AlphaController is the main engine controller which handles the lifecycle of the engine.
+    /** 
+     * AlphaController
+     * This is the main engine controller which handles the lifecycle of the
+     * engine, the interaction between engine sub-systems, and the main loop.
+     *
+     * Sub-systems:
+     *     ThreadSystem
+     *     LogicSystem
+     *     GraphicsSystem
+     *     AssetSystem
+     *     AudioSystem
+     *     HIDSystem
+     *
+     * Other:
+     *     StateMachine (game state machine)
      */
 	class AlphaController
 	{
@@ -43,8 +56,7 @@ namespace alpha
         virtual ~AlphaController();
 
         /** Set the game logic */
-        void SetLogic(std::shared_ptr<LogicSystem> pLogic);
-
+        void SetLogic(LogicSystem * pLogic);
         /** Create the state machine and set the starting state. */
         void SetGameState(std::shared_ptr<AGameState> state);
 
@@ -60,32 +72,27 @@ namespace alpha
         bool Update();
         bool Shutdown();
 
-        /** main loop timer */
+        /** Threading pool system */
+        ThreadSystem * m_pThreads;
+        /** game logic system */
+        LogicSystem * m_pLogic;
+        /** Graphics render system */
+        GraphicsSystem * m_pGraphics;
+        /** Asset Management System */
+        AssetSystem * m_pAssets;
+        /** Audio management system, manages FMOD lifecycle. */
+        AudioSystem * m_pAudio;
+        /** Human input management system. */
+        HIDSystem * m_pInput;
+
+        /** The game state machine; manages current state and transition to next game state. */
+        StateMachine * m_pGameStateMachine;
+
+        /** main loop timer variables */
         std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
         double m_timeLastFrame = 0.0f;
         double m_timeAccumulator = 0.0f;
         double sk_maxUpdateTime = 1.0f / 60.0f;
-
-        /** Threading pool system */
-        ThreadSystem * m_pThreads;
-
-        /** game logic system */
-        std::shared_ptr<LogicSystem> m_pLogic;
-
-        /** Graphics render system */
-        std::unique_ptr<GraphicsSystem> m_pGraphics;
-
-        /** Asset Management System */
-        std::shared_ptr<AssetSystem> m_pAssets;
-
-        /** The game state machine; manages current state and transition to next game state. */
-        std::unique_ptr<StateMachine> m_pGameStateMachine;
-
-        /** Audio management system, manages FMOD lifecycle. */
-        std::shared_ptr<AudioSystem> m_pAudio;
-
-        /** Human input management system. */
-        HIDSystem * m_pInput;
 	};
 }
 

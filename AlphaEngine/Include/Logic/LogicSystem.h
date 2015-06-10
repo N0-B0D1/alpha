@@ -56,9 +56,9 @@ namespace alpha
         /** Set AssetSystem
          * This must be set before any entities can be created.
          */
-        void SetAssetSystem(std::shared_ptr<AssetSystem> pAssets);
+        void SetAssetSystem(AssetSystem * const pAssets);
         /** Allow controller to attach audio system to logic layer. */
-        void SetAudioSystem(std::weak_ptr<AudioSystem> pAudio);
+        void SetAudioSystem(AudioSystem * const pAudio);
 
         /** Entity life-cycle methods */
         std::shared_ptr<Entity> GetEntity(const unsigned long entityId);
@@ -86,10 +86,10 @@ namespace alpha
         std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
 
         /** Asset management system handle. */
-        std::shared_ptr<AssetSystem> m_pAssets;
+        AssetSystem * m_pAssets;
 
         /** Handle to the audio system, allows logic to create and manage sounds in a game */
-        std::weak_ptr<AudioSystem> m_pAudio;
+        AudioSystem * m_pAudio;
 
         /** Publisher for new entities created */
         EventDataPublisher<EventData_EntityCreated> m_pubEntityCreated;

@@ -29,7 +29,7 @@ limitations under the License.
 
 namespace alpha
 {
-    SceneManager::SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher, std::weak_ptr<AssetSystem> pAssets)
+    SceneManager::SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher, AssetSystem * const pAssets)
         : m_pAssets(pAssets)
         , m_pTaskPublisher(pTaskPublisher)
     { }
@@ -144,9 +144,9 @@ namespace alpha
             if (auto mesh_component = std::dynamic_pointer_cast<MeshComponent>(scene_component))
             {
                 auto path = mesh_component->GetMeshPath();
-                if (auto pAssets = m_pAssets.lock())
+                if (m_pAssets != nullptr)
                 {
-                    auto asset = pAssets->GetAsset(path.c_str());
+                    auto asset = m_pAssets->GetAsset(path.c_str());
                     node->SetMesh(asset);
                 }
             }
@@ -154,9 +154,9 @@ namespace alpha
             // get the material path, load as an asset, and set it on the node.
             auto material_path = scene_component->GetMaterialPath();
             std::shared_ptr<Material> pMaterial;
-            if (auto pAssets = m_pAssets.lock())
+            if (m_pAssets != nullptr)
             {
-                auto pAsset = pAssets->GetAsset(material_path.c_str());
+                auto pAsset = m_pAssets->GetAsset(material_path.c_str());
 
                 // XXX TODO - pass asset through a material manager, so that only one
                 // material every exists for a given material script.

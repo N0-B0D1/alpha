@@ -52,7 +52,7 @@ namespace alpha
         return m_pLogic->CreateSound(resource);
     }
 
-    void AGameState::SetLogic(std::shared_ptr<LogicSystem> pLogic)
+    void AGameState::SetLogic(LogicSystem * const pLogic)
     {
         m_pLogic = pLogic;
     }

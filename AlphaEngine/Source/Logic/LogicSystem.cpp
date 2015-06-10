@@ -33,6 +33,7 @@ namespace alpha
         : AlphaSystem(60)
         , m_pEntityFactory(nullptr)
         , m_pAssets(nullptr)
+        , m_pAudio(nullptr)
         , m_pHIDContextManager(nullptr)
     { }
     LogicSystem::~LogicSystem() { }
@@ -72,12 +73,12 @@ namespace alpha
         return true;
     }
 
-    void LogicSystem::SetAssetSystem(std::shared_ptr<AssetSystem> pAssets)
+    void LogicSystem::SetAssetSystem(AssetSystem * const pAssets)
     {
         m_pAssets = pAssets;
     }
 
-    void LogicSystem::SetAudioSystem(std::weak_ptr<AudioSystem> pAudio)
+    void LogicSystem::SetAudioSystem(AudioSystem * const pAudio)
     {
         m_pAudio = pAudio;
     }
@@ -97,11 +98,14 @@ namespace alpha
         std::shared_ptr<Entity> new_entity = nullptr;
 
         // get the entity script resource specified, and make an entity with it
-        auto asset = m_pAssets->GetAsset(resource);
-        if (asset != nullptr)
+        if (m_pAssets != nullptr) 
         {
-            new_entity = m_pEntityFactory->CreateEntity(asset);
-            m_entities[new_entity->GetId()] = new_entity;
+            auto asset = m_pAssets->GetAsset(resource);
+            if (asset != nullptr)
+            {
+                new_entity = m_pEntityFactory->CreateEntity(asset);
+                m_entities[new_entity->GetId()] = new_entity;
+            }
         }
 
         // create an Entity Created event, and publish it to all subscribers
@@ -121,12 +125,15 @@ namespace alpha
     {
         std::weak_ptr<Sound> new_sound = std::weak_ptr<Sound>();
 
-        auto asset = m_pAssets->GetAsset(resource);
-        if (asset != nullptr)
+        if (m_pAssets != nullptr)
         {
-            if (auto pAudio = m_pAudio.lock())
+            auto asset = m_pAssets->GetAsset(resource);
+            if (asset != nullptr)
             {
-                new_sound = pAudio->CreateSound(asset);
+                if (m_pAudio != nullptr)
+                {
+                    new_sound = m_pAudio->CreateSound(asset);
+                }
             }
         }
 

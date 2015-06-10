@@ -47,7 +47,7 @@ namespace alpha
 
         void Render();
 
-        void SetAssetSystem(std::shared_ptr<AssetSystem> pAssets);
+        void SetAssetSystem(AssetSystem * const pAssets);
 
         /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
         std::shared_ptr<AEventDataSubscriber> GetEntityCreatedSubscriber() const;
@@ -63,7 +63,7 @@ namespace alpha
         void ReadSubscriptions();
 
         /** A handle to the main asset system. */
-        std::shared_ptr<AssetSystem> m_pAssets;
+        AssetSystem * m_pAssets;
         /** Renderer implementation (e.g.: DirectX, OpenGL) */
         IRenderer *m_pRenderer;
         /** SceneManager for tracking logic and propagation of renderable objects in the Scene */
