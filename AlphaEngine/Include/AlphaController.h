@@ -55,20 +55,18 @@ namespace alpha
         AlphaController();
         virtual ~AlphaController();
 
-        /** Set the game logic */
-        void SetLogic(LogicSystem * pLogic);
         /** Create the state machine and set the starting state. */
         void SetGameState(std::shared_ptr<AGameState> state);
 
         /** Begin controller execution. */
-        void Execute();
+        void Execute(std::shared_ptr<AGameState> state);
         
     private:
         // non-copyable
         AlphaController(const AlphaController&);
         AlphaController & operator=(const AlphaController&);
 
-        bool Initialize();
+        bool Initialize(std::shared_ptr<AGameState> state);
         bool Update();
         bool Shutdown();
 

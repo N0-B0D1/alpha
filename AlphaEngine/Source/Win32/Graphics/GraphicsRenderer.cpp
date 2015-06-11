@@ -61,7 +61,7 @@ namespace alpha
     { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
-    bool GraphicsRenderer::Initialize(std::shared_ptr<AssetSystem> pAssets)
+    bool GraphicsRenderer::Initialize(AssetSystem * const pAssets)
     {
         m_vsDefaultShader = pAssets->GetAsset("Shaders/dx_vs_normal.hlsl");
         m_psDefaultShader = pAssets->GetAsset("Shaders/dx_ps_normal.hlsl");

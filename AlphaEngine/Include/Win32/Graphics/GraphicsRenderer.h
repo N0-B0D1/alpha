@@ -43,7 +43,7 @@ namespace alpha
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
-        bool Initialize(std::shared_ptr<AssetSystem> pAssets);
+        bool Initialize(AssetSystem * const pAssets);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 

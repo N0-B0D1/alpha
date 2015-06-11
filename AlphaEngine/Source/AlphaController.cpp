@@ -40,19 +40,6 @@ namespace alpha
     { }
     AlphaController::~AlphaController() { }
 
-
-    void AlphaController::SetLogic(LogicSystem * pLogic)
-    {
-        if (m_pLogic == nullptr)
-        {
-            m_pLogic = pLogic;
-        }
-        else
-        {
-            LOG_WARN("<AlphaController>", " Attempted to attach game logic after it has already been attached.");
-        }
-    }
-
     void AlphaController::SetGameState(std::shared_ptr<AGameState> state)
     {
         if (m_pGameStateMachine == nullptr)
@@ -66,11 +53,11 @@ namespace alpha
         }
     }
 
-    void AlphaController::Execute()
+    void AlphaController::Execute(std::shared_ptr<AGameState> state)
     {
         LOG("<AlphaController> Execution start.");
 
-        if (this->Initialize())
+        if (this->Initialize(state))
         {
             for (;;)
             {
@@ -90,7 +77,7 @@ namespace alpha
         LOG("<AlphaController> Execution complete.");
     }
 
-    bool AlphaController::Initialize()
+    bool AlphaController::Initialize(std::shared_ptr<AGameState> state)
     {
         // Initialize asset repository
         m_pAssets = new AssetSystem();
@@ -124,11 +111,14 @@ namespace alpha
             LOG_ERR("AudioSystem > Initialization failed!");
             return false;
         }
+
+        m_pLogic = new LogicSystem();
         // attach audio system to logic layer
         m_pLogic->SetAudioSystem(m_pAudio);
-
         // initialize the game logic
         m_pLogic->SetAssetSystem(m_pAssets);
+        // set starting state
+        this->SetGameState(state);
         if (!m_pLogic->VInitialize())
         {
             LOG_ERR("<LogicSystem> Initialization failed!");

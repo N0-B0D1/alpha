@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include "AlphaController.h"
-#include "Logic/GameLogic.h"
 #include "Logic/GameState.h"
 
 #if WIN32
@@ -27,16 +26,10 @@ int main(int /*argc*/, char ** /*argv*/)
 {
     alpha::AlphaController controller;
 
-    // The controller will manage the logic system life-cycle, no need to delete it
-    GameLogic * pLogic = new GameLogic();
-    controller.SetLogic(pLogic);
-
     // set starting game state
     std::shared_ptr<GameState> state = std::make_shared<GameState>();
-    controller.SetGameState(state);
-
     // begin engine execution
-    controller.Execute();
+    controller.Execute(state);
 
     return 0;
 }
