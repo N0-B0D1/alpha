@@ -17,13 +17,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <vector>
+
 namespace alpha
 {
+    class AlphaSystem;
+    class Event;
+    class EventInterface;
+
     class EventManager
     {
     public:
         virtual ~EventManager();
+        
+        bool Initialize();
+        bool Update();
+        bool Shutdown();
+
+        /** Register an interface so that it can receive events. */
+        void RegisterEventInterface(EventInterface * const pEventInterface);
+        /** Remove the event interface from the manager so that it no longer recieves events */
+        void UnregisterEventInterface(EventInterface * const pEventInterface);
+
+    private:
+        /** A list of publisher that the event manager reads from. */
+        std::vector<EventInterface *> m_vInterfaces;
     };
 }
 
-#endif // ALPAH_EVENT_MANAGER_H
+#endif // ALPHA_EVENT_MANAGER_H

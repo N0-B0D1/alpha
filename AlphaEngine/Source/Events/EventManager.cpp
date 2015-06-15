@@ -15,8 +15,39 @@ limitations under the License.
 */
 
 #include "Events/EventManager.h"
+#include "Events/EventInterface.h"
+#include "Events/Event.h"
 
 namespace alpha
 {
-    EventManager::~EventManager(){ }
+    EventManager::~EventManager() { }
+
+
+        
+    bool EventManager::Initialize()
+    {
+        return true;
+    }
+
+    bool EventManager::Update()
+    {
+        return true;
+    }
+
+    bool EventManager::Shutdown()
+    {
+        return true;
+    }
+
+    /** Register an interface so that it can receive events. */
+    void EventManager::RegisterEventInterface(EventInterface * const pEventInterface)
+    {
+
+    }
+    
+    /** Remove the event interface from the manager so that it no longer recieves events */
+    void EventManager::UnregisterEventInterface(EventInterface * const pEventInterface)
+    {
+
+    }
 }
