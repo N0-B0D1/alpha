@@ -19,10 +19,19 @@ limitations under the License.
 
 namespace alpha
 {
+    /**
+     * EventInterface
+     * Defines an interface for interacting with the EventManger, allowing the
+     * implementer to publish events and listen for events.
+     */
     class EventInterface
     {
     public:
         virtual ~EventInterface();
+
+    private:
+        /** The unique id representing this interface */
+        unsigned int m_id;
     };
 }
 
