@@ -80,6 +80,9 @@ namespace alpha
 
     bool AlphaController::Initialize(std::shared_ptr<AGameState> state)
     {
+        // Create the event manager first
+        // the event manager is responsible for all communication between
+        // sub-systems, thus it must exist for any systems.
         m_pEventManager = new EventManager();
         if (!m_pEventManager->Initialize())
         {
@@ -89,49 +92,27 @@ namespace alpha
 
         // Initialize asset repository
         m_pAssets = new AssetSystem();
-        if (!m_pAssets->Initialize(m_pEventManager))
-        {
-            LOG_ERR("<AssetSystem> Initialization failed!");
-            return false;
-        }
+        if (!InitializeSystem(m_pAssets)) { LOG_ERR("<AssetSystem> Initialization failed!"); return false; }
 
-        // create graphcs
+        // create graphics system, for platform specific rendering
         m_pGraphics = new GraphicsSystem();
-        m_pGraphics->SetAssetSystem(m_pAssets);
-        if (!m_pGraphics->Initialize(m_pEventManager))
-        {
-            LOG_ERR("<GraphicsSystem> Initialization failed!");
-            return false;
-        }
+        m_pGraphics->SetAssetSystem(m_pAssets); // attach asset system to graphics system
+        if (!InitializeSystem(m_pGraphics)) { LOG_ERR("<GraphicsSystem> Initialization failed!"); return false; }
 
         // create human input device system
         m_pInput = new HIDSystem();
-        if (!m_pInput->Initialize(m_pEventManager))
-        {
-            LOG_ERR("<HIDSystem> Initialization failed!");
-            return false;
-        }
+        if (!InitializeSystem(m_pInput)) { LOG_ERR("<HIDSystem> Initialization failed!"); return false; }
 
         // create audio system
         m_pAudio = new AudioSystem();
-        if (!m_pAudio->Initialize(m_pEventManager))
-        {
-            LOG_ERR("AudioSystem > Initialization failed!");
-            return false;
-        }
+        if (!InitializeSystem(m_pAudio)) { LOG_ERR("<AudioSystem> Initialization failed!"); return false; }
 
+        // create logic system to manage game layer
         m_pLogic = new LogicSystem();
-        // attach audio system to logic layer
-        m_pLogic->SetAudioSystem(m_pAudio);
-        // initialize the game logic
-        m_pLogic->SetAssetSystem(m_pAssets);
-        // set starting state
-        this->SetGameState(state);
-        if (!m_pLogic->Initialize(m_pEventManager))
-        {
-            LOG_ERR("<LogicSystem> Initialization failed!");
-            return false;
-        }
+        m_pLogic->SetAudioSystem(m_pAudio);     // attach audio system to logic layer
+        m_pLogic->SetAssetSystem(m_pAssets);    // initialize the game logic
+        this->SetGameState(state);              // set starting state
+        if (!InitializeSystem(m_pLogic)) { LOG_ERR("<LogicSystem> Initialization failed!"); return false; }
 
         // wire up pub-sub relations
         m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
@@ -145,20 +126,12 @@ namespace alpha
             LOG_ERR("<AlphaController> No Game State specified.");
             return false;
         }
-        if (!m_pGameStateMachine->Initialize(m_pEventManager))
-        {
-            LOG_ERR("<AlphaController> Game State failed to initialize.");
-            return false;
-        }
+        if (!InitializeSystem(m_pGameStateMachine)) { LOG_ERR("<AlphaController> Game State failed to initialize."); return false; }
 
         // prep threading system last, so tasks can't be processed until
         // the whole engine is up and running.
         m_pThreads = new ThreadSystem();
-        if (!m_pThreads->Initialize(m_pEventManager))
-        {
-            LOG_ERR("<ThreadSystem> Initialization failed!");
-            return false;
-        }
+        if (!InitializeSystem(m_pThreads)) { LOG_ERR("<ThreadSystem> Initialization failed!"); return false; }
 
         // subscribe the threading system to any new task publishers
         auto taskSubscriber = m_pThreads->GetThreadTaskCreatedSubscriber();
@@ -168,6 +141,15 @@ namespace alpha
         m_start = std::chrono::high_resolution_clock::now();
 
         LOG("<AlphaController> Initialization complete.");
+        return true;
+    }
+
+    bool AlphaController::InitializeSystem(AlphaSystem * pSystem)
+    {
+        if (!pSystem->Initialize(m_pEventManager))
+        {
+            return false;
+        }
         return true;
     }
 

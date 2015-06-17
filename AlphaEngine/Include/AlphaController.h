@@ -68,6 +68,7 @@ namespace alpha
         AlphaController & operator=(const AlphaController&);
 
         bool Initialize(std::shared_ptr<AGameState> state);
+        bool InitializeSystem(AlphaSystem * pSystem);
         bool Update();
         bool Shutdown();
         bool ShutdownSystem(AlphaSystem * pSystem);
