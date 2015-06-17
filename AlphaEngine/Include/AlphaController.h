@@ -22,6 +22,7 @@ limitations under the License.
 
 namespace alpha
 {
+    class AlphaSystem;
     class AudioSystem;
     class EventManager;
     class LogicSystem;
@@ -69,6 +70,10 @@ namespace alpha
         bool Initialize(std::shared_ptr<AGameState> state);
         bool Update();
         bool Shutdown();
+        bool ShutdownSystem(AlphaSystem * pSystem);
+
+        /** Main event management system */
+        EventManager * m_pEventManager;
 
         /** Threading pool system */
         ThreadSystem * m_pThreads;

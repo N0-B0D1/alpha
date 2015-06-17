@@ -42,12 +42,20 @@ namespace alpha
     /** Register an interface so that it can receive events. */
     void EventManager::RegisterEventInterface(EventInterface * const pEventInterface)
     {
-
+        auto it = std::find(m_vInterfaces.begin(), m_vInterfaces.end(), pEventInterface);
+        if (it == m_vInterfaces.end())
+        {
+            m_vInterfaces.push_back(pEventInterface);
+        }
     }
     
     /** Remove the event interface from the manager so that it no longer recieves events */
     void EventManager::UnregisterEventInterface(EventInterface * const pEventInterface)
     {
-
+        auto it = std::find(m_vInterfaces.begin(), m_vInterfaces.end(), pEventInterface);
+        if (it != m_vInterfaces.end())
+        {
+            m_vInterfaces.erase(it);
+        }
     }
 }

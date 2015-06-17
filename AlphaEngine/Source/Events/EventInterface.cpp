@@ -18,8 +18,5 @@ limitations under the License.
 
 namespace alpha
 {
-    EventInterface::EventInterface(unsigned int id)
-        : m_id(id)
-    { }
     EventInterface::~EventInterface() { }
 }

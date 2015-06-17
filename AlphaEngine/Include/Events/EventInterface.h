@@ -28,10 +28,6 @@ namespace alpha
     {
     public:
         virtual ~EventInterface();
-
-    private:
-        /** The unique id representing this interface */
-        unsigned int m_id;
     };
 }
 

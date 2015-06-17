@@ -21,6 +21,9 @@ limitations under the License.
 
 namespace alpha
 {
+    class EventManager;
+    class EventInterface;
+
     /**
      * The AlphaSystem represents a classic engine sub-system, such as Graphcs, AI, Physics, etc.
      * Or it might represent a set of game logic.
@@ -33,21 +36,26 @@ namespace alpha
         AlphaSystem(uint8_t hertz);
         virtual ~AlphaSystem();
 
-        virtual bool VInitialize() = 0;
+        bool Initialize(EventManager * pEventManager);
         bool Update(double currentTime, double elapsedTime);
-        virtual bool VShutdown() = 0;
+        bool Shutdown(EventManager * pEventManager);
 
     private:
         // non-copyable
         AlphaSystem(const AlphaSystem&);
         AlphaSystem & operator=(const AlphaSystem&);
 
+        virtual bool VInitialize() = 0;
         virtual bool VUpdate(double currentTime, double elapsedTime) = 0;
+        virtual bool VShutdown() = 0;
 
         /** update frequency */
         uint8_t m_hertz;
         double m_updateFrequency;
         double m_elapsedTime = 0.0f;
+
+        /** Interface for receiving and publishing events */
+        EventInterface * m_pEventInterface;
     };
 }
 

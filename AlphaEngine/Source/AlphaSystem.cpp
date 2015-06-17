@@ -15,14 +15,25 @@ limitations under the License.
 */
 
 #include "AlphaSystem.h"
+#include "Events/EventManager.h"
+#include "Events/EventInterface.h"
 
 namespace alpha
 {
-    AlphaSystem::AlphaSystem(uint8_t hertz) : m_hertz(hertz)
+    AlphaSystem::AlphaSystem(uint8_t hertz)
+        : m_hertz(hertz)
+        , m_pEventInterface(nullptr)
     {
         m_updateFrequency = 1.0f / m_hertz;
     }
     AlphaSystem::~AlphaSystem() { }
+
+    bool AlphaSystem::Initialize(EventManager * pEventManager)
+    {
+        m_pEventInterface = new EventInterface();
+        pEventManager->RegisterEventInterface(m_pEventInterface);
+        return VInitialize();
+    }
 
     bool AlphaSystem::Update(double currentTime, double elapsedTime)
     {
@@ -32,6 +43,17 @@ namespace alpha
         {
             success = this->VUpdate(currentTime, m_updateFrequency);
             m_elapsedTime = m_elapsedTime - m_updateFrequency;
+        }
+        return success;
+    }
+
+    bool AlphaSystem::Shutdown(EventManager * pEventManager)
+    {
+        bool success = VShutdown();
+        if (m_pEventInterface)
+        {
+            pEventManager->UnregisterEventInterface(m_pEventInterface);
+            delete m_pEventInterface;
         }
         return success;
     }
