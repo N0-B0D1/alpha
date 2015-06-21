@@ -21,10 +21,6 @@ limitations under the License.
 #include <memory>
 #include "AlphaSystem.h"
 
-#include "Events/EventDataSubscriber.h"
-#include "Events/EventDataPublisher.h"
-#include "Events/EventData_HIDKeyAction.h"
-
 namespace alpha
 {
     class AssetSystem;
@@ -66,14 +62,11 @@ namespace alpha
         /** Audio life-cycle methods */
         std::weak_ptr<Sound> CreateSound(const char * resource);
 
-        /** Retrieve the HIDKeyAction subscriber so it can be 'subscribed' to the publisher */
-        std::shared_ptr<AEventDataSubscriber> GetHIDKeyActionSubscriber() const;
-
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
         /** Handle HID Key Action events from subscription */
-        void ReadHIDKeyActionSubscription();
+        void HandleHIDKeyActionEvent(AEvent * pEvent);
         
         EntityFactory *m_pEntityFactory;
         std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
@@ -82,9 +75,6 @@ namespace alpha
         AssetSystem * m_pAssets;
         /** Handle to the audio system, allows logic to create and manage sounds in a game */
         AudioSystem * m_pAudio;
-
-        /** Subscriber for HIDKeyAction events */
-        std::shared_ptr<EventDataSubscriber<EventData_HIDKeyAction>> m_subHIDKeyAction;
 
         /** HID Context Manager, handles translation of engine input code events, to contextual actions */
         HIDContextManager * m_pHIDContextManager;

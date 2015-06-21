@@ -114,9 +114,6 @@ namespace alpha
         this->SetGameState(state);              // set starting state
         if (!InitializeSystem(m_pLogic)) { LOG_ERR("<LogicSystem> Initialization failed!"); return false; }
 
-        // wire up pub-sub relations
-        m_pInput->SubscribeToHIDKeyAction(m_pLogic->GetHIDKeyActionSubscriber());
-
         // initialize the specified game state
         // if no state has been specified, then fail to startup
         if (m_pGameStateMachine == nullptr)
@@ -130,10 +127,6 @@ namespace alpha
         // the whole engine is up and running.
         m_pThreads = new ThreadSystem();
         if (!InitializeSystem(m_pThreads)) { LOG_ERR("<ThreadSystem> Initialization failed!"); return false; }
-
-        // subscribe the threading system to any new task publishers
-        auto taskSubscriber = m_pThreads->GetThreadTaskCreatedSubscriber();
-        m_pGraphics->SubscribeToThreadTaskCreated(taskSubscriber);
 
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();

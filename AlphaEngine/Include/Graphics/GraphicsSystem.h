@@ -21,10 +21,6 @@ limitations under the License.
 
 #include "AlphaSystem.h"
 
-#include "Events/EventDataPublisher.h"
-#include "Events/EventDataSubscriber.h"
-#include "Events/EventData_ThreadTaskCreated.h"
-
 namespace alpha
 {
     class IRenderer;
@@ -48,13 +44,8 @@ namespace alpha
 
         void SetAssetSystem(AssetSystem * const pAssets);
 
-        /** Allow other systems to subscribe to new threading tasks from this system */
-        void SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
-
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
-        /** Read the EntityCreated subscription on each update to handle any new entities that need to be rendered. */
-        void ReadSubscriptions();
 
         /** Handle entity created event. */
         void HandleEntityCreatedEvent(AEvent * pEvent);
@@ -69,9 +60,6 @@ namespace alpha
         SceneManager * m_pSceneManager;
         /** Track the current camera that is viewing the scene */
         std::shared_ptr<Camera> m_pCamera;
-
-        /** Publisher for new threading tasks */
-        std::shared_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pubThreadTaskCreated;
     };
 }
 

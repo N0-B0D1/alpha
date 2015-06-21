@@ -20,10 +20,10 @@ limitations under the License.
 #include "Entities/Entity.h"
 #include "Toolbox/Logger.h"
 #include "Assets/AssetSystem.h"
-#include "Events/EventData_HIDKeyAction.h"
 #include "FSA/StateMachine.h"
 #include "HID/HIDContextManager.h"
 #include "HID/HIDConstants.h"
+#include "HID/HIDSystemEvents.h"
 #include "Audio/AudioSystem.h"
 #include "Audio/Sound.h"
 
@@ -47,8 +47,8 @@ namespace alpha
             return false;
         }
 
-        // create input subscriber
-        m_subHIDKeyAction = std::make_shared<EventDataSubscriber<EventData_HIDKeyAction>>();
+        // register event handlers
+        this->AddEventHandler(AEvent::GetIDFromName(Event_HIDKeyAction::sk_name), [this](AEvent * pEvent) { this->HandleHIDKeyActionEvent(pEvent); });
 
         // setup context manager
         m_pHIDContextManager = new HIDContextManager();
@@ -69,7 +69,6 @@ namespace alpha
 
     bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        ReadHIDKeyActionSubscription();
         return true;
     }
 
@@ -138,15 +137,9 @@ namespace alpha
         return new_sound;
     }
 
-    std::shared_ptr<AEventDataSubscriber> LogicSystem::GetHIDKeyActionSubscriber() const
+    void LogicSystem::HandleHIDKeyActionEvent(AEvent * pEvent)
     {
-        return m_subHIDKeyAction;
-    }
-
-    void LogicSystem::ReadHIDKeyActionSubscription()
-    {
-        // read any published EventData_HIDKeyAction events that may have occured since the last update.
-        while (std::shared_ptr<const EventData_HIDKeyAction> data = m_subHIDKeyAction->GetNextEvent())
+        if (auto data = dynamic_cast<Event_HIDKeyAction *>(pEvent))
         {
             bool pressed = data->GetPressed();
             HIDAction action = data->GetAction();

@@ -18,6 +18,7 @@ limitations under the License.
 */
 
 #include <memory>
+#include <vector>
 
 namespace alpha
 {

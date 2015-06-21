@@ -21,9 +21,6 @@ limitations under the License.
 #include <memory>
 #include <vector>
 
-#include "Events/EventDataPublisher.h"
-#include "Events/EventData_ThreadTaskCreated.h"
-
 namespace alpha
 {
     class AssetSystem;
@@ -39,7 +36,7 @@ namespace alpha
     class SceneManager
     {
     public:
-        explicit SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher, AssetSystem * const pAssets);
+        explicit SceneManager(AssetSystem * const pAssets);
         virtual ~SceneManager();
 
         /** Keeps the Render Data structurs up to date, and preped for rendering if needed */
@@ -89,9 +86,6 @@ namespace alpha
         std::vector<RenderSet *> m_vRenderData;
         /** Store a list of lights for use on the next render call. */
         std::vector<Light *> m_vLightData;
-
-        /** Handle to task publisher for creating thread tasks. */
-        std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pTaskPublisher;
     };
 }
 

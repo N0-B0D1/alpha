@@ -33,7 +33,6 @@ namespace alpha
         , m_pRenderer(nullptr)
         , m_pSceneManager(nullptr)
         , m_pCamera(nullptr)
-        , m_pubThreadTaskCreated(nullptr)
     { }
     GraphicsSystem::~GraphicsSystem() { }
 
@@ -46,11 +45,8 @@ namespace alpha
             return false;
         }
 
-        // make task publisher, and shared with sub-systems
-        m_pubThreadTaskCreated = std::make_shared<EventDataPublisher<EventData_ThreadTaskCreated>>();
-
         // Scene renerable manager
-        m_pSceneManager = new SceneManager(m_pubThreadTaskCreated, m_pAssets);
+        m_pSceneManager = new SceneManager(m_pAssets);
 
         // register event handlers
         this->AddEventHandler(AEvent::GetIDFromName(Event_EntityCreated::sk_name), [this](AEvent * pEvent) { this->HandleEntityCreatedEvent(pEvent); });
@@ -91,11 +87,6 @@ namespace alpha
 
         // Render the array of renderables from the given camera viewpoint
         m_pRenderer->Render(m_pCamera, renderables, lights);
-    }
-
-    void GraphicsSystem::SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
-    {
-        m_pubThreadTaskCreated->Subscribe(pSubscriber);
     }
 
     bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)

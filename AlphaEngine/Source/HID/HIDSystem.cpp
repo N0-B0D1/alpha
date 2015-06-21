@@ -17,6 +17,7 @@ limitations under the License.
 #include "HID/HIDSystem.h"
 #include "HID/HIDWindowListener.h"
 #include "HID/HIDContextManager.h"
+#include "HID/HIDSystemEvents.h"
 
 namespace alpha
 {
@@ -28,7 +29,9 @@ namespace alpha
 
     bool HIDSystem::VInitialize()
     {
-        m_pWindowListener = new HIDWindowListener(m_pubHIDKeyAction);
+        //m_pWindowListener = new HIDWindowListener(m_pubHIDKeyAction);
+        m_pWindowListener = new HIDWindowListener([this](HID device, const HIDAction & action, bool pressed) { this->DispatchHIDActionKeyEvent(device, action, pressed); },
+                                                  [this](HID device, const HIDAction & action, long relative, float absolute) { this->DispatchHIDActionAxisEvent(device, action, relative, absolute); });
 
         return true;
     }
@@ -42,14 +45,19 @@ namespace alpha
         return true;
     }
 
-    void HIDSystem::SubscribeToHIDKeyAction(std::shared_ptr<AEventDataSubscriber> pSubscriber)
-    {
-        m_pubHIDKeyAction.Subscribe(pSubscriber);
-    }
-
     bool HIDSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
         m_pWindowListener->Update();
         return true;
+    }
+
+    void HIDSystem::DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed)
+    {
+        this->PublishEvent(new Event_HIDKeyAction(device, action, pressed));
+    }
+
+    void HIDSystem::DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute)
+    {
+        this->PublishEvent(new Event_HIDKeyAction(device, action, false, relative, absolute));
     }
 }
