@@ -19,8 +19,7 @@ limitations under the License.
 
 #include <GLFW/glfw3.h>
 
-#include "Events/EventDataPublisher.h"
-#include "Events/EventData_HIDKeyAction.h"
+#include "HID/HIDTypes.h"
 
 namespace alpha
 {
@@ -33,7 +32,7 @@ namespace alpha
     class HIDWindowListener
     {
     public:
-        HIDWindowListener(EventDataPublisher<EventData_HIDKeyAction> & pubHIDKeyAction);
+        HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis);
         virtual ~HIDWindowListener();
 
         void Update();
@@ -49,9 +48,9 @@ namespace alpha
         HIDWindowListener & operator=(const HIDWindowListener&);
 
         /** Helper for dispatching HID Action key up/down events */
-        void DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed);
+        std::function<void(HID, const HIDAction &, bool)> m_fDispatchHIDActionKey;
         /** Helper for dispatching HID Action axis range events */
-        void DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute);
+        std::function<void(HID, const HIDAction &, long, float)> m_fDispatchHIDActionAxis;
 
         /** Track the current mouse absolute and relative position */
         MousePosition m_mousePosition;
@@ -59,8 +58,6 @@ namespace alpha
         MousePosition m_lastMousePosition;
         /** Platform translator handles translation from platform code to engine code */
         HIDPlatformTranslator * m_pPlatformTranslator;
-        /** Handle to the HID Key Action publisher */
-        EventDataPublisher<EventData_HIDKeyAction> & m_pubHIDKeyAction;
     };
 }
 

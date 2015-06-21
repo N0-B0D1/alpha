@@ -14,9 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <functional>
+
 #include "HID/HIDWindowListener.h"
 #include "HID/HIDPlatformTranslator.h"
 #include "Graphics/RenderWindow.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -50,9 +53,10 @@ namespace alpha
         }
     }
 
-    HIDWindowListener::HIDWindowListener(EventDataPublisher<EventData_HIDKeyAction> & pubHIDKeyAction)
-        : m_pPlatformTranslator(nullptr)
-        , m_pubHIDKeyAction(pubHIDKeyAction)
+    HIDWindowListener::HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis)
+        : m_fDispatchHIDActionKey(dispatchHIDActionKey)
+        , m_fDispatchHIDActionAxis(dispatchHIDActionAxis)
+        , m_pPlatformTranslator(nullptr)
     {
         g_pWindowListener = this;
 
@@ -79,13 +83,13 @@ namespace alpha
         {
             m_mousePosition.xRelativePos = m_lastMousePosition.xAbsolutePos - m_mousePosition.xAbsolutePos;
             HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_X_AXIS);
-            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
         }
         if (m_lastMousePosition.yAbsolutePos != m_mousePosition.yAbsolutePos)
         {
             m_mousePosition.yRelativePos = m_lastMousePosition.yAbsolutePos - m_mousePosition.yAbsolutePos;
             HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_Y_AXIS);
-            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
         }
 
         // store last position
@@ -100,7 +104,7 @@ namespace alpha
             auto pAction = m_pPlatformTranslator->TranslateKeyboardCode(key);
             if (pAction)
             {
-                this->DispatchHIDActionKeyEvent(HID_KEYBOARD, *pAction, action == GLFW_PRESS);
+                m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, action == GLFW_PRESS);
             }
 
             // When a user presses the escape key, we set the WindowShouldClose property to true, 
@@ -116,7 +120,7 @@ namespace alpha
         auto pAction = m_pPlatformTranslator->TranslateMouseCode(button);
         if (pAction)
         {
-            this->DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, action == GLFW_PRESS);
+            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, action == GLFW_PRESS);
         }
         else
         {
@@ -130,26 +134,26 @@ namespace alpha
         {
             // forward
             auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_FORWARD);
-            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, yoffset, 120);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, yoffset, 120);
         }
         else
         {
             // back scroll
             auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_BACK);
-            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, yoffset, -120);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, yoffset, -120);
         }
 
         if (xoffset > 0)
         {
             // left
             auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_LEFT);
-            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, true);
+            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
         }
         else
         {
             // right
             auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_RIGHT);
-            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, true);
+            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
         }
     }
 
@@ -157,18 +161,5 @@ namespace alpha
     {
         m_mousePosition.xAbsolutePos = xpos;
         m_mousePosition.yAbsolutePos = ypos;
-    }
-
-    void HIDWindowListener::DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed)
-    {
-        std::shared_ptr<EventData_HIDKeyAction> event = std::make_shared<EventData_HIDKeyAction>(device, action, pressed);
-        m_pubHIDKeyAction.Publish(event);
-
-    }
-
-    void HIDWindowListener::DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute)
-    {
-        std::shared_ptr<EventData_HIDKeyAction> event = std::make_shared<EventData_HIDKeyAction>(device, action, false, relative, absolute);
-        m_pubHIDKeyAction.Publish(event);
     }
 }
