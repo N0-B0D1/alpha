@@ -21,12 +21,6 @@ limitations under the License.
 
 #include "AlphaSystem.h"
 
-#include "Events/EventDataPublisher.h"
-#include "Events/EventDataSubscriber.h"
-#include "Events/EventData_EntityCreated.h"
-#include "Events/EventData_ThreadTaskCreated.h"
-#include "Events/EventData_SetActiveCamera.h"
-
 namespace alpha
 {
     class IRenderer;
@@ -35,6 +29,7 @@ namespace alpha
     class Camera;
     class AssetSystem;
     class Asset;
+    class AEvent;
 
     class GraphicsSystem : public AlphaSystem
     {
@@ -47,37 +42,24 @@ namespace alpha
 
         void Render();
 
-        void SetAssetSystem(std::shared_ptr<AssetSystem> pAssets);
-
-        /** Retrieve the subscriber so it can be 'subscribed' to the publisher */
-        std::shared_ptr<AEventDataSubscriber> GetEntityCreatedSubscriber() const;
-        /** Retrieve subscriber for SetActiveCamera */
-        std::shared_ptr<AEventDataSubscriber> GetSetActiveCameraSubscriber() const;
-
-        /** Allow other systems to subscribe to new threading tasks from this system */
-        void SubscribeToThreadTaskCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
+        void SetAssetSystem(AssetSystem * const pAssets);
 
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
-        /** Read the EntityCreated subscription on each update to handle any new entities that need to be rendered. */
-        void ReadSubscriptions();
+
+        /** Handle entity created event. */
+        void HandleEntityCreatedEvent(AEvent * pEvent);
+        /** Handle set active camera event */
+        void HandleSetActiveCameraEvent(AEvent * pEvent);
 
         /** A handle to the main asset system. */
-        std::shared_ptr<AssetSystem> m_pAssets;
+        AssetSystem * m_pAssets;
         /** Renderer implementation (e.g.: DirectX, OpenGL) */
         IRenderer *m_pRenderer;
         /** SceneManager for tracking logic and propagation of renderable objects in the Scene */
         SceneManager * m_pSceneManager;
         /** Track the current camera that is viewing the scene */
         std::shared_ptr<Camera> m_pCamera;
-
-        /** Subscriber for new entity created events */
-        std::shared_ptr<EventDataSubscriber<EventData_EntityCreated>> m_subEntityCreated;
-        /** Subscriber for setting the active camera on the scene */
-        std::shared_ptr<EventDataSubscriber<EventData_SetActiveCamera>> m_subSetActiveCamera;
-
-        /** Publisher for new threading tasks */
-        std::shared_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> m_pubThreadTaskCreated;
     };
 }
 

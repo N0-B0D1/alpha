@@ -1,5 +1,5 @@
-#ifndef EVENT_DATA_H
-#define EVENT_DATA_H
+#ifndef ALPHA_EVENT_H
+#define ALPHA_EVENT_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -21,10 +21,10 @@ limitations under the License.
 
 namespace alpha
 {
-    class EventData
+    class AEvent
     {
     public:
-        virtual ~EventData();
+        virtual ~AEvent();
 
         /** Get the hashed string ID for the derived EventData type. */
         unsigned int GetTypeID() const;
@@ -32,7 +32,10 @@ namespace alpha
         virtual std::string VGetTypeName() const = 0;
         /** Hashes the given string and returns the unsigned int representation. */
         static unsigned int GetIDFromName(const std::string & name);
+
+        /** Copy event so the copy can be pushed out to event interfaces */
+        virtual AEvent * VCopy() = 0;
     };
 }
 
-#endif // EVENT_DATA_H
+#endif // ALPHA_EVENT_H

@@ -18,9 +18,15 @@ limitations under the License.
 */
 
 #include <cstdint>
+#include <functional>
+#include <map>
 
 namespace alpha
 {
+    class EventManager;
+    class EventInterface;
+    class AEvent;
+
     /**
      * The AlphaSystem represents a classic engine sub-system, such as Graphcs, AI, Physics, etc.
      * Or it might represent a set of game logic.
@@ -33,21 +39,39 @@ namespace alpha
         AlphaSystem(uint8_t hertz);
         virtual ~AlphaSystem();
 
-        virtual bool VInitialize() = 0;
+        bool Initialize(EventManager * pEventManager);
         bool Update(double currentTime, double elapsedTime);
-        virtual bool VShutdown() = 0;
+        bool Shutdown(EventManager * pEventManager);
+
+    protected:
+        /** Publish an event to the event interface to be sent to other systems. */
+        void PublishEvent(AEvent * pEvent);
+        /** Register a function handler for an incoming event type */
+        void AddEventHandler(unsigned int event_id, std::function<void(AEvent * const)> handler);
+        /** Removed the handler for the incoming event type */
+        void RemoveEventHandler(unsigned int event_id);
 
     private:
         // non-copyable
         AlphaSystem(const AlphaSystem&);
         AlphaSystem & operator=(const AlphaSystem&);
 
+        virtual bool VInitialize() = 0;
         virtual bool VUpdate(double currentTime, double elapsedTime) = 0;
+        virtual bool VShutdown() = 0;
+
+        /** Handle any events recieved since the last update */
+        void HandleEvents();
 
         /** update frequency */
         uint8_t m_hertz;
         double m_updateFrequency;
         double m_elapsedTime = 0.0f;
+
+        /** Interface for receiving and publishing events */
+        EventInterface * m_pEventInterface;
+        /** Map event id to a function handler */
+        std::map<unsigned int, std::function<void(AEvent * const)>> m_mEventHandlers;
     };
 }
 

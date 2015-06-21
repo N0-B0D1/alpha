@@ -21,12 +21,6 @@ limitations under the License.
 #include <memory>
 #include "AlphaSystem.h"
 
-#include "Events/EventDataSubscriber.h"
-#include "Events/EventDataPublisher.h"
-#include "Events/EventData_EntityCreated.h"
-#include "Events/EventData_HIDKeyAction.h"
-#include "Events/EventData_SetActiveCamera.h"
-
 namespace alpha
 {
     class AssetSystem;
@@ -56,9 +50,9 @@ namespace alpha
         /** Set AssetSystem
          * This must be set before any entities can be created.
          */
-        void SetAssetSystem(std::shared_ptr<AssetSystem> pAssets);
+        void SetAssetSystem(AssetSystem * const pAssets);
         /** Allow controller to attach audio system to logic layer. */
-        void SetAudioSystem(std::weak_ptr<AudioSystem> pAudio);
+        void SetAudioSystem(AudioSystem * const pAudio);
 
         /** Entity life-cycle methods */
         std::shared_ptr<Entity> GetEntity(const unsigned long entityId);
@@ -68,36 +62,19 @@ namespace alpha
         /** Audio life-cycle methods */
         std::weak_ptr<Sound> CreateSound(const char * resource);
 
-        /** event subscriptions */
-        void SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
-        /** Subscribe to set active camera events */
-        void SubscribeToSetActiveCamera(std::shared_ptr<AEventDataSubscriber> pSubscriber);
-
-        /** Retrieve the HIDKeyAction subscriber so it can be 'subscribed' to the publisher */
-        std::shared_ptr<AEventDataSubscriber> GetHIDKeyActionSubscriber() const;
-
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
         /** Handle HID Key Action events from subscription */
-        void ReadHIDKeyActionSubscription();
+        void HandleHIDKeyActionEvent(AEvent * pEvent);
         
         EntityFactory *m_pEntityFactory;
         std::map<unsigned long, std::shared_ptr<Entity> > m_entities;
 
         /** Asset management system handle. */
-        std::shared_ptr<AssetSystem> m_pAssets;
-
+        AssetSystem * m_pAssets;
         /** Handle to the audio system, allows logic to create and manage sounds in a game */
-        std::weak_ptr<AudioSystem> m_pAudio;
-
-        /** Publisher for new entities created */
-        EventDataPublisher<EventData_EntityCreated> m_pubEntityCreated;
-        /** Publisher for setting active camera */
-        EventDataPublisher<EventData_SetActiveCamera> m_pubSetActiveCamera;
-
-        /** Subscriber for HIDKeyAction events */
-        std::shared_ptr<EventDataSubscriber<EventData_HIDKeyAction>> m_subHIDKeyAction;
+        AudioSystem * m_pAudio;
 
         /** HID Context Manager, handles translation of engine input code events, to contextual actions */
         HIDContextManager * m_pHIDContextManager;

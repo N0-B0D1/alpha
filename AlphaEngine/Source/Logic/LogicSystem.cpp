@@ -15,15 +15,15 @@ limitations under the License.
 */
 
 #include "Logic/LogicSystem.h"
+#include "Logic/LogicSystemEvents.h"
 #include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
 #include "Toolbox/Logger.h"
 #include "Assets/AssetSystem.h"
-#include "Events/EventData_EntityCreated.h"
-#include "Events/EventData_HIDKeyAction.h"
 #include "FSA/StateMachine.h"
 #include "HID/HIDContextManager.h"
 #include "HID/HIDConstants.h"
+#include "HID/HIDSystemEvents.h"
 #include "Audio/AudioSystem.h"
 #include "Audio/Sound.h"
 
@@ -33,6 +33,7 @@ namespace alpha
         : AlphaSystem(60)
         , m_pEntityFactory(nullptr)
         , m_pAssets(nullptr)
+        , m_pAudio(nullptr)
         , m_pHIDContextManager(nullptr)
     { }
     LogicSystem::~LogicSystem() { }
@@ -46,8 +47,8 @@ namespace alpha
             return false;
         }
 
-        // create input subscriber
-        m_subHIDKeyAction = std::make_shared<EventDataSubscriber<EventData_HIDKeyAction>>();
+        // register event handlers
+        this->AddEventHandler(AEvent::GetIDFromName(Event_HIDKeyAction::sk_name), [this](AEvent * pEvent) { this->HandleHIDKeyActionEvent(pEvent); });
 
         // setup context manager
         m_pHIDContextManager = new HIDContextManager();
@@ -68,16 +69,15 @@ namespace alpha
 
     bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        ReadHIDKeyActionSubscription();
         return true;
     }
 
-    void LogicSystem::SetAssetSystem(std::shared_ptr<AssetSystem> pAssets)
+    void LogicSystem::SetAssetSystem(AssetSystem * const pAssets)
     {
         m_pAssets = pAssets;
     }
 
-    void LogicSystem::SetAudioSystem(std::weak_ptr<AudioSystem> pAudio)
+    void LogicSystem::SetAudioSystem(AudioSystem * const pAudio)
     {
         m_pAudio = pAudio;
     }
@@ -97,16 +97,17 @@ namespace alpha
         std::shared_ptr<Entity> new_entity = nullptr;
 
         // get the entity script resource specified, and make an entity with it
-        auto asset = m_pAssets->GetAsset(resource);
-        if (asset != nullptr)
+        if (m_pAssets != nullptr) 
         {
-            new_entity = m_pEntityFactory->CreateEntity(asset);
-            m_entities[new_entity->GetId()] = new_entity;
+            auto asset = m_pAssets->GetAsset(resource);
+            if (asset != nullptr)
+            {
+                new_entity = m_pEntityFactory->CreateEntity(asset);
+                m_entities[new_entity->GetId()] = new_entity;
+            }
         }
 
-        // create an Entity Created event, and publish it to all subscribers
-        std::shared_ptr<EventData_EntityCreated> event = std::make_shared<EventData_EntityCreated>(new_entity);
-        m_pubEntityCreated.Publish(event);
+        this->PublishEvent(new Event_EntityCreated(new_entity));
 
         // might be nullptr
         return new_entity;
@@ -121,37 +122,24 @@ namespace alpha
     {
         std::weak_ptr<Sound> new_sound = std::weak_ptr<Sound>();
 
-        auto asset = m_pAssets->GetAsset(resource);
-        if (asset != nullptr)
+        if (m_pAssets != nullptr)
         {
-            if (auto pAudio = m_pAudio.lock())
+            auto asset = m_pAssets->GetAsset(resource);
+            if (asset != nullptr)
             {
-                new_sound = pAudio->CreateSound(asset);
+                if (m_pAudio != nullptr)
+                {
+                    new_sound = m_pAudio->CreateSound(asset);
+                }
             }
         }
 
         return new_sound;
     }
 
-    void LogicSystem::SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
+    void LogicSystem::HandleHIDKeyActionEvent(AEvent * pEvent)
     {
-        m_pubEntityCreated.Subscribe(pSubscriber);
-    }
-
-    void LogicSystem::SubscribeToSetActiveCamera(std::shared_ptr<AEventDataSubscriber> pSubscriber)
-    {
-        m_pubSetActiveCamera.Subscribe(pSubscriber);
-    }
-
-    std::shared_ptr<AEventDataSubscriber> LogicSystem::GetHIDKeyActionSubscriber() const
-    {
-        return m_subHIDKeyAction;
-    }
-
-    void LogicSystem::ReadHIDKeyActionSubscription()
-    {
-        // read any published EventData_HIDKeyAction events that may have occured since the last update.
-        while (std::shared_ptr<const EventData_HIDKeyAction> data = m_subHIDKeyAction->GetNextEvent())
+        if (auto data = dynamic_cast<Event_HIDKeyAction *>(pEvent))
         {
             bool pressed = data->GetPressed();
             HIDAction action = data->GetAction();

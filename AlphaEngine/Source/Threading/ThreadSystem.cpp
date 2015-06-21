@@ -32,9 +32,6 @@ namespace alpha
             return false;
         }
 
-        // create event subscribers
-        m_subThreadTaskCreated = std::make_shared<EventDataSubscriber<EventData_ThreadTaskCreated> >();
-
         return true;
     }
 
@@ -49,11 +46,6 @@ namespace alpha
         return true;
     }
 
-    std::shared_ptr<AEventDataSubscriber> ThreadSystem::GetThreadTaskCreatedSubscriber() const
-    {
-        return m_subThreadTaskCreated;
-    }
-
     bool ThreadSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
         // queue up new tasks for the thread pool
@@ -63,11 +55,13 @@ namespace alpha
 
     void ThreadSystem::ReadSubscriptions()
     {
+        /*
         // read any published EventData_EntityCreated events that may have occured since the last update.
         while(std::shared_ptr<const EventData_ThreadTaskCreated> data = m_subThreadTaskCreated->GetNextEvent())
         {
             //LOG("Threading system received new Task to execute.");
             m_pThreadPool->QueueTask(data->GetTask());
         }
+        */
     }
 }

@@ -71,8 +71,8 @@ namespace alpha
         void SetActiveCamera(std::shared_ptr<CameraComponent> pCameraComponent);
 
     private:
-        void SetLogic(std::shared_ptr<LogicSystem> pLogic);
-        std::shared_ptr<LogicSystem> m_pLogic;
+        void SetLogic(LogicSystem * const pLogic);
+        LogicSystem * m_pLogic;
     };
 }
 

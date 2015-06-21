@@ -18,6 +18,7 @@ limitations under the License.
 */
 
 #include <memory>
+#include <vector>
 
 namespace alpha
 {
@@ -31,7 +32,7 @@ namespace alpha
     public:
         virtual ~IRenderer() { };
 
-        virtual bool Initialize(std::shared_ptr<AssetSystem> pAssets) = 0;
+        virtual bool Initialize(AssetSystem * const pAssets) = 0;
         virtual bool Update(double currentTime, double elapsedTime) = 0;
         virtual bool Shutdown() = 0;
 

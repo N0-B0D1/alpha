@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <Windows.h>
+#include <functional>
 
 #include "HID/HIDWindowListener.h"
 #include "HID/HIDPlatformTranslator.h"
@@ -34,11 +35,13 @@ namespace alpha
         return S_OK;
     }
 
-    HIDWindowListener::HIDWindowListener(EventDataPublisher<EventData_HIDKeyAction> & pubHIDKeyAction)
+    HIDWindowListener::HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey,
+                                         std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis)
         : m_origWndProc(nullptr)
         , m_mouseTracking(false)
         , m_pPlatformTranslator(nullptr)
-        , m_pubHIDKeyAction(pubHIDKeyAction)
+        , m_fDispatchHIDActionKey(dispatchHIDActionKey)
+        , m_fDispatchHIDActionAxis(dispatchHIDActionAxis)
     {
         // set global pointer, so static wndproc can call this class instance, which should be a singlton, but we don't enforce that ...
         g_pWindowListener = this;
@@ -68,13 +71,13 @@ namespace alpha
         {
             // send x-axis action event
             HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_X_AXIS);
-            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
         }
         if (m_lastMousePosition.yRelativePos != m_mousePosition.yRelativePos || m_lastMousePosition.yAbsolutePos != m_mousePosition.yAbsolutePos)
         {
             // send y-axis action event
             HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_Y_AXIS);
-            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
         }
 
         // update last mouse postition
@@ -120,9 +123,6 @@ namespace alpha
     void HIDWindowListener::WMInputHandler(HWND /*hWnd*/, UINT /*message*/, WPARAM /*wParam*/, LPARAM lParam)
     {
         UINT size;
-        //HRESULT hr;
-
-        //TCHAR szTempOutput[256];
         GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &size, sizeof(RAWINPUTHEADER));
 
         LPBYTE lpByte = new BYTE[size];
@@ -147,7 +147,7 @@ namespace alpha
 
             if (pAction != nullptr)
             {
-                DispatchHIDActionKeyEvent(HID_KEYBOARD, *pAction, !keyUp);
+                m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, !keyUp);
             }
             else
             {
@@ -177,7 +177,7 @@ namespace alpha
                         HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(code);
                         if (pAction)
                         {
-                            DispatchHIDActionAxisEvent(HID_MOUSE, *pAction, delta / 120, delta);
+                            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, delta / 120, delta);
                         }
                     }
                     else
@@ -186,7 +186,7 @@ namespace alpha
                         HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(btnIndex);
                         if (pAction)
                         {
-                            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, true);
+                            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
                         }
                     }
                 }
@@ -200,7 +200,6 @@ namespace alpha
                 if (btnState)
                 {
                     // this button was released
-                    //m_pContextManager->MouseButtonUp(static_cast<MouseButtonCode>(btnIndex));
                     if (rawIndex == 0x0800) // mouse wheel left/right
                     {
                         // dispatch mouse wheel left or right
@@ -211,7 +210,7 @@ namespace alpha
                         HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(code);
                         if (pAction)
                         {
-                            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, delta > 0);
+                            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, delta > 0);
                         }
                     }
                     else
@@ -219,7 +218,7 @@ namespace alpha
                         HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(btnIndex);
                         if (pAction)
                         {
-                            DispatchHIDActionKeyEvent(HID_MOUSE, *pAction, false);
+                            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, false);
                         }
                     }
                 }
@@ -377,17 +376,5 @@ namespace alpha
         {
             LOG_ERR("HIDWindowListener > Failed to register raw HIDs.");
         }
-    }
-
-    void HIDWindowListener::DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed)
-    {
-        std::shared_ptr<EventData_HIDKeyAction> event = std::make_shared<EventData_HIDKeyAction>(device, action, pressed);
-        m_pubHIDKeyAction.Publish(event);
-    }
-
-    void HIDWindowListener::DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute)
-    {
-        std::shared_ptr<EventData_HIDKeyAction> event = std::make_shared<EventData_HIDKeyAction>(device, action, false, relative, absolute);
-        m_pubHIDKeyAction.Publish(event);
     }
 }

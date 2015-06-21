@@ -26,6 +26,7 @@ limitations under the License.
 #include "FSA/GameState.h"
 #include "Threading/ThreadSystem.h"
 #include "HID/HIDSystem.h"
+#include "Events/EventManager.h"
 
 namespace alpha
 {
@@ -36,30 +37,16 @@ namespace alpha
         , m_pAssets(nullptr)
         , m_pAudio(nullptr)
         , m_pInput(nullptr)
-    {
-        LOG("<AlphaController> Constructed.");
-    }
+        , m_pGameStateMachine(nullptr)
+    { }
     AlphaController::~AlphaController() { }
-
-
-    void AlphaController::SetLogic(std::shared_ptr<LogicSystem> pLogic)
-    {
-        if (m_pLogic == nullptr)
-        {
-            m_pLogic = pLogic;
-        }
-        else
-        {
-            LOG_WARN("<AlphaController>", " Attempted to attach game logic after it has already been attached.");
-        }
-    }
 
     void AlphaController::SetGameState(std::shared_ptr<AGameState> state)
     {
         if (m_pGameStateMachine == nullptr)
         {
             state->SetLogic(m_pLogic);
-            m_pGameStateMachine = std::unique_ptr<StateMachine>(new StateMachine(state));
+            m_pGameStateMachine = new StateMachine(state);
         }
         else
         {
@@ -67,11 +54,11 @@ namespace alpha
         }
     }
 
-    void AlphaController::Execute()
+    void AlphaController::Execute(std::shared_ptr<AGameState> state)
     {
         LOG("<AlphaController> Execution start.");
 
-        if (this->Initialize())
+        if (this->Initialize(state))
         {
             for (;;)
             {
@@ -91,55 +78,41 @@ namespace alpha
         LOG("<AlphaController> Execution complete.");
     }
 
-    bool AlphaController::Initialize()
+    bool AlphaController::Initialize(std::shared_ptr<AGameState> state)
     {
-        // Initialize asset repository
-        m_pAssets = std::make_shared<AssetSystem>();
-        if (!m_pAssets->VInitialize())
+        // Create the event manager first
+        // the event manager is responsible for all communication between
+        // sub-systems, thus it must exist for any systems.
+        m_pEventManager = new EventManager();
+        if (!m_pEventManager->Initialize())
         {
-            LOG_ERR("<AssetSystem> Initialization failed!");
+            LOG_ERR("--EventManager-- Initialization failed!");
             return false;
         }
 
-        // create graphcs
-        m_pGraphics = std::unique_ptr<GraphicsSystem>(new GraphicsSystem());
-        m_pGraphics->SetAssetSystem(m_pAssets);
-        if (!m_pGraphics->VInitialize())
-        {
-            LOG_ERR("<GraphicsSystem> Initialization failed!");
-            return false;
-        }
+        // Initialize asset repository
+        m_pAssets = new AssetSystem();
+        if (!InitializeSystem(m_pAssets)) { LOG_ERR("<AssetSystem> Initialization failed!"); return false; }
+
+        // create graphics system, for platform specific rendering
+        m_pGraphics = new GraphicsSystem();
+        m_pGraphics->SetAssetSystem(m_pAssets); // attach asset system to graphics system
+        if (!InitializeSystem(m_pGraphics)) { LOG_ERR("<GraphicsSystem> Initialization failed!"); return false; }
 
         // create human input device system
         m_pInput = new HIDSystem();
-        if (!m_pInput->VInitialize())
-        {
-            LOG_ERR("<HIDSystem> Initialization failed!");
-            return false;
-        }
+        if (!InitializeSystem(m_pInput)) { LOG_ERR("<HIDSystem> Initialization failed!"); return false; }
 
         // create audio system
-        m_pAudio = std::make_shared<AudioSystem>();
-        if (!m_pAudio->VInitialize())
-        {
-            LOG_ERR("AudioSystem > Initialization failed!");
-            return false;
-        }
-        // attach audio system to logic layer
-        m_pLogic->SetAudioSystem(m_pAudio);
+        m_pAudio = new AudioSystem();
+        if (!InitializeSystem(m_pAudio)) { LOG_ERR("<AudioSystem> Initialization failed!"); return false; }
 
-        // initialize the game logic
-        m_pLogic->SetAssetSystem(m_pAssets);
-        if (!m_pLogic->VInitialize())
-        {
-            LOG_ERR("<LogicSystem> Initialization failed!");
-            return false;
-        }
-
-        // wire up pub-sub relations
-        m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
-        m_pLogic->SubscribeToSetActiveCamera(m_pGraphics->GetSetActiveCameraSubscriber());
-        m_pInput->SubscribeToHIDKeyAction(m_pLogic->GetHIDKeyActionSubscriber());
+        // create logic system to manage game layer
+        m_pLogic = new LogicSystem();
+        m_pLogic->SetAudioSystem(m_pAudio);     // attach audio system to logic layer
+        m_pLogic->SetAssetSystem(m_pAssets);    // initialize the game logic
+        this->SetGameState(state);              // set starting state
+        if (!InitializeSystem(m_pLogic)) { LOG_ERR("<LogicSystem> Initialization failed!"); return false; }
 
         // initialize the specified game state
         // if no state has been specified, then fail to startup
@@ -148,24 +121,12 @@ namespace alpha
             LOG_ERR("<AlphaController> No Game State specified.");
             return false;
         }
-        if (!m_pGameStateMachine->VInitialize())
-        {
-            LOG_ERR("<AlphaController> Game State failed to initialize.");
-            return false;
-        }
+        if (!InitializeSystem(m_pGameStateMachine)) { LOG_ERR("<AlphaController> Game State failed to initialize."); return false; }
 
         // prep threading system last, so tasks can't be processed until
         // the whole engine is up and running.
         m_pThreads = new ThreadSystem();
-        if (!m_pThreads->VInitialize())
-        {
-            LOG_ERR("<ThreadSystem> Initialization failed!");
-            return false;
-        }
-
-        // subscribe the threading system to any new task publishers
-        auto taskSubscriber = m_pThreads->GetThreadTaskCreatedSubscriber();
-        m_pGraphics->SubscribeToThreadTaskCreated(taskSubscriber);
+        if (!InitializeSystem(m_pThreads)) { LOG_ERR("<ThreadSystem> Initialization failed!"); return false; }
 
         // setup timer/clock
         m_start = std::chrono::high_resolution_clock::now();
@@ -174,9 +135,21 @@ namespace alpha
         return true;
     }
 
+    bool AlphaController::InitializeSystem(AlphaSystem * pSystem)
+    {
+        if (!pSystem->Initialize(m_pEventManager))
+        {
+            return false;
+        }
+        return true;
+    }
+
     bool AlphaController::Update()
     {
         bool success = true;
+
+        // update event manager first each frame
+        m_pEventManager->Update();
 
         // calculate elapsed time since last frame started rendering
         std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
@@ -228,8 +201,6 @@ namespace alpha
         // render after updates complete
         m_pGraphics->Render();
 
-        //loops -= 1;
-        //return loops > 0;
         return success;
     }
 
@@ -241,45 +212,26 @@ namespace alpha
 
         // dispose of threading system first, so any running threads will be joined
         // and tasks wont be left in a bad state as the engine shuts down.
-        if (m_pThreads)
-        {
-            m_pThreads->VShutdown();
-            delete m_pThreads;
-            LOG("<ThreadSystem> Disposed.");
-        }
-        if (m_pGameStateMachine)
-        {
-            m_pGameStateMachine->VShutdown();
-            LOG("<GameStateMachine> Disposed.");
-        }
-        if (m_pLogic)
-        {
-            m_pLogic->VShutdown();
-            LOG("<LogicSystem> Disposed.");
-        }
-        if (m_pAudio)
-        {
-            m_pAudio->VShutdown();
-            LOG("<AudioSystem> Disposed.");
-        }
-        if (m_pInput)
-        {
-            m_pInput->VShutdown();
-            delete m_pInput;
-            LOG("<HIDSystem> Disposed.");
-        }
-        if (m_pGraphics)
-        {
-            m_pGraphics->VShutdown();
-            LOG("<GraphicsSystem> Disposed.");
-        }
-        if (m_pAssets)
-        {
-            m_pAssets->VShutdown();
-            LOG("<AssetSystem> Disposed.");
-        }
+        if (ShutdownSystem(m_pThreads)) { LOG("<ThreadSystem> Disposed."); }
+        if (ShutdownSystem(m_pGameStateMachine)) { LOG("<GameStateMachine> Disposed."); } // XXX game state machine probably shouldn't be a system ...
+        if (ShutdownSystem(m_pLogic)) { LOG("<LogicSystem> Disposed."); }
+        if (ShutdownSystem(m_pAudio)) { LOG("<AudioSystem> Disposed."); }
+        if (ShutdownSystem(m_pInput)) { LOG("<HIDSystem> Disposed."); }
+        if (ShutdownSystem(m_pGraphics)) { LOG("<GraphicsSystem> Disposed."); }
+        if (ShutdownSystem(m_pAssets)) { LOG("<AssetSystem> Disposed."); }
 
         LOG("<AlphaController> Shutdown complete.");
         return true;
+    }
+
+    bool AlphaController::ShutdownSystem(AlphaSystem * pSystem)
+    {
+        if (pSystem)
+        {
+            pSystem->Shutdown(m_pEventManager);
+            delete pSystem;
+            return true;
+        }
+        return false;
     }
 }

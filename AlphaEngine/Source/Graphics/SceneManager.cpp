@@ -23,15 +23,12 @@ limitations under the License.
 #include "Entities/EntityComponent.h"
 #include "Entities/MeshComponent.h"
 #include "Entities/LightComponent.h"
-#include "Events/EventDataPublisher.h"
-#include "Events/EventData_ThreadTaskCreated.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    SceneManager::SceneManager(std::weak_ptr<EventDataPublisher<EventData_ThreadTaskCreated>> pTaskPublisher, std::weak_ptr<AssetSystem> pAssets)
+    SceneManager::SceneManager(AssetSystem * const pAssets)
         : m_pAssets(pAssets)
-        , m_pTaskPublisher(pTaskPublisher)
     { }
     SceneManager::~SceneManager()
     {
@@ -52,23 +49,6 @@ namespace alpha
         // clean the list, so it can be rebuilt.
         m_vRenderData.clear();
         m_vLightData.clear();
-
-        // walk the tree, and create render data for renderable scene nodes.
-        // make a task for each entity scene node set, and publish it
-
-        /*
-        // XXX This doesn't actually work ... animations are extremely clunky
-        if (auto spPublisher = m_pTaskPublisher.lock())
-        {
-            for (auto pair : m_nodes)
-            {
-                Task * pTask = new RenderDataTask(pair.second);
-                auto pEvent = std::make_shared<EventData_ThreadTaskCreated>(pTask);
-                spPublisher->Publish(pEvent);
-                this->BuildRenderData(pair.first, pair.second, m_vRenderData);
-            }
-        }
-        */
 
         for (auto pair : m_nodes)
         {
@@ -144,9 +124,9 @@ namespace alpha
             if (auto mesh_component = std::dynamic_pointer_cast<MeshComponent>(scene_component))
             {
                 auto path = mesh_component->GetMeshPath();
-                if (auto pAssets = m_pAssets.lock())
+                if (m_pAssets != nullptr)
                 {
-                    auto asset = pAssets->GetAsset(path.c_str());
+                    auto asset = m_pAssets->GetAsset(path.c_str());
                     node->SetMesh(asset);
                 }
             }
@@ -154,9 +134,9 @@ namespace alpha
             // get the material path, load as an asset, and set it on the node.
             auto material_path = scene_component->GetMaterialPath();
             std::shared_ptr<Material> pMaterial;
-            if (auto pAssets = m_pAssets.lock())
+            if (m_pAssets != nullptr)
             {
-                auto pAsset = pAssets->GetAsset(material_path.c_str());
+                auto pAsset = m_pAssets->GetAsset(material_path.c_str());
 
                 // XXX TODO - pass asset through a material manager, so that only one
                 // material every exists for a given material script.

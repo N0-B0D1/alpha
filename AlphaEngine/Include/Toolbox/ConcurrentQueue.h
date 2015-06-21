@@ -41,8 +41,10 @@ namespace alpha
 		bool TryPop(Data &poppedValue)
 		{
 			std::lock_guard<std::mutex> guard(m_queueLock);
-			if (m_queue.empty())
-				return false;
+            if (m_queue.empty())
+            {
+                return false;
+            }
 
 			poppedValue = m_queue.front();
 			m_queue.pop();

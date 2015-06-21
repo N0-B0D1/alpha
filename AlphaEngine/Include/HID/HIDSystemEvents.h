@@ -1,5 +1,5 @@
-#ifndef ALPHA_EVENT_DATA_HID_KEY_DOWN_H
-#define ALPHA_EVENT_DATA_HID_KEY_DOWN_H
+#ifndef ALPHA_HID_SYSTEM_EVENTS_H
+#define ALPHA_HID_SYSTEM_EVENTS_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,21 +17,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Events/EventData.h"
+#include <memory>
+
+#include "Events/AEvent.h"
 #include "HID/HIDTypes.h"
 
 namespace alpha
 {
-    struct HIDAction;
-
-    class EventData_HIDKeyAction : public EventData
+    /**
+    * Event_HIDKeyAction
+    * Published when the user interacts with an HID device.
+    */
+    class Event_HIDKeyAction : public AEvent
     {
-        /** The type name that defines this event type */
+    public:
         static const std::string sk_name;
 
-    public:
-        explicit EventData_HIDKeyAction(HID device, const HIDAction & action, bool pressed, long relative = 0, float absolute = 0.f);
+        explicit Event_HIDKeyAction(HID device, const HIDAction & action, bool pressed, long relative = 0, float absolute = 0.f);
+
         virtual std::string VGetTypeName() const;
+        virtual AEvent * VCopy();
 
         HID GetDevice() const;
         const HIDAction & GetAction() const;
@@ -42,8 +47,8 @@ namespace alpha
 
     private:
         // non-copyable
-        EventData_HIDKeyAction(const EventData_HIDKeyAction&);
-        EventData_HIDKeyAction & operator=(const EventData_HIDKeyAction&);
+        Event_HIDKeyAction(const Event_HIDKeyAction&);
+        Event_HIDKeyAction & operator=(const Event_HIDKeyAction&);
 
         // normal key up/down values
         HID m_device;
@@ -56,4 +61,4 @@ namespace alpha
     };
 }
 
-#endif // ALPHA_EVENT_DATA_HID_KEY_DOWN_H
+#endif // ALPHA_HID_SYSTEM_EVENTS_H

@@ -33,15 +33,14 @@ namespace alpha
          */
         explicit StateMachine(std::shared_ptr<AState> startingState);
 
-        virtual bool VInitialize();
-        virtual bool VShutdown();
-
     private:
+        virtual bool VInitialize();
         /** \brief Update the current state and advance to next state if necessary.
         * \param currentTime The current global tick time.
         * \param elapsedTime Time elapsed since last update.
         */
         virtual bool VUpdate(double currentTime, double elapsedTime);
+        virtual bool VShutdown();
 
         /** Tracks the current active state. */
         std::shared_ptr<AState> m_pCurrentState;

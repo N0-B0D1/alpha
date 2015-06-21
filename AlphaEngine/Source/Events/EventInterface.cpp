@@ -1,6 +1,3 @@
-#ifndef GAME_LOGIC_H
-#define GAME_LOGIC_H
-
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -17,21 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Entities/Entity.h"
+#include "Events/EventInterface.h"
+#include "Events/AEvent.h"
 
-#include "Logic/LogicSystem.h"
-
-namespace alpha {
-    class AssetSystem;
-}
-
-class GameLogic : public alpha::LogicSystem
+namespace alpha
 {
-public:
-    GameLogic();
-    virtual ~GameLogic();
+    EventInterface::~EventInterface() { }
 
-    virtual bool VInitialize();
-};
+    void EventInterface::PublishEvent(AEvent * pEvent)
+    {
+        m_qOutgoingEvents.Push(pEvent);
+    }
 
-#endif // GAME_LOGIC_H
+    AEvent * EventInterface::GetNextEvent()
+    {
+        AEvent * pEvent;
+        if (m_qIncomingEvents.TryPop(pEvent))
+        {
+            return pEvent;
+        }
+        return nullptr;
+    }
+}
