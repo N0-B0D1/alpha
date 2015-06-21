@@ -15,8 +15,24 @@ limitations under the License.
 */
 
 #include "Events/EventInterface.h"
+#include "Events/AEvent.h"
 
 namespace alpha
 {
     EventInterface::~EventInterface() { }
+
+    void EventInterface::PublishEvent(AEvent * pEvent)
+    {
+        m_qOutgoingEvents.Push(pEvent);
+    }
+
+    AEvent * EventInterface::GetNextEvent()
+    {
+        AEvent * pEvent;
+        if (m_qIncomingEvents.TryPop(pEvent))
+        {
+            return pEvent;
+        }
+        return nullptr;
+    }
 }

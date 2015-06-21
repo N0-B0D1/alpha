@@ -115,8 +115,6 @@ namespace alpha
         if (!InitializeSystem(m_pLogic)) { LOG_ERR("<LogicSystem> Initialization failed!"); return false; }
 
         // wire up pub-sub relations
-        m_pLogic->SubscribeToEntityCreated(m_pGraphics->GetEntityCreatedSubscriber());
-        m_pLogic->SubscribeToSetActiveCamera(m_pGraphics->GetSetActiveCameraSubscriber());
         m_pInput->SubscribeToHIDKeyAction(m_pLogic->GetHIDKeyActionSubscriber());
 
         // initialize the specified game state
@@ -156,6 +154,9 @@ namespace alpha
     bool AlphaController::Update()
     {
         bool success = true;
+
+        // update event manager first each frame
+        m_pEventManager->Update();
 
         // calculate elapsed time since last frame started rendering
         std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();

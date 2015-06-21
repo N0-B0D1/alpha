@@ -17,8 +17,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "Toolbox/ConcurrentQueue.h"
+
 namespace alpha
 {
+    class EventManager;
+    class AEvent;
+
     /**
      * EventInterface
      * Defines an interface for interacting with the EventManger, allowing the
@@ -26,8 +31,21 @@ namespace alpha
      */
     class EventInterface
     {
+        friend class EventManager;
+
     public:
         virtual ~EventInterface();
+
+        /** Publish an event for consumption by other systems. */
+        void PublishEvent(AEvent * pEvent);
+        /** Pull the next event off of the incoming event queue. */
+        AEvent * GetNextEvent();
+
+    private:
+        /** Queue of incoming events from other engine systems */
+        ConcurrentQueue<AEvent *> m_qIncomingEvents;
+        /** Queue of outgoing events, these will be processed by the event manager */
+        ConcurrentQueue<AEvent *> m_qOutgoingEvents;
     };
 }
 

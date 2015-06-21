@@ -14,23 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Events/EventData_EntityCreated.h"
+#include <string>
+
+#include "Events/AEvent.h"
 
 namespace alpha
 {
-    const std::string EventData_EntityCreated::sk_name = "EventData_EntityCreated";
+    AEvent::~AEvent() { }
 
-    EventData_EntityCreated::EventData_EntityCreated(std::shared_ptr<Entity> entity)
-        : m_entity(entity)
-    { }
-
-    std::string EventData_EntityCreated::VGetTypeName() const
+    unsigned int AEvent::GetTypeID() const
     {
-        return EventData_EntityCreated::sk_name;
+        return GetIDFromName(this->VGetTypeName());
     }
 
-    std::shared_ptr<Entity> EventData_EntityCreated::GetEntity() const
+    unsigned int AEvent::GetIDFromName(const std::string & name)
     {
-        return m_entity;
+        static std::hash<std::string> string_hash;
+        return string_hash(name);
     }
 }

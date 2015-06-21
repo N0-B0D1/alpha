@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "Events/EventManager.h"
 #include "Events/EventInterface.h"
-#include "Events/Event.h"
+#include "Events/AEvent.h"
 
 namespace alpha
 {
@@ -33,6 +33,31 @@ namespace alpha
 
     bool EventManager::Update()
     {
+        std::vector<AEvent *> events;
+
+        // for each interface, gather all new outgoing events
+        for (auto pEventInterface : m_vInterfaces)
+        {
+            AEvent * pEvent;
+            while (pEventInterface->m_qOutgoingEvents.TryPop(pEvent))
+            {
+                events.push_back(pEvent);
+            }
+        }
+
+        // once all events are gathered, publish each event too all interfaces
+        while (events.size() > 0)
+        {
+            auto pEvent = events.back();
+            for (auto pEventInterface : m_vInterfaces)
+            {
+                pEventInterface->m_qIncomingEvents.Push(pEvent->VCopy());
+            }
+
+            events.pop_back();
+            delete pEvent;
+        }
+
         return true;
     }
 

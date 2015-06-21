@@ -23,9 +23,7 @@ limitations under the License.
 
 #include "Events/EventDataSubscriber.h"
 #include "Events/EventDataPublisher.h"
-#include "Events/EventData_EntityCreated.h"
 #include "Events/EventData_HIDKeyAction.h"
-#include "Events/EventData_SetActiveCamera.h"
 
 namespace alpha
 {
@@ -68,11 +66,6 @@ namespace alpha
         /** Audio life-cycle methods */
         std::weak_ptr<Sound> CreateSound(const char * resource);
 
-        /** event subscriptions */
-        void SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber);
-        /** Subscribe to set active camera events */
-        void SubscribeToSetActiveCamera(std::shared_ptr<AEventDataSubscriber> pSubscriber);
-
         /** Retrieve the HIDKeyAction subscriber so it can be 'subscribed' to the publisher */
         std::shared_ptr<AEventDataSubscriber> GetHIDKeyActionSubscriber() const;
 
@@ -87,14 +80,8 @@ namespace alpha
 
         /** Asset management system handle. */
         AssetSystem * m_pAssets;
-
         /** Handle to the audio system, allows logic to create and manage sounds in a game */
         AudioSystem * m_pAudio;
-
-        /** Publisher for new entities created */
-        EventDataPublisher<EventData_EntityCreated> m_pubEntityCreated;
-        /** Publisher for setting active camera */
-        EventDataPublisher<EventData_SetActiveCamera> m_pubSetActiveCamera;
 
         /** Subscriber for HIDKeyAction events */
         std::shared_ptr<EventDataSubscriber<EventData_HIDKeyAction>> m_subHIDKeyAction;

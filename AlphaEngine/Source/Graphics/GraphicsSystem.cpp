@@ -23,6 +23,7 @@ limitations under the License.
 #include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
+#include "Logic/LogicSystemEvents.h"
 
 namespace alpha
 {
@@ -32,8 +33,6 @@ namespace alpha
         , m_pRenderer(nullptr)
         , m_pSceneManager(nullptr)
         , m_pCamera(nullptr)
-        , m_subEntityCreated(nullptr)
-        , m_subSetActiveCamera(nullptr)
         , m_pubThreadTaskCreated(nullptr)
     { }
     GraphicsSystem::~GraphicsSystem() { }
@@ -53,12 +52,11 @@ namespace alpha
         // Scene renerable manager
         m_pSceneManager = new SceneManager(m_pubThreadTaskCreated, m_pAssets);
 
-        // create event subscribers
-        m_subEntityCreated = std::make_shared<EventDataSubscriber<EventData_EntityCreated>>();
-        // create set active camera subscription
-        m_subSetActiveCamera = std::make_shared<EventDataSubscriber<EventData_SetActiveCamera>>();
+        // register event handlers
+        this->AddEventHandler(AEvent::GetIDFromName(Event_EntityCreated::sk_name), [this](AEvent * pEvent) { this->HandleEntityCreatedEvent(pEvent); });
+        this->AddEventHandler(AEvent::GetIDFromName(Event_SetActiveCamera::sk_name), [this](AEvent * pEvent) { this->HandleSetActiveCameraEvent(pEvent); });
 
-        // create our player camera view of the scene
+        // create a default camera for the scene
         m_pCamera = std::make_shared<Camera>(Vector3(0.f, 0.f, 20.f));
 
         return true;
@@ -102,11 +100,6 @@ namespace alpha
 
     bool GraphicsSystem::VUpdate(double currentTime, double elapsedTime)
     {
-        // add any new entities to the graphics system
-        // update any existing entities in the scene
-        // remove and destroyed entities from the scene.
-        this->ReadSubscriptions();
-
         // udpate scene manager, produces the current
         // set of objects that should be rendered in the
         // scene.
@@ -129,29 +122,21 @@ namespace alpha
         m_pAssets = pAssets;
     }
 
-    void GraphicsSystem::ReadSubscriptions()
+    void GraphicsSystem::HandleEntityCreatedEvent(AEvent * pEvent)
     {
-        // read any published EventData_EntityCreated events that may have occured since the last update.
-        while(std::shared_ptr<const EventData_EntityCreated> data = m_subEntityCreated->GetNextEvent())
+        LOG("Graphics system received EntityCreated event");
+        if (auto pEntityCreatedEvent = dynamic_cast<Event_EntityCreated *>(pEvent))
         {
-            LOG("Graphics system received EntityCreated event");
-            m_pSceneManager->Add(data->GetEntity());
-        }
-
-        while(auto data = m_subSetActiveCamera->GetNextEvent())
-        {
-            LOG("Graphics system received SetActiveCamera event.");
-            m_pCamera->SetCameraComponent(data->GetCameraComponent());
+            this->m_pSceneManager->Add(pEntityCreatedEvent->GetEntity());
         }
     }
 
-    std::shared_ptr<AEventDataSubscriber> GraphicsSystem::GetEntityCreatedSubscriber() const
+    void GraphicsSystem::HandleSetActiveCameraEvent(AEvent * pEvent)
     {
-        return m_subEntityCreated;
-    }
-
-    std::shared_ptr<AEventDataSubscriber> GraphicsSystem::GetSetActiveCameraSubscriber() const
-    {
-        return m_subSetActiveCamera;
+        LOG("Graphics system received SetActiveCamera event.");
+        if (auto pSetActiveCameraEvent = dynamic_cast<Event_SetActiveCamera *>(pEvent))
+        {
+            this->m_pCamera->SetCameraComponent(pSetActiveCameraEvent->GetCameraComponent());
+        }
     }
 }

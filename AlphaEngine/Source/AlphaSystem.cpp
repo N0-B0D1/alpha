@@ -17,6 +17,7 @@ limitations under the License.
 #include "AlphaSystem.h"
 #include "Events/EventManager.h"
 #include "Events/EventInterface.h"
+#include "Events/AEvent.h"
 
 namespace alpha
 {
@@ -41,6 +42,10 @@ namespace alpha
         m_elapsedTime += elapsedTime;
         if (m_elapsedTime > m_updateFrequency)
         {
+            // Allow any event handler to be called
+            HandleEvents();
+
+            // let the sub-system update
             success = this->VUpdate(currentTime, m_updateFrequency);
             m_elapsedTime = m_elapsedTime - m_updateFrequency;
         }
@@ -56,5 +61,40 @@ namespace alpha
             delete m_pEventInterface;
         }
         return success;
+    }
+
+    void AlphaSystem::PublishEvent(AEvent * pEvent)
+    {
+        if (pEvent)
+        {
+            m_pEventInterface->PublishEvent(pEvent);
+        }
+    }
+
+    void AlphaSystem::AddEventHandler(unsigned int event_id, std::function<void(AEvent * const)> handler)
+    {
+        m_mEventHandlers[event_id] = handler;
+    }
+
+    void AlphaSystem::RemoveEventHandler(unsigned int event_id)
+    {
+        auto it = m_mEventHandlers.find(event_id);
+        if (it != m_mEventHandlers.end())
+        {
+            m_mEventHandlers.erase(it);
+        }
+    }
+
+    void AlphaSystem::HandleEvents()
+    {
+        while (auto pEvent = m_pEventInterface->GetNextEvent())
+        {
+            auto it = m_mEventHandlers.find(pEvent->GetTypeID());
+            if (it != m_mEventHandlers.end())
+            {
+                it->second(pEvent);
+            }
+            delete pEvent;
+        }
     }
 }

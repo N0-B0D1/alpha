@@ -15,11 +15,11 @@ limitations under the License.
 */
 
 #include "Logic/LogicSystem.h"
+#include "Logic/LogicSystemEvents.h"
 #include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
 #include "Toolbox/Logger.h"
 #include "Assets/AssetSystem.h"
-#include "Events/EventData_EntityCreated.h"
 #include "Events/EventData_HIDKeyAction.h"
 #include "FSA/StateMachine.h"
 #include "HID/HIDContextManager.h"
@@ -108,9 +108,7 @@ namespace alpha
             }
         }
 
-        // create an Entity Created event, and publish it to all subscribers
-        std::shared_ptr<EventData_EntityCreated> event = std::make_shared<EventData_EntityCreated>(new_entity);
-        m_pubEntityCreated.Publish(event);
+        this->PublishEvent(new Event_EntityCreated(new_entity));
 
         // might be nullptr
         return new_entity;
@@ -138,16 +136,6 @@ namespace alpha
         }
 
         return new_sound;
-    }
-
-    void LogicSystem::SubscribeToEntityCreated(std::shared_ptr<AEventDataSubscriber> pSubscriber)
-    {
-        m_pubEntityCreated.Subscribe(pSubscriber);
-    }
-
-    void LogicSystem::SubscribeToSetActiveCamera(std::shared_ptr<AEventDataSubscriber> pSubscriber)
-    {
-        m_pubSetActiveCamera.Subscribe(pSubscriber);
     }
 
     std::shared_ptr<AEventDataSubscriber> LogicSystem::GetHIDKeyActionSubscriber() const

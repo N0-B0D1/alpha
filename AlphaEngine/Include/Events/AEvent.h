@@ -17,12 +17,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string>
+
 namespace alpha
 {
-    class Event
+    class AEvent
     {
     public:
-        virtual ~Event();
+        virtual ~AEvent();
+
+        /** Get the hashed string ID for the derived EventData type. */
+        unsigned int GetTypeID() const;
+        /** Get the name that represents the EventData type, NOT the instance. */
+        virtual std::string VGetTypeName() const = 0;
+        /** Hashes the given string and returns the unsigned int representation. */
+        static unsigned int GetIDFromName(const std::string & name);
+
+        /** Copy event so the copy can be pushed out to event interfaces */
+        virtual AEvent * VCopy() = 0;
     };
 }
 
