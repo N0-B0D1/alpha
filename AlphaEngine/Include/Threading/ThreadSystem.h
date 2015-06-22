@@ -29,14 +29,18 @@ namespace alpha
         ThreadSystem();
         virtual ~ThreadSystem();
 
-        virtual bool VInitialize();
-        virtual bool VShutdown();
+        /**
+         * Block until all tasks have complete their job for the current update cycle.
+         */
+        void JoinTasks();
 
     private:
+        virtual bool VInitialize();
         virtual bool VUpdate(double currentTime, double elapsedTime);
+        virtual bool VShutdown();
 
-        /** Read any new subscriptions, called on update */
-        void ReadSubscriptions();
+        /** Handle incoming threading task events. */
+        void HandleNewThreadTaskEvents(AEvent * pEvent);
 
         /** Handle to the thread pool that allocates thread reasources */
         ThreadPool * m_pThreadPool;

@@ -1,6 +1,3 @@
-#ifndef ALPHA_TASK_H
-#define ALPHA_TASK_H
-
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -17,14 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "Threading/ThreadSystemEvents.h"
+#include "Threading/ATask.h"
+
 namespace alpha
 {
-    class Task
-    {
-    public:
-        virtual ~Task();
-        virtual void VExecute() = 0;
-    };
-}
+    const std::string Event_NewThreadTask::sk_name = "Event_NewThreadTask";
 
-#endif
+    Event_NewThreadTask::Event_NewThreadTask(ATask * pTask)
+        : m_pTask(pTask)
+    { }
+
+    std::string Event_NewThreadTask::VGetTypeName() const
+    {
+        return Event_NewThreadTask::sk_name;
+    }
+
+    AEvent * Event_NewThreadTask::VCopy()
+    {
+        return new Event_NewThreadTask(m_pTask);
+    }
+
+    ATask * Event_NewThreadTask::GetTask() const
+    {
+        return m_pTask;
+    }
+}

@@ -162,7 +162,8 @@ namespace alpha
         // update systems in discrete chunks of time
         while (m_timeAccumulator >= sk_maxUpdateTime)
         {
-            // update thread sub-system, allow threads access to any new tasks.
+            // update thread sub-system
+            // this will pick up any new tasks created during the last update cycle and start executing them.
             m_pThreads->Update(currentTime, sk_maxUpdateTime);
 
             // update audio sub-system
@@ -187,6 +188,9 @@ namespace alpha
             {
                 return false;
             }
+
+            // wait for all threading tasks to complete for this update iteration
+            m_pThreads->JoinTasks();
 
             m_timeAccumulator -= sk_maxUpdateTime;
         }

@@ -26,7 +26,7 @@ limitations under the License.
 namespace alpha
 {
     class TaskRunner;
-    class Task;
+    class ATask;
 
     /**
      * \brief The ThreadPool maintains a pre-defined number of threads and passes Tasks to them as needed.
@@ -42,8 +42,14 @@ namespace alpha
         /** Join all threads and dispose of them. */
         bool Shutdown();
 
+        /** Check to see if the current task queue is empty. */
+        bool IsCurrentQueueEmpty();
+
+        /** Set next task queue as the active queue. */
+        void SwapTaskQueue();
+
         /** Queue a task for the threads to execute */
-        void QueueTask(Task * pTask);
+        void QueueTask(ATask * pTask);
 
     private:
         /** Number of supported hardware threads. */
@@ -54,7 +60,8 @@ namespace alpha
         /** Array of all TaskRunners that are executing in threads. */
         std::vector<TaskRunner> m_runners;
 
-        std::shared_ptr<ConcurrentQueue<Task *> > m_pTaskQueue;
+        int m_currentQueue;
+        std::shared_ptr<ConcurrentQueue<ATask *> > m_pTaskQueue[2];
 
         /** Thread running state, setting to false will stop all task runner activity. */
         bool m_running;

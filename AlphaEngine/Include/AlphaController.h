@@ -48,6 +48,7 @@ namespace alpha
      *     HIDSystem
      *
      * Other:
+     *     EventManager
      *     StateMachine (game state machine)
      */
 	class AlphaController

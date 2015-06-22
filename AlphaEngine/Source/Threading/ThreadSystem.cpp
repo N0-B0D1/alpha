@@ -16,12 +16,21 @@ limitations under the License.
 
 #include "Threading/ThreadSystem.h"
 #include "Threading/ThreadPool.h"
+#include "Threading/ThreadSystemEvents.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     ThreadSystem::ThreadSystem() : AlphaSystem(60) { }
     ThreadSystem::~ThreadSystem() { }
+
+    void ThreadSystem::JoinTasks()
+    {
+        while (m_pThreadPool->IsCurrentQueueEmpty() == false)
+        {
+            LOG_WARN("Waiting on task queue to empty ...");
+        }
+    }
 
     bool ThreadSystem::VInitialize()
     {
@@ -31,6 +40,9 @@ namespace alpha
         {
             return false;
         }
+
+        // register event handlers
+        this->AddEventHandler(AEvent::GetIDFromName(Event_NewThreadTask::sk_name), [this](AEvent * pEvent) { this->HandleNewThreadTaskEvents(pEvent); });
 
         return true;
     }
@@ -48,20 +60,19 @@ namespace alpha
 
     bool ThreadSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        // queue up new tasks for the thread pool
-        this->ReadSubscriptions();
+        // swap task queues
+        m_pThreadPool->SwapTaskQueue();
+
         return true;
     }
 
-    void ThreadSystem::ReadSubscriptions()
+    //void ThreadSystem::ReadSubscriptions()
+    void ThreadSystem::HandleNewThreadTaskEvents(AEvent * pEvent)
     {
-        /*
-        // read any published EventData_EntityCreated events that may have occured since the last update.
-        while(std::shared_ptr<const EventData_ThreadTaskCreated> data = m_subThreadTaskCreated->GetNextEvent())
+        LOG("Threading system received Event_NewThreadTask");
+        if (auto pNewThreadTaskEvent = dynamic_cast<Event_NewThreadTask *>(pEvent))
         {
-            //LOG("Threading system received new Task to execute.");
-            m_pThreadPool->QueueTask(data->GetTask());
+            m_pThreadPool->QueueTask(pNewThreadTaskEvent->GetTask());
         }
-        */
     }
 }
