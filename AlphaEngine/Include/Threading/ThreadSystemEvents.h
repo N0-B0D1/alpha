@@ -1,5 +1,5 @@
-#ifndef ALPHA_RENDER_DATA_TASK_H
-#define ALPHA_RENDER_DATA_TASK_H
+#ifndef ALPHA_THREAD_SYSTEM_EVENTS_H
+#define ALPHA_THREAD_SYSTEM_EVENTS_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,30 +17,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <map>
-
-#include "Threading/ATask.h"
+#include "Events/AEvent.h"
 
 namespace alpha
 {
-    class SceneNode;
+    class ATask;
 
     /**
-     * \brief RenderDataTask handles updating the logic data for a single RenderData object.
-     */
-    class RenderDataTask : public ATask
+    * Event_NewThreadTask
+    */
+    class Event_NewThreadTask : public AEvent
     {
     public:
-        explicit RenderDataTask(std::map<unsigned int, SceneNode *> nodes);
+        static const std::string sk_name;
 
-        /** Handle all logic to completion */
-        virtual bool VExecute();
+        explicit Event_NewThreadTask(ATask * pTask);
+
+        virtual std::string VGetTypeName() const;
+        virtual AEvent * VCopy();
+
+        /** Retrieve the task to be executed in a thread. */
+        ATask * GetTask() const;
 
     private:
-        void UpdateNodes(std::map<unsigned int, SceneNode *> nodes);
-
-        std::map<unsigned int, SceneNode *> m_nodes;
+        ATask * m_pTask;
     };
 }
 
-#endif // ALPHA_RENDER_DATA_TASK_H
+#endif // ALPHA_THREAD_SYSTEM_EVENTS_H

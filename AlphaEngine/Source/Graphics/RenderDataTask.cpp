@@ -26,9 +26,10 @@ namespace alpha
         : m_nodes(nodes)
     { }
 
-    void RenderDataTask::VExecute()
+    bool RenderDataTask::VExecute()
     {
         this->UpdateNodes(m_nodes);
+        return true;
     }
 
     void RenderDataTask::UpdateNodes(std::map<unsigned int, SceneNode *> nodes)

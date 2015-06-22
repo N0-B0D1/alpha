@@ -33,7 +33,7 @@ namespace alpha
 			std::lock_guard<std::mutex> guard(m_queueLock);
 			m_queue.push(data);
 		}
-		bool Empty() const
+		bool Empty()
 		{
 			std::lock_guard<std::mutex> guard(m_queueLock);
 			return m_queue.empty();

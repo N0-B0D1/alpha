@@ -14,9 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Threading/Task.h"
+#include "Threading/ATask.h"
 
 namespace alpha
 {
-    Task::~Task() { }
+    ATask::ATask()
+        : m_complete(false)
+    { }
+    ATask::~ATask() { }
+
+    void ATask::Execute()
+    {
+        m_complete = this->VExecute();
+    }
+
+    bool ATask::IsComplete() const
+    {
+        return m_complete;
+    }
 }

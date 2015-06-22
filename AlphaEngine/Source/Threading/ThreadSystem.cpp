@@ -23,6 +23,14 @@ namespace alpha
     ThreadSystem::ThreadSystem() : AlphaSystem(60) { }
     ThreadSystem::~ThreadSystem() { }
 
+    void ThreadSystem::JoinTasks()
+    {
+        while (m_pThreadPool->IsCurrentQueueEmpty() == false)
+        {
+            LOG_WARN("Waiting on task queue to empty ...");
+        }
+    }
+
     bool ThreadSystem::VInitialize()
     {
         // create a thread pool to manage threads as resources
@@ -48,8 +56,9 @@ namespace alpha
 
     bool ThreadSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        // queue up new tasks for the thread pool
-        this->ReadSubscriptions();
+        // swap task queues
+        m_pThreadPool->SwapTaskQueue();
+
         return true;
     }
 

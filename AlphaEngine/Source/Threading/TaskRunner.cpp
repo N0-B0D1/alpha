@@ -18,16 +18,19 @@ limitations under the License.
 #include <thread>
 
 #include "Threading/TaskRunner.h"
-#include "Threading/Task.h"
+#include "Threading/ATask.h"
 
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    TaskRunner::TaskRunner(const bool * const running, std::shared_ptr<ConcurrentQueue<Task *> > pTaskQueue)
+    TaskRunner::TaskRunner(const bool * const running, const int * const currentQueue, std::shared_ptr<ConcurrentQueue<ATask *> > pTaskQueue[2])
         : m_running(running)
-        , m_pTaskQueue(pTaskQueue)
-    { }
+        , m_currentQueue(currentQueue)
+    {
+        m_pTaskQueue[0] = pTaskQueue[0];
+        m_pTaskQueue[1] = pTaskQueue[1];
+    }
     TaskRunner::~TaskRunner() { }
 
     void TaskRunner::operator()()
@@ -35,21 +38,34 @@ namespace alpha
         LOG("Executing task runner thread.");
         while ((*m_running) == true)
         {
+            // store the original value of the current queue
+            // up front so that we can put the task on the next
+            // queue.
+            int current_queue = (*m_currentQueue);
+
             // pickup tasks from threading system queue
-            Task * pTask;
-            if (m_pTaskQueue->TryPop(pTask))
+            ATask * pTask;
+            if (m_pTaskQueue[current_queue]->TryPop(pTask))
             {
-                //LOG("Thread got new task to process.");
+                LOG("Thread got new task to process.");
                 // execute the task, all task logic should be self contained
                 // exiting the execute method ammounts to completing the task.
-                pTask->VExecute();
+                pTask->Execute();
 
-                // once done, destroy the task
-                if (pTask) { delete pTask; }
+                if (pTask->IsComplete())
+                {
+                    // once done, destroy the task
+                    delete pTask;
+                }
+                else
+                {
+                    // if not complete after this iteration, push the task onto the next 
+                    // queue, so that it can be processed again on the next update loop.
+                    m_pTaskQueue[(current_queue + 1) % 2]->Push(pTask);
+                }
             }
             else
             {
-                //LOG("Thread waiting ....");
                 // when no task is available to process, sleep for 1 second
                 // so that we don't hog all the system resources
                 std::this_thread::sleep_for(std::chrono::seconds(1));

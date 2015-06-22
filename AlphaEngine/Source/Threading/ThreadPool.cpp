@@ -19,36 +19,41 @@ limitations under the License.
 
 #include "Threading/ThreadPool.h"
 #include "Threading/TaskRunner.h"
-#include "Threading/Task.h"
+#include "Threading/ATask.h"
 #include "Toolbox/ConcurrentQueue.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     ThreadPool::ThreadPool()
-        : m_pTaskQueue(nullptr)
-        , m_running(true)
+        : m_running(true)
     { }
-    ThreadPool::~ThreadPool() { }
+    ThreadPool::~ThreadPool()
+    {
+        m_pTaskQueue[0] = nullptr;
+        m_pTaskQueue[1] = nullptr;
+    }
 
     bool ThreadPool::Initialize()
     {
         // set the max number of hardware threads for the current machine
         // if zero/not computable, make a minimum of 1 thread.
         m_maxThreads = std::thread::hardware_concurrency();
-        if (m_maxThreads == 0)
+        if (m_maxThreads <= 0)
         {
             m_maxThreads = 1;
         }
         LOG("  ThreadPool > Detected ", m_maxThreads, " max possible hardware threads.");
 
         // create the task queue
-        m_pTaskQueue = std::make_shared<ConcurrentQueue<Task *> >();
+        m_pTaskQueue[0] = std::make_shared<ConcurrentQueue<ATask *> >();
+        m_pTaskQueue[1] = std::make_shared<ConcurrentQueue<ATask *> >();
+        m_currentQueue = 0;
 
         // Create a TaskRunner thread for each hardware thread available.
         for (unsigned i = 0; i < m_maxThreads; ++i)
         {
-            m_threads.push_back(std::thread(TaskRunner(&m_running, m_pTaskQueue)));
+            m_threads.push_back(std::thread(TaskRunner(&m_running, &m_currentQueue, m_pTaskQueue)));
         }
 
         return true;
@@ -83,8 +88,20 @@ namespace alpha
         return true;
     }
 
-    void ThreadPool::QueueTask(Task * pTask)
+    bool ThreadPool::IsCurrentQueueEmpty()
     {
-        m_pTaskQueue->Push(pTask);
+        return m_pTaskQueue[m_currentQueue]->Empty();
+        //return true;
+    }
+
+    void ThreadPool::SwapTaskQueue()
+    {
+        m_currentQueue = (m_currentQueue + 1) % 2;
+    }
+
+    void ThreadPool::QueueTask(ATask * pTask)
+    {
+        // always add tasks to the next task queue
+        m_pTaskQueue[(m_currentQueue + 1) % 2]->Push(pTask);
     }
 }

@@ -23,7 +23,7 @@ limitations under the License.
 
 namespace alpha
 {
-    class Task;
+    class ATask;
 
     /**
      * \brief TaskRunner defines the threaded task processer
@@ -40,11 +40,11 @@ namespace alpha
          * \param running A reference to the main thread pool running variable.
          * \param taskQueue A reference to the main thread pools task queue.  Task runners can safely grab new tasks from this thread safe queue.
          */
-        explicit TaskRunner(const bool * const running, std::shared_ptr<ConcurrentQueue<Task *> > pTaskQueue);
+        explicit TaskRunner(const bool * const running, const int * const currentQueue, std::shared_ptr<ConcurrentQueue<ATask *> > pTaskQueue[2]);
         virtual ~TaskRunner();
 
         /**
-         * \brief allow this classed to be called like a function, so a thread can be created from an instance
+         * \brief allow this class to be called like a function, so a thread can be created from an instance
          */
         void operator()();
 
@@ -52,7 +52,8 @@ namespace alpha
         TaskRunner & operator=(const TaskRunner &);
 
         const bool * const m_running;
-        std::shared_ptr<ConcurrentQueue<Task *> > m_pTaskQueue;
+        const int * const m_currentQueue;
+        std::shared_ptr<ConcurrentQueue<ATask *> > m_pTaskQueue[2];
     };
 }
 

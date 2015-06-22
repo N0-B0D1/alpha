@@ -1,5 +1,5 @@
-#ifndef ALPHA_RENDER_DATA_TASK_H
-#define ALPHA_RENDER_DATA_TASK_H
+#ifndef ALPHA_ATASK_H
+#define ALPHA_ATASK_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,30 +17,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <map>
-
-#include "Threading/ATask.h"
-
 namespace alpha
 {
-    class SceneNode;
-
-    /**
-     * \brief RenderDataTask handles updating the logic data for a single RenderData object.
-     */
-    class RenderDataTask : public ATask
+    class ATask
     {
     public:
-        explicit RenderDataTask(std::map<unsigned int, SceneNode *> nodes);
+        ATask();
+        virtual ~ATask();
 
-        /** Handle all logic to completion */
-        virtual bool VExecute();
+        /** Execute a single iteration on the Task, handles setting of completion flag */
+        void Execute();
+        /** Check if the task is complete. */
+        bool IsComplete() const;
 
     private:
-        void UpdateNodes(std::map<unsigned int, SceneNode *> nodes);
+        /** Perform one iteration of the implemented task, return true if task is complet, false otherwise. */
+        virtual bool VExecute() = 0;
 
-        std::map<unsigned int, SceneNode *> m_nodes;
+        bool m_complete;
     };
 }
 
-#endif // ALPHA_RENDER_DATA_TASK_H
+#endif // ALPHA_ATASK_H
