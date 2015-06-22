@@ -39,8 +39,8 @@ namespace alpha
         virtual bool VUpdate(double currentTime, double elapsedTime);
         virtual bool VShutdown();
 
-        /** Read any new subscriptions, called on update */
-        void ReadSubscriptions();
+        /** Handle incoming threading task events. */
+        void HandleNewThreadTaskEvents(AEvent * pEvent);
 
         /** Handle to the thread pool that allocates thread reasources */
         ThreadPool * m_pThreadPool;

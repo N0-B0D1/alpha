@@ -91,7 +91,6 @@ namespace alpha
     bool ThreadPool::IsCurrentQueueEmpty()
     {
         return m_pTaskQueue[m_currentQueue]->Empty();
-        //return true;
     }
 
     void ThreadPool::SwapTaskQueue()

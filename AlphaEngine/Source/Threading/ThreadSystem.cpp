@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "Threading/ThreadSystem.h"
 #include "Threading/ThreadPool.h"
+#include "Threading/ThreadSystemEvents.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
@@ -40,6 +41,9 @@ namespace alpha
             return false;
         }
 
+        // register event handlers
+        this->AddEventHandler(AEvent::GetIDFromName(Event_NewThreadTask::sk_name), [this](AEvent * pEvent) { this->HandleNewThreadTaskEvents(pEvent); });
+
         return true;
     }
 
@@ -62,15 +66,13 @@ namespace alpha
         return true;
     }
 
-    void ThreadSystem::ReadSubscriptions()
+    //void ThreadSystem::ReadSubscriptions()
+    void ThreadSystem::HandleNewThreadTaskEvents(AEvent * pEvent)
     {
-        /*
-        // read any published EventData_EntityCreated events that may have occured since the last update.
-        while(std::shared_ptr<const EventData_ThreadTaskCreated> data = m_subThreadTaskCreated->GetNextEvent())
+        LOG("Threading system received Event_NewThreadTask");
+        if (auto pNewThreadTaskEvent = dynamic_cast<Event_NewThreadTask *>(pEvent))
         {
-            //LOG("Threading system received new Task to execute.");
-            m_pThreadPool->QueueTask(data->GetTask());
+            m_pThreadPool->QueueTask(pNewThreadTaskEvent->GetTask());
         }
-        */
     }
 }
