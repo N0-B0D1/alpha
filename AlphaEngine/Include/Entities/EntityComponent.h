@@ -52,7 +52,7 @@ namespace alpha
         /** Initialize the component from a script variable. */
         virtual void VInitialize(std::shared_ptr<LuaVar> var) = 0;
         /** Tick the component. */
-        virtual bool VUpdate(float fCurrentTime, float fElapsedTime) = 0;
+        bool Update(float fCurrentTime, float fElapsedTime);
 
         /** Add a child component to this component */
         void Attach(unsigned int component_id, std::shared_ptr<EntityComponent> component);
@@ -68,6 +68,9 @@ namespace alpha
         static unsigned int GetIDFromName(const std::string & name);
 
     protected:
+        /** Tick the component. */
+        virtual bool VUpdate(float fCurrentTime, float fElapsedTime) = 0;
+
         /** Reference to this components parent, null if is top-level component */
         std::weak_ptr<EntityComponent> m_parent;
 

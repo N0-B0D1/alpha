@@ -24,13 +24,21 @@ namespace alpha
     Entity::Entity(unsigned long entityId, std::shared_ptr<EntityScript> script)
         : m_entityId(entityId)
         , m_script(script)
-        , m_updated(false)
     { }
     Entity::~Entity() { }
 
-    bool Entity::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
+    bool Entity::Update(float fCurrentTime, float fElapsedTime)
     {
-        return true;
+        bool entity_updated = false;
+
+        // update all entity components
+        for (auto key_value : m_allComponents)
+        {
+            auto component = key_value.second;
+            entity_updated = component->Update(fCurrentTime, fElapsedTime) || entity_updated;
+        }
+
+        return entity_updated;
     }
 
     unsigned long Entity::GetId() const
@@ -91,15 +99,5 @@ namespace alpha
     const std::map<unsigned int, std::shared_ptr<EntityComponent> > Entity::GetComponents() const
     {
         return m_rootComponents;
-    }
-
-    void Entity::SetUpdated(bool updated)
-    {
-        m_updated = updated;
-    }
-
-    bool Entity::IsUpdated() const
-    {
-        return m_updated;
     }
 }

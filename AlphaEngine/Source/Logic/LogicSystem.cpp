@@ -67,14 +67,14 @@ namespace alpha
         return true;
     }
 
-    bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
+    bool LogicSystem::VUpdate(double fCurrentTime, double fElapsedTime)
     {
         for (auto key_value : m_entities)
         {
             //auto entity_id = key_value.first;
             auto entity = key_value.second;
 
-            if (entity->IsUpdated())
+            if (entity->Update(fCurrentTime, fElapsedTime))
             {
                 this->PublishEvent(new Event_EntityUpdated(entity));
             }

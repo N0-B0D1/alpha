@@ -82,17 +82,16 @@ namespace alpha
         return false;
     }
 
-    bool SceneManager::Update(const std::shared_ptr<Entity> & /*entity*/)
+    bool SceneManager::Update(const std::shared_ptr<Entity> & entity)
     {
-        /*
+        
         auto search = m_nodes.find(entity->GetId());
         if (search != m_nodes.end())
         {
+            //this->BuildRenderData(search.first, search.second, m_vRenderData, m_vLightData);
             return true;
         }
         return false;
-        */
-        return true;
     }
 
     bool SceneManager::Remove(const std::shared_ptr<Entity> & /*entity*/)

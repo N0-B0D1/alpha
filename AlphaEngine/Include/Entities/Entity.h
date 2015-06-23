@@ -32,7 +32,8 @@ namespace alpha
         Entity(unsigned long entityId, std::shared_ptr<EntityScript> script);
         virtual ~Entity();
 
-        bool VUpdate(float fCurrentTime, float fElapsedTime);
+        /** Tick the entity, and update all components. */
+        bool Update(float fCurrentTime, float fElapsedTime);
 
         unsigned long GetId() const;
         std::shared_ptr<EntityScript> GetScript() const;
@@ -44,11 +45,6 @@ namespace alpha
         /** Retrieve the map container of all components belonging to this entity instance. */
         const std::map<unsigned int, std::shared_ptr<EntityComponent> > GetComponents() const;
 
-        /** Mark the entity as updated so that it will be pushed out to other systems. */
-        void SetUpdated(bool updated);
-        /** Check to see if the entity has been updated */
-        bool IsUpdated() const;
-
     private:
         unsigned long m_entityId;
 
@@ -59,9 +55,6 @@ namespace alpha
         std::map<unsigned int, std::shared_ptr<EntityComponent> > m_allComponents;
         /** Root map container only contains root level components, so it can be treated more like a tree */
         std::map<unsigned int, std::shared_ptr<EntityComponent> > m_rootComponents;
-
-        /** Flag signifying if the entity has been updated. */
-        bool m_updated;
     };
 }
 
