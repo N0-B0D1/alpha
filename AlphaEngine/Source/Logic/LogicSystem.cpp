@@ -69,6 +69,17 @@ namespace alpha
 
     bool LogicSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
+        for (auto key_value : m_entities)
+        {
+            //auto entity_id = key_value.first;
+            auto entity = key_value.second;
+
+            if (entity->IsUpdated())
+            {
+                this->PublishEvent(new Event_EntityUpdated(entity));
+            }
+        }
+
         return true;
     }
 

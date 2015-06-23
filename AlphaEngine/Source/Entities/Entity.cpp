@@ -24,6 +24,7 @@ namespace alpha
     Entity::Entity(unsigned long entityId, std::shared_ptr<EntityScript> script)
         : m_entityId(entityId)
         , m_script(script)
+        , m_updated(false)
     { }
     Entity::~Entity() { }
 
@@ -47,7 +48,7 @@ namespace alpha
         auto it = m_allComponents.find(component_id);
         if (it != m_allComponents.end())
         {
-            LOG_WARN("  <Entity> Attempt to add a component type that already exists: <type: ", component->VGetName());
+            LOG_WARN("  <Entity> Attempt to add a component type that already exists: type: ", component->VGetName());
         }
         else 
         {
@@ -90,5 +91,15 @@ namespace alpha
     const std::map<unsigned int, std::shared_ptr<EntityComponent> > Entity::GetComponents() const
     {
         return m_rootComponents;
+    }
+
+    void Entity::SetUpdated(bool updated)
+    {
+        m_updated = updated;
+    }
+
+    bool Entity::IsUpdated() const
+    {
+        return m_updated;
     }
 }

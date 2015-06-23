@@ -37,15 +37,17 @@ namespace alpha
         unsigned long GetId() const;
         std::shared_ptr<EntityScript> GetScript() const;
 
-        //! Component manipulation functions
         void Add(unsigned int component_id, std::shared_ptr<EntityComponent> component);
         std::shared_ptr<EntityComponent> Get(const std::string & component_name);
         //void Remove(unsigned int component_id);
 
-        /**
-         * \brief Retrieve the map container of all components belonging to this entity instance.
-         */
+        /** Retrieve the map container of all components belonging to this entity instance. */
         const std::map<unsigned int, std::shared_ptr<EntityComponent> > GetComponents() const;
+
+        /** Mark the entity as updated so that it will be pushed out to other systems. */
+        void SetUpdated(bool updated);
+        /** Check to see if the entity has been updated */
+        bool IsUpdated() const;
 
     private:
         unsigned long m_entityId;
@@ -57,6 +59,9 @@ namespace alpha
         std::map<unsigned int, std::shared_ptr<EntityComponent> > m_allComponents;
         /** Root map container only contains root level components, so it can be treated more like a tree */
         std::map<unsigned int, std::shared_ptr<EntityComponent> > m_rootComponents;
+
+        /** Flag signifying if the entity has been updated. */
+        bool m_updated;
     };
 }
 
