@@ -73,6 +73,9 @@ namespace alpha
 
     void GraphicsSystem::Render()
     {
+        // prepare the scene data for rendering
+        m_pSceneManager->PreRender();
+
         // udpate the camera pre-render, so it can adjust to any game logic changes
         m_pCamera->Update(800, 600);
 
@@ -125,8 +128,8 @@ namespace alpha
 
     void GraphicsSystem::HandleEntityUpdatedEvent(AEvent * pEvent)
     {
-        LOG("Graphics system received Event_EntityUpdated");
-        if (auto pUpdateEvent = dynamic_cast<Event_EntityCreated *>(pEvent))
+        //LOG("Graphics system received Event_EntityUpdated");
+        if (auto pUpdateEvent = dynamic_cast<Event_EntityUpdated *>(pEvent))
         {
             this->m_pSceneManager->Update(pUpdateEvent->GetEntity());
         }

@@ -42,6 +42,9 @@ namespace alpha
         /** Keeps the Render Data structurs up to date, and preped for rendering if needed */
         bool Update(double currentTime, double elapsedTime);
 
+        /** Before rendering, prepare render and light data. */
+        bool PreRender();
+
         /**
          * \brief Constructs and array of data to be rendered on the next render call.
          */
@@ -76,6 +79,8 @@ namespace alpha
 
         /** Recursively build render data for an entities scene node map */
         void BuildRenderData(unsigned int entity_id, std::map<unsigned int, SceneNode *> nodes, std::vector<RenderSet *> & renderables, std::vector<Light *> & lights) const;
+        /** recursively update render data for an entity. */
+        void UpdateRenderData(std::map<unsigned int, SceneNode *> nodes) const;
 
         /** Handle to the asset system, so that the scene manager can pull in any necessary assets */
         AssetSystem * m_pAssets;

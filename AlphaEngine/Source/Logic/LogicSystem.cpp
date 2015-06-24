@@ -74,7 +74,7 @@ namespace alpha
             //auto entity_id = key_value.first;
             auto entity = key_value.second;
 
-            if (entity->Update(fCurrentTime, fElapsedTime))
+            if (entity->Update(static_cast<float>(fCurrentTime), static_cast<float>(fElapsedTime)))
             {
                 this->PublishEvent(new Event_EntityUpdated(entity));
             }
