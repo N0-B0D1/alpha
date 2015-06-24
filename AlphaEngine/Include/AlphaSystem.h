@@ -44,7 +44,7 @@ namespace alpha
         bool Shutdown(EventManager * pEventManager);
 
     protected:
-        /** Publish an event to the event interface to be sent to other systems. */
+        /** Publish an event to the event interface to be sent to other systems. THREAD-SAFE */
         void PublishEvent(AEvent * pEvent);
         /** Register a function handler for an incoming event type */
         void AddEventHandler(unsigned int event_id, std::function<void(AEvent * const)> handler);

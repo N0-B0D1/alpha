@@ -26,10 +26,10 @@ namespace alpha
 
     void ThreadSystem::JoinTasks()
     {
-        while (m_pThreadPool->IsCurrentQueueEmpty() == false)
-        {
-            LOG_WARN("Waiting on task queue to empty ...");
-        }
+        while (m_pThreadPool->IsCurrentQueueEmpty() == false);
+        //{
+            //LOG_WARN("Waiting on task queue to empty ...");
+        //}
     }
 
     bool ThreadSystem::VInitialize()
@@ -69,7 +69,7 @@ namespace alpha
     //void ThreadSystem::ReadSubscriptions()
     void ThreadSystem::HandleNewThreadTaskEvents(AEvent * pEvent)
     {
-        LOG("Threading system received Event_NewThreadTask");
+        //LOG("Threading system received Event_NewThreadTask");
         if (auto pNewThreadTaskEvent = dynamic_cast<Event_NewThreadTask *>(pEvent))
         {
             m_pThreadPool->QueueTask(pNewThreadTaskEvent->GetTask());

@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "Logic/LogicSystem.h"
 #include "Logic/LogicSystemEvents.h"
+#include "Logic/Task_UpdateEntity.h"
 #include "Entities/EntityFactory.h"
 #include "Entities/Entity.h"
 #include "Toolbox/Logger.h"
@@ -26,6 +27,7 @@ limitations under the License.
 #include "HID/HIDSystemEvents.h"
 #include "Audio/AudioSystem.h"
 #include "Audio/Sound.h"
+#include "Threading/ThreadSystemEvents.h"
 
 namespace alpha
 {
@@ -69,15 +71,20 @@ namespace alpha
 
     bool LogicSystem::VUpdate(double fCurrentTime, double fElapsedTime)
     {
+        float current_time = static_cast<float>(fCurrentTime);
+        float elapsed_time = static_cast<float>(fElapsedTime);
+
         for (auto key_value : m_entities)
         {
-            //auto entity_id = key_value.first;
-            auto entity = key_value.second;
+            auto pTask = new Task_UpdateEntity(current_time, elapsed_time, key_value.second, [this](AEvent * pEvent) { this->PublishEvent(pEvent); });
+            this->PublishEvent(new Event_NewThreadTask(pTask));
 
-            if (entity->Update(static_cast<float>(fCurrentTime), static_cast<float>(fElapsedTime)))
-            {
-                this->PublishEvent(new Event_EntityUpdated(entity));
-            }
+            //auto entity = key_value.second;
+
+            //if (entity->Update(static_cast<float>(fCurrentTime), static_cast<float>(fElapsedTime)))
+            //{
+            //    this->PublishEvent(new Event_EntityUpdated(entity));
+            //}
         }
 
         return true;

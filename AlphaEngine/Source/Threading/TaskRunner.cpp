@@ -47,7 +47,7 @@ namespace alpha
             ATask * pTask;
             if (m_pTaskQueue[current_queue]->TryPop(pTask))
             {
-                LOG("Thread got new task to process.");
+                //LOG("Thread got new task to process.");
                 // execute the task, all task logic should be self contained
                 // exiting the execute method ammounts to completing the task.
                 pTask->Execute();
