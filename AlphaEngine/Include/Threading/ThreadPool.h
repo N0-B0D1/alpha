@@ -45,8 +45,8 @@ namespace alpha
         /** Check to see if the current task queue is empty. */
         bool IsCurrentQueueEmpty();
 
-        /** Set next task queue as the active queue. */
-        void SwapTaskQueue();
+        /** Process tasks which did not complete, and need to be put back on the task queue */
+        void ProcessReturns();
 
         /** Queue a task for the threads to execute */
         void QueueTask(ATask * pTask);
@@ -60,8 +60,12 @@ namespace alpha
         /** Array of all TaskRunners that are executing in threads. */
         std::vector<TaskRunner> m_runners;
 
+        /** The last queue to have a task pushed to it. */
         int m_currentQueue;
-        std::shared_ptr<ConcurrentQueue<ATask *> > m_pTaskQueue[2];
+        /** A list of concurrent queues for sending tasks to task runner threads. */
+        std::vector<std::shared_ptr<ConcurrentQueue<ATask *> > > m_vTaskRunnerQueues;
+        /** A queue for tasks that have not completed, and have returned from a task runner.*/
+        std::shared_ptr<ConcurrentQueue<ATask *> > m_pReturnQueue;
 
         /** Thread running state, setting to false will stop all task runner activity. */
         bool m_running;

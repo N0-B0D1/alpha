@@ -40,7 +40,7 @@ namespace alpha
          * \param running A reference to the main thread pool running variable.
          * \param taskQueue A reference to the main thread pools task queue.  Task runners can safely grab new tasks from this thread safe queue.
          */
-        explicit TaskRunner(const bool * const running, const int * const currentQueue, std::shared_ptr<ConcurrentQueue<ATask *> > pTaskQueue[2]);
+        explicit TaskRunner(const bool * const running, std::shared_ptr<ConcurrentQueue<ATask *> > pTaskQueue, std::shared_ptr<ConcurrentQueue<ATask *> > pReturnQueue);
         virtual ~TaskRunner();
 
         /**
@@ -52,8 +52,8 @@ namespace alpha
         TaskRunner & operator=(const TaskRunner &);
 
         const bool * const m_running;
-        const int * const m_currentQueue;
-        std::shared_ptr<ConcurrentQueue<ATask *> > m_pTaskQueue[2];
+        std::shared_ptr<ConcurrentQueue<ATask *> > m_pTaskQueue;
+        std::shared_ptr<ConcurrentQueue<ATask *> > m_pReturnQueue;
     };
 }
 

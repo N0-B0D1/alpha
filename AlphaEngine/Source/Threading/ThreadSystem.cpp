@@ -27,9 +27,6 @@ namespace alpha
     void ThreadSystem::JoinTasks()
     {
         while (m_pThreadPool->IsCurrentQueueEmpty() == false);
-        //{
-            //LOG_WARN("Waiting on task queue to empty ...");
-        //}
     }
 
     bool ThreadSystem::VInitialize()
@@ -60,8 +57,8 @@ namespace alpha
 
     bool ThreadSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        // swap task queues
-        m_pThreadPool->SwapTaskQueue();
+        // process tasks which need to be requeued
+        m_pThreadPool->ProcessReturns();
 
         return true;
     }

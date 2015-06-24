@@ -78,13 +78,6 @@ namespace alpha
         {
             auto pTask = new Task_UpdateEntity(current_time, elapsed_time, key_value.second, [this](AEvent * pEvent) { this->PublishEvent(pEvent); });
             this->PublishEvent(new Event_NewThreadTask(pTask));
-
-            //auto entity = key_value.second;
-
-            //if (entity->Update(static_cast<float>(fCurrentTime), static_cast<float>(fElapsedTime)))
-            //{
-            //    this->PublishEvent(new Event_EntityUpdated(entity));
-            //}
         }
 
         return true;
