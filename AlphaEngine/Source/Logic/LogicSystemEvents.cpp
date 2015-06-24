@@ -45,6 +45,32 @@ namespace alpha
 
 
 
+
+    const std::string Event_EntityUpdated::sk_name = "Event_EntityUpdated";
+
+    Event_EntityUpdated::Event_EntityUpdated(std::shared_ptr<Entity> pEntity)
+        : m_pEntity(pEntity)
+    { }
+
+    std::string Event_EntityUpdated::VGetTypeName() const
+    {
+        return Event_EntityUpdated::sk_name;
+    }
+
+    AEvent * Event_EntityUpdated::VCopy()
+    {
+        return new Event_EntityUpdated(m_pEntity);
+    }
+
+    std::shared_ptr<Entity> Event_EntityUpdated::GetEntity() const
+    {
+        return m_pEntity;
+    }
+
+
+
+
+
     const std::string Event_SetActiveCamera::sk_name = "EventData_SetActiveCamera";
 
     Event_SetActiveCamera::Event_SetActiveCamera(std::weak_ptr<CameraComponent> pCameraComponent)

@@ -49,6 +49,8 @@ namespace alpha
 
         /** Handle entity created event. */
         void HandleEntityCreatedEvent(AEvent * pEvent);
+        /** Handle entity updated event. */
+        void HandleEntityUpdatedEvent(AEvent * pEvent);
         /** Handle set active camera event */
         void HandleSetActiveCameraEvent(AEvent * pEvent);
 

@@ -34,9 +34,21 @@ namespace alpha
     {
         m_parent = parent;
     }
+
     std::weak_ptr<EntityComponent> EntityComponent::GetParent() const
     {
         return m_parent;
+    }
+
+    bool EntityComponent::Update(float fCurrentTime, float fElapsedTime)
+    {
+        // update the component implementation
+        this->VUpdate(fCurrentTime, fElapsedTime);
+
+        // return the dirty flag, and change it back to not dirty.
+        bool dirty = m_dirty;
+        m_dirty = false;
+        return dirty;
     }
 
     void EntityComponent::Attach(unsigned int component_id, std::shared_ptr<EntityComponent> component)
@@ -188,5 +200,9 @@ namespace alpha
         this->m_mTransform = this->m_mTransform * Matrix::Rotate(this->m_qRotation);
         this->m_mTransform = this->m_mTransform * Matrix::Scale(this->m_vScale);
         this->m_mTransform = this->m_mTransform * Matrix::Translate(this->m_vPosition);
+
+        // mark this component as dirty, so it can notify the parent entity
+        // that an update has occured.
+        m_dirty = true;
     }
 }

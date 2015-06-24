@@ -50,6 +50,7 @@ namespace alpha
 
         // register event handlers
         this->AddEventHandler(AEvent::GetIDFromName(Event_EntityCreated::sk_name), [this](AEvent * pEvent) { this->HandleEntityCreatedEvent(pEvent); });
+        this->AddEventHandler(AEvent::GetIDFromName(Event_EntityUpdated::sk_name), [this](AEvent * pEvent) { this->HandleEntityUpdatedEvent(pEvent); });
         this->AddEventHandler(AEvent::GetIDFromName(Event_SetActiveCamera::sk_name), [this](AEvent * pEvent) { this->HandleSetActiveCameraEvent(pEvent); });
 
         // create a default camera for the scene
@@ -72,6 +73,9 @@ namespace alpha
 
     void GraphicsSystem::Render()
     {
+        // prepare the scene data for rendering
+        m_pSceneManager->PreRender();
+
         // udpate the camera pre-render, so it can adjust to any game logic changes
         m_pCamera->Update(800, 600);
 
@@ -115,16 +119,25 @@ namespace alpha
 
     void GraphicsSystem::HandleEntityCreatedEvent(AEvent * pEvent)
     {
-        LOG("Graphics system received EntityCreated event");
+        LOG("Graphics system received Event_EntityCreated");
         if (auto pEntityCreatedEvent = dynamic_cast<Event_EntityCreated *>(pEvent))
         {
             this->m_pSceneManager->Add(pEntityCreatedEvent->GetEntity());
         }
     }
 
+    void GraphicsSystem::HandleEntityUpdatedEvent(AEvent * pEvent)
+    {
+        //LOG("Graphics system received Event_EntityUpdated");
+        if (auto pUpdateEvent = dynamic_cast<Event_EntityUpdated *>(pEvent))
+        {
+            this->m_pSceneManager->Update(pUpdateEvent->GetEntity());
+        }
+    }
+
     void GraphicsSystem::HandleSetActiveCameraEvent(AEvent * pEvent)
     {
-        LOG("Graphics system received SetActiveCamera event.");
+        LOG("Graphics system received Event_SetActiveCamera.");
         if (auto pSetActiveCameraEvent = dynamic_cast<Event_SetActiveCamera *>(pEvent))
         {
             this->m_pCamera->SetCameraComponent(pSetActiveCameraEvent->GetCameraComponent());

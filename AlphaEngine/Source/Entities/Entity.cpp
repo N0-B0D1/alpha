@@ -27,9 +27,18 @@ namespace alpha
     { }
     Entity::~Entity() { }
 
-    bool Entity::VUpdate(float /*fCurrentTime*/, float /*fElapsedTime*/)
+    bool Entity::Update(float fCurrentTime, float fElapsedTime)
     {
-        return true;
+        bool entity_updated = false;
+
+        // update all entity components
+        for (auto key_value : m_allComponents)
+        {
+            auto component = key_value.second;
+            entity_updated = component->Update(fCurrentTime, fElapsedTime) || entity_updated;
+        }
+
+        return entity_updated;
     }
 
     unsigned long Entity::GetId() const
@@ -47,7 +56,7 @@ namespace alpha
         auto it = m_allComponents.find(component_id);
         if (it != m_allComponents.end())
         {
-            LOG_WARN("  <Entity> Attempt to add a component type that already exists: <type: ", component->VGetName());
+            LOG_WARN("  <Entity> Attempt to add a component type that already exists: type: ", component->VGetName());
         }
         else 
         {

@@ -46,7 +46,22 @@ namespace alpha
 
     bool SceneManager::Update(double /*currentTime*/, double /*elapsedTime*/)
     {
+        /*
         // clean the list, so it can be rebuilt.
+        m_vRenderData.clear();
+        m_vLightData.clear();
+
+        for (auto pair : m_nodes)
+        {
+            this->BuildRenderData(pair.first, pair.second, m_vRenderData, m_vLightData);
+        }
+        */
+
+        return true;
+    }
+
+    bool SceneManager::PreRender()
+    {
         m_vRenderData.clear();
         m_vLightData.clear();
 
@@ -77,22 +92,21 @@ namespace alpha
         {
             auto components = entity->GetComponents();
             m_nodes[entity_id] = this->CreateNodes(components, nullptr);
+            this->UpdateRenderData(m_nodes[entity_id]);
             return true;
         }
         return false;
     }
 
-    bool SceneManager::Update(const std::shared_ptr<Entity> & /*entity*/)
+    bool SceneManager::Update(const std::shared_ptr<Entity> & entity)
     {
-        /*
         auto search = m_nodes.find(entity->GetId());
         if (search != m_nodes.end())
         {
+            this->UpdateRenderData(search->second);
             return true;
         }
         return false;
-        */
-        return true;
     }
 
     bool SceneManager::Remove(const std::shared_ptr<Entity> & /*entity*/)
@@ -170,7 +184,34 @@ namespace alpha
         {
             // check this node
             auto node = iter.second;
-            
+
+            Light * pLight = node->GetLight();
+
+            // make render data for this node
+            if (RenderSet * rs = node->GetRenderSet())
+            {
+                renderables.push_back(rs);
+            }
+
+            // see if it is a light
+            if (pLight != nullptr)
+            {
+                lights.push_back(pLight);
+            }
+
+            // recurse each child node
+            this->BuildRenderData(entity_id, node->GetChildren(), renderables, lights);
+        }
+    }
+
+    void SceneManager::UpdateRenderData(std::map<unsigned int, SceneNode *> nodes) const
+    {
+        // for each node
+        for (auto iter : nodes)
+        {
+            // check this node
+            auto node = iter.second;
+
             // prep the world transform for this node
             Matrix world_transform = node->GetWorldTransform();
 
@@ -188,19 +229,16 @@ namespace alpha
 
                 // set the render sets material
                 rs->material = node->GetMaterial();
-
-                renderables.push_back(rs);
             }
 
             // see if it is a light
             if (pLight != nullptr)
             {
                 pLight->worldTransform = world_transform;
-                lights.push_back(pLight);
             }
 
             // recurse each child node
-            this->BuildRenderData(entity_id, node->GetChildren(), renderables, lights);
+            this->UpdateRenderData(node->GetChildren());
         }
     }
 }

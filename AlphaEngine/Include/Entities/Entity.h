@@ -32,19 +32,17 @@ namespace alpha
         Entity(unsigned long entityId, std::shared_ptr<EntityScript> script);
         virtual ~Entity();
 
-        bool VUpdate(float fCurrentTime, float fElapsedTime);
+        /** Tick the entity, and update all components. */
+        bool Update(float fCurrentTime, float fElapsedTime);
 
         unsigned long GetId() const;
         std::shared_ptr<EntityScript> GetScript() const;
 
-        //! Component manipulation functions
         void Add(unsigned int component_id, std::shared_ptr<EntityComponent> component);
         std::shared_ptr<EntityComponent> Get(const std::string & component_name);
         //void Remove(unsigned int component_id);
 
-        /**
-         * \brief Retrieve the map container of all components belonging to this entity instance.
-         */
+        /** Retrieve the map container of all components belonging to this entity instance. */
         const std::map<unsigned int, std::shared_ptr<EntityComponent> > GetComponents() const;
 
     private:

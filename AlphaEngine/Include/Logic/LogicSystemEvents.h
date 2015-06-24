@@ -47,6 +47,23 @@ namespace alpha
         std::shared_ptr<Entity> m_pEntity;
     };
 
+    class Event_EntityUpdated : public AEvent
+    {
+    public:
+        static const std::string sk_name;
+
+        explicit Event_EntityUpdated(std::shared_ptr<Entity> pEntity);
+
+        virtual std::string VGetTypeName() const;
+        virtual AEvent * VCopy();
+
+        /** Retrieve the entity that was created. */
+        std::shared_ptr<Entity> GetEntity() const;
+
+    private:
+        std::shared_ptr<Entity> m_pEntity;
+    };
+
     /**
      * Event_SetActiveCamera
      * This event is published whenever the implementor of the game state logic requests that a
