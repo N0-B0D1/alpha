@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include <math.h>
-
 #include <vector>
 
 #define GLEW_STATIC
@@ -29,6 +28,8 @@ limitations under the License.
 #include "Graphics/RenderWindow.h"
 #include "Graphics/RenderSet.h"
 #include "Graphics/Renderable.h"
+#include "Graphics/GeometryPass.h"
+#include "Graphics/LightingPass.h"
 #include "Graphics/Camera.h"
 #include "Graphics/Light.h"
 #include "Math/Vector4.h"
@@ -49,6 +50,13 @@ namespace alpha
         m_psDefaultShader = pAssets->GetAsset("Shaders/gl_ps_normal.glsl");
         m_vsLightShader = pAssets->GetAsset("Shaders/gl_vs_light.glsl");
         m_psLightShader = pAssets->GetAsset("Shaders/gl_ps_light.glsl");
+
+        m_vRenderPasses.push_back(new GeometryPass(m_vsDefaultShader, m_psDefaultShader));
+        m_vRenderPasses.push_back(new LightingPass(m_vsLightShader, m_psLightShader));
+        for (unsigned int i = 0; i < m_vRenderPasses.size(); ++i)
+        {
+            m_vRenderPasses[i]->VInitialize();
+        }
 
         LOG("GraphicsRenderer > Creating render window.");
 		m_pWindow = new RenderWindow();
@@ -74,6 +82,16 @@ namespace alpha
 			m_pWindow->Shutdown();
 			delete m_pWindow;
 		}
+
+        // destroy render passes
+        ARenderPass * pass = nullptr;
+        while (m_vRenderPasses.size() > 0)
+        {
+            pass = m_vRenderPasses.back();
+            m_vRenderPasses.pop_back();
+            pass->VShutdown();
+            delete pass;
+        }
 
         // let glfw cleanup opengl
         glfwTerminate();

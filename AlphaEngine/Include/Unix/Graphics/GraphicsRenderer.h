@@ -29,6 +29,7 @@ namespace alpha
 {
 	class RenderWindow;
     class RenderSet;
+    class ARenderPass;
     class Camera;
     class Asset;
     class AssetSystem;
@@ -71,6 +72,9 @@ namespace alpha
         std::shared_ptr<Asset> m_psDefaultShader;
         std::shared_ptr<Asset> m_vsLightShader;
         std::shared_ptr<Asset> m_psLightShader;
+
+        /** A list of render passes to run during the render call. */
+        std::vector<ARenderPass *> m_vRenderPasses;
         
         const GLubyte *m_pRendererInfo;
         const GLubyte *m_pVersionInfo;
