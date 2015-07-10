@@ -43,6 +43,8 @@ namespace alpha
         const Vector4 & GetSpecular() const;
         float GetShininess() const;
 
+        float GetSpecularCoefficient() const;
+
     private:
         MaterialScript * m_pMaterialScript;
 

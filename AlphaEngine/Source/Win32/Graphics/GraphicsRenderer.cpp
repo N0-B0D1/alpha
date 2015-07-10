@@ -29,6 +29,8 @@ limitations under the License.
 #include "Graphics/Renderable.h"
 #include "Graphics/Light.h"
 #include "Graphics/Camera.h"
+#include "Graphics/GeometryPass.h"
+#include "Graphics/LightingPass.h"
 #include "Math/Matrix.h"
 #include "Math/Matrix_Conversions.h"
 #include "Math/Vector3.h"
@@ -42,10 +44,8 @@ using namespace DirectX;
 namespace alpha
 {
     GraphicsRenderer::GraphicsRenderer()
-        : m_vsDefaultShader(nullptr)
-        , m_psDefaultShader(nullptr)
-        , m_vsLightShader(nullptr)
-        , m_psLightShader(nullptr)
+        : m_pGeometryPass(nullptr)
+        , m_pLightingPass(nullptr)
         , m_driverType(D3D_DRIVER_TYPE_NULL)
         , m_featureLevel(D3D_FEATURE_LEVEL_11_1)
         , m_pd3dDevice(nullptr)
@@ -61,15 +61,10 @@ namespace alpha
     { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
-    bool GraphicsRenderer::Initialize(AssetSystem * const pAssets)
+    bool GraphicsRenderer::Initialize(AssetSystem * const pAssets, int windowWidth, int windowHeight)
     {
-        m_vsDefaultShader = pAssets->GetAsset("Shaders/dx_vs_normal.hlsl");
-        m_psDefaultShader = pAssets->GetAsset("Shaders/dx_ps_normal.hlsl");
-        m_vsLightShader = pAssets->GetAsset("Shaders/dx_vs_light.hlsl");
-        m_psLightShader = pAssets->GetAsset("Shaders/dx_ps_light.hlsl");
-
         m_pWindow = new GraphicsWindow();
-        if (!m_pWindow->Initialize())
+        if (!m_pWindow->Initialize(windowWidth, windowHeight))
         {
             LOG_ERR("Failed to create and open game window.");
             return false;
@@ -79,11 +74,49 @@ namespace alpha
             LOG_ERR("Failed to initialize graphics device.");
             return false;
         }
+
+        // create the render passes to run against the scene
+        m_pGeometryPass = new GeometryPass();
+        if (!m_pGeometryPass->VInitialize(pAssets, m_pd3dDevice, windowWidth, windowHeight))
+        {
+            LOG_ERR("Failed to initialize graphics render pass: Geometry pass");
+            return false;
+        }
+
+        m_pLightingPass = new LightingPass();
+        if (!m_pLightingPass->VInitialize(pAssets, m_pd3dDevice, windowWidth, windowHeight))
+        {
+            LOG_ERR("Failed to initialize graphics render pass: Lighting pass");
+            return false;
+        }
+
+        // attach gbuffer shader views to lighting pass
+        m_pLightingPass->AttachShaderResourceViews(m_pGeometryPass->GetShaderResourceViews());
+
         return true;
     }
 
     bool GraphicsRenderer::Shutdown()
     {
+        // shutdown each render pass
+        if (m_pGeometryPass)
+        {
+            if (!m_pGeometryPass->VShutdown())
+            {
+                LOG_ERR("Failed to shutdown graphics render pass: Geometry");
+            }
+            delete m_pGeometryPass;
+        }
+
+        if (m_pLightingPass)
+        {
+            if (!m_pLightingPass->VShutdown())
+            {
+                LOG_ERR("Failed to shutdown graphics render pass: Lighting");
+            }
+            delete m_pLightingPass;
+        }
+
         // close game window
         if (!m_pWindow->Shutdown())
         {
@@ -105,63 +138,47 @@ namespace alpha
 
     void GraphicsRenderer::PreRender(RenderSet * renderSet)
     {
-        //HRESULT hr = S_OK;
-
         auto renderables = renderSet->GetRenderables();
-
-        auto vsShader = renderSet->emitsLight ? m_vsLightShader : m_vsDefaultShader;
-        auto psShader = renderSet->emitsLight ? m_psLightShader : m_psDefaultShader;
 
         for (Renderable * renderable : renderables)
         {
-            // create vertex shader
-            ID3DBlob* pVSBlob = nullptr;
-            if (renderable->m_pVertexShader == nullptr)
-            {
-                renderable->m_pVertexShader = this->CreateVertexShaderFromAsset(vsShader, "VS", &pVSBlob);
-            }
-
-            // vertex input layout
-            if (renderable->m_pInputLayout == nullptr && pVSBlob != nullptr)
-            {
-                renderable->m_pInputLayout = this->CreateInputLayoutFromVSBlob(&pVSBlob);
-                pVSBlob->Release();
-            }
-
-            // pixel shader
-            if (renderable->m_pPixelShader == nullptr)
-            {
-                renderable->m_pPixelShader = this->CreatePixelShaderFromAsset(psShader, renderSet->m_psEntryPoint);
-            }
-
             // vertex buffer
-            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr || renderable->m_pConstantBuffer == nullptr || renderable->m_pMatrixBuffer == nullptr)
+            if (renderable->m_pVertexBuffer == nullptr || renderable->m_pIndexBuffer == nullptr)
             {
                 this->CreateBuffer(sizeof(Vertex) * renderable->vertices.size(), D3D11_BIND_VERTEX_BUFFER, &renderable->vertices[0], &renderable->m_pVertexBuffer);
                 this->CreateBuffer(sizeof(unsigned int) * renderable->indices.size(), D3D11_BIND_INDEX_BUFFER, &renderable->indices[0], &renderable->m_pIndexBuffer);
-                this->CreateBuffer(sizeof(MatrixBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pMatrixBuffer);
-                this->CreateBuffer(sizeof(ConstantBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pConstantBuffer);
-                this->CreateBuffer(sizeof(CameraBuffer), D3D11_BIND_CONSTANT_BUFFER, nullptr, &renderable->m_pCameraBuffer);
             }
         }
     }
 
     void GraphicsRenderer::Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights)
     {
-        // clear ... zap!
+        // Clear PS Shader resources, so the textures are un-bound and can be used as a render target again
+        m_pImmediateContext->PSSetShaderResources(0, 1, &m_pNULLShaderResourceView);
+        m_pImmediateContext->PSSetShaderResources(1, 1, &m_pNULLShaderResourceView);
+        m_pImmediateContext->PSSetShaderResources(2, 1, &m_pNULLShaderResourceView);
+
+        // render geometry to multiple render target (MRT) textures
+        m_pGeometryPass->VSetRenderTarget(m_pImmediateContext);
+        m_pGeometryPass->VClearRenderTarget(m_pImmediateContext);
+        m_pGeometryPass->VRender(m_pImmediateContext, pCamera, renderables, lights);
+
+        // switch back to render to back buffer
+        m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+        m_pImmediateContext->RSSetViewports(1, &m_viewport);
+
+        // clear back buffer target
         m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, DirectX::Colors::Black);
         m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        // sets wireframe mode
-        //m_pImmediateContext->RSSetState(m_pWireFrame);
+        // turn off z-buffer for 2d rendering
+        m_pImmediateContext->OMSetDepthStencilState(m_pDepthDisabledStencilState, 1);
 
-        // prep lights for rendering
-        CreateLightBufferData(lights);
+        // render gbuffer textures with lighting pass
+        m_pLightingPass->VRender(m_pImmediateContext, pCamera, renderables, lights);
 
-        for (RenderSet * render_set : renderables)
-        {
-            this->RenderRenderable(pCamera, render_set);
-        }
+        // turn z-buffer back on for next iteration
+        m_pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, 1);
 
         // swap buffer that we just drew to.
         m_pSwapChain->Present(0, 0);
@@ -215,10 +232,7 @@ namespace alpha
                 break;
             }
         }
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        if (FAILED(hr)) { return hr; }
 
         // Obtain DXGI factory from device (since we used nullptr for pAdapter above)
         IDXGIFactory1* dxgiFactory = nullptr;
@@ -237,10 +251,7 @@ namespace alpha
                 dxgiDevice->Release();
             }
         }
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        if (FAILED(hr)) { return hr; }
 
         // Create swap chain
         IDXGIFactory2* dxgiFactory2 = nullptr;
@@ -293,26 +304,16 @@ namespace alpha
         }
 
         dxgiFactory->Release();
-
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        if (FAILED(hr)) { return hr; }
 
         // Create a render target view
         ID3D11Texture2D* pBackBuffer = nullptr;
         hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBackBuffer));
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        if (FAILED(hr)) { return hr; }
 
         hr = m_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &m_pRenderTargetView);
         pBackBuffer->Release();
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        if (FAILED(hr)) { return hr; }
 
         // Create depth stencil texture
         D3D11_TEXTURE2D_DESC descDepth;
@@ -329,10 +330,52 @@ namespace alpha
         descDepth.CPUAccessFlags = 0;
         descDepth.MiscFlags = 0;
         hr = m_pd3dDevice->CreateTexture2D(&descDepth, nullptr, &m_pDepthStencil);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        if (FAILED(hr)) { return hr; }
+
+        // Create the normal depth buffer for 3d rendering
+        D3D11_DEPTH_STENCIL_DESC descStencil;
+        ZeroMemory(&descStencil, sizeof(descStencil));
+        descStencil.DepthEnable = true;
+        descStencil.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+        descStencil.DepthFunc = D3D11_COMPARISON_LESS;
+        descStencil.StencilEnable = true;
+        descStencil.StencilReadMask = 0xFF;
+        descStencil.StencilWriteMask = 0xFF;
+        // Stencil operations if pixel is front-facing.
+        descStencil.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+        descStencil.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+        // Stencil operations if pixel is back-facing.
+        descStencil.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+        descStencil.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+        hr = m_pd3dDevice->CreateDepthStencilState(&descStencil, &m_pDepthStencilState);
+        if (FAILED(hr)) { return hr; }
+
+        m_pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, 1);
+
+        // create the 2d depth stencil
+        ZeroMemory(&descStencil, sizeof(descStencil));
+        descStencil.DepthEnable = false;
+        descStencil.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+        descStencil.DepthFunc = D3D11_COMPARISON_LESS;
+        descStencil.StencilEnable = true;
+        descStencil.StencilReadMask = 0xFF;
+        descStencil.StencilWriteMask = 0xFF;
+        // Stencil operations if pixel is front-facing.
+        descStencil.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+        descStencil.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+        // Stencil operations if pixel is back-facing.
+        descStencil.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+        descStencil.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+        descStencil.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+        hr = m_pd3dDevice->CreateDepthStencilState(&descStencil, &m_pDepthDisabledStencilState);
+        if (FAILED(hr)) { return hr; }
 
         // Create the depth stencil view
         D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
@@ -341,29 +384,46 @@ namespace alpha
         descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
         descDSV.Texture2D.MipSlice = 0;
         hr = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        if (FAILED(hr)) { return hr; }
 
         m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 
-        // Setup the viewport
-        D3D11_VIEWPORT vp;
-        vp.Width = (FLOAT)width;
-        vp.Height = (FLOAT)height;
-        vp.MinDepth = 0.0f;
-        vp.MaxDepth = 1.0f;
-        vp.TopLeftX = 0;
-        vp.TopLeftY = 0;
-        m_pImmediateContext->RSSetViewports(1, &vp);
-
-        // set default rasterization
+        // create wireframe rasterizer
         D3D11_RASTERIZER_DESC rasterDesc;
         ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
         rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
         rasterDesc.CullMode = D3D11_CULL_NONE;
         hr = m_pd3dDevice->CreateRasterizerState(&rasterDesc, &m_pWireFrame);
+        if (FAILED(hr)) { return hr; }
+
+        // create default rasterizer state
+        rasterDesc.AntialiasedLineEnable = false;
+        rasterDesc.FillMode = D3D11_FILL_SOLID;
+        rasterDesc.CullMode = D3D11_CULL_BACK;
+        rasterDesc.DepthBias = 0;
+        rasterDesc.DepthBiasClamp = 0.0f;
+        rasterDesc.DepthClipEnable = true;
+        rasterDesc.FrontCounterClockwise = false;
+        rasterDesc.MultisampleEnable = false;
+        rasterDesc.ScissorEnable = false;
+        rasterDesc.SlopeScaledDepthBias = 0.0f;
+        hr = m_pd3dDevice->CreateRasterizerState(&rasterDesc, &m_pRasterizerState);
+        if (FAILED(hr)) { return hr; }
+
+        m_pImmediateContext->RSSetState(m_pRasterizerState);
+        //m_pImmediateContext->RSSetState(m_pWireFrame);
+
+        // Setup the viewport
+        m_viewport.Width = (FLOAT)width;
+        m_viewport.Height = (FLOAT)height;
+        m_viewport.MinDepth = 0.0f;
+        m_viewport.MaxDepth = 1.0f;
+        m_viewport.TopLeftX = 0;
+        m_viewport.TopLeftY = 0;
+        m_pImmediateContext->RSSetViewports(1, &m_viewport);
+
+        // make a NULL shader resource view to clear the PS Shader Resource before use
+        m_pNULLShaderResourceView = { nullptr };
 
         return S_OK;
     }
@@ -373,6 +433,9 @@ namespace alpha
         if (m_pImmediateContext) m_pImmediateContext->ClearState();
 
         if (m_pWireFrame) m_pWireFrame->Release();
+        if (m_pRasterizerState) m_pRasterizerState->Release();
+        if (m_pDepthDisabledStencilState) m_pDepthDisabledStencilState->Release();
+        if (m_pDepthStencilState) m_pDepthStencilState->Release();
         if (m_pDepthStencil) m_pDepthStencil->Release();
         if (m_pDepthStencilView) m_pDepthStencilView->Release();
         if (m_pRenderTargetView) m_pRenderTargetView->Release();
@@ -384,216 +447,6 @@ namespace alpha
         if (m_pd3dDevice) m_pd3dDevice->Release();
     }
 
-    void GraphicsRenderer::RenderRenderable(std::shared_ptr<Camera> pCamera, RenderSet * renderSet)
-    {
-        switch (m_directionalLights.size())
-        {
-        case 0:
-            // XXX add at least one directional light
-            m_directionalLights.push_back(DirectionalLight());
-            break;
-        }
-
-        switch (m_pointLights.size())
-        {
-        case 1:
-            // XXX add second black light so the shader doesn't need to be smart
-            //PointLight pl;
-            m_pointLights.push_back(PointLight());
-            m_pointLights[m_pointLights.size() - 1].attenuationConstant = 1.f;
-            m_pointLights[m_pointLights.size() - 1].attenuationLinear = 0.045f;
-            m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = 0.0075f;
-            break;
-        case 0:
-            // XXX add two lights
-            for (int i = 0; i < 2; i++)
-            {
-                m_pointLights.push_back(PointLight());
-                m_pointLights[m_pointLights.size() - 1].attenuationConstant = 1.f;
-                m_pointLights[m_pointLights.size() - 1].attenuationLinear = 0.045f;
-                m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = 0.0075f;
-            }
-            break;
-            break;
-        }
-
-        auto renderables = renderSet->GetRenderables();
-        auto material = renderSet->material.lock();
-
-        for (auto renderable : renderables)
-        {
-            // set input layout
-            m_pImmediateContext->IASetInputLayout(renderable->m_pInputLayout);
-
-            // Set vertex buffer
-            UINT stride = sizeof(Vertex);
-            UINT offset = 0;
-            m_pImmediateContext->IASetVertexBuffers(0, 1, &renderable->m_pVertexBuffer, &stride, &offset);
-
-            // Set index buffer
-            m_pImmediateContext->IASetIndexBuffer(renderable->m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-            // Set primitive topology
-            m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-            // update constant buffers
-            MatrixBuffer mb;
-            mb.mWorld = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(renderSet->worldTransform));
-            mb.mView = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetView()));
-            mb.mProjection = DirectX::XMMatrixTranspose(MatrixToXMMATRIX(pCamera->GetProjection()));
-            m_pImmediateContext->UpdateSubresource(renderable->m_pMatrixBuffer, 0, nullptr, &mb, 0, 0);
-
-            ConstantBuffer cb;
-            // light 1
-            cb.pointLight[0] = m_pointLights[0];
-            // light 2
-            cb.pointLight[1] = m_pointLights[1];
-            // direction light
-            cb.directionalLight = m_directionalLights[0];
-            // object
-            cb.ambient = material->GetAmbient();
-            cb.diffuse = material->GetDiffuse();
-            cb.specular = material->GetSpecular();
-            cb.shininess = material->GetShininess();
-            cb.vOutputColor = material->GetColor();
-            m_pImmediateContext->UpdateSubresource(renderable->m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
-
-            CameraBuffer camera_buffer;
-            camera_buffer.cameraPosition = pCamera->GetView().Position();
-            m_pImmediateContext->UpdateSubresource(renderable->m_pCameraBuffer, 0, nullptr, &camera_buffer, 0, 0);
-
-            // render object
-            m_pImmediateContext->VSSetShader(renderable->m_pVertexShader, nullptr, 0);
-            m_pImmediateContext->VSSetConstantBuffers(0, 1, &renderable->m_pMatrixBuffer);
-            m_pImmediateContext->VSSetConstantBuffers(1, 1, &renderable->m_pCameraBuffer);
-            m_pImmediateContext->PSSetShader(renderable->m_pPixelShader, nullptr, 0);
-            m_pImmediateContext->PSSetConstantBuffers(0, 1, &renderable->m_pMatrixBuffer);
-            m_pImmediateContext->PSSetConstantBuffers(1, 1, &renderable->m_pConstantBuffer);
-
-            m_pImmediateContext->DrawIndexed(renderable->indices.size(), 0, 0);
-        }
-    }
-
-    bool GraphicsRenderer::CompileShaderFromAsset(std::shared_ptr<Asset> asset, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
-    {
-        HRESULT hr = S_OK;
-        ID3DBlob* pErrorBlob = nullptr;
-        DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-        std::vector<unsigned char> data = asset->GetData();
-
-#ifdef ALPHA_DEBUG
-        // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-        // Setting this flag improves the shader debugging experience, but still allows 
-        // the shaders to be optimized and to run exactly the way they will run in 
-        // the release configuration of this program.
-        dwShaderFlags |= D3DCOMPILE_DEBUG;
-
-        // Disable optimizations to further improve shader debugging
-        dwShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
-
-        hr = D3DCompile(&data[0], sizeof(char) * data.size(), nullptr, nullptr, nullptr, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
-        if (FAILED(hr))
-        {
-            if (pErrorBlob)
-            {
-                auto bufptr = reinterpret_cast<const char*>(pErrorBlob->GetBufferPointer());
-                LOG_ERR("SHADER Failed to compile shader, ", bufptr);
-                pErrorBlob->Release();
-            }
-            return false;
-        }
-
-        if (pErrorBlob)
-        {
-            pErrorBlob->Release();
-        }
-
-        return true;
-    }
-
-    ID3D11VertexShader * GraphicsRenderer::CreateVertexShaderFromAsset(std::shared_ptr<Asset> vsAsset, const std::string & sEntryPoint, ID3DBlob** ppVSBlobOut)
-    {
-        // TODO: store created shader, and retrieve if used again.
-
-        HRESULT hr = S_OK;
-        //ID3DBlob* pVSBlob = nullptr;
-        ID3D11VertexShader * vs = nullptr;
-
-        // compile shader
-        if (!this->CompileShaderFromAsset(vsAsset, sEntryPoint.c_str(), "vs_4_0", ppVSBlobOut))
-        {
-            LOG_WARN("GraphicsRenderer > Failed to compile pixel shader");
-            return nullptr;
-        }
-
-        // Create the vertex shader
-        hr = m_pd3dDevice->CreateVertexShader((*ppVSBlobOut)->GetBufferPointer(), (*ppVSBlobOut)->GetBufferSize(), nullptr, &vs);
-        if (FAILED(hr))
-        {
-            LOG_WARN("GraphicsRenderer > Failed to create pixel shader.");
-            (*ppVSBlobOut)->Release();
-            return nullptr;
-        }
-
-        return vs;
-    }
-
-    ID3D11PixelShader * GraphicsRenderer::CreatePixelShaderFromAsset(std::shared_ptr<Asset> psAsset, const std::string & sEntryPoint)
-    {
-        // TODO: store created shader, and retrieve if used again.
-
-        HRESULT hr = S_OK;
-        ID3DBlob* pPSBlob = nullptr;
-        ID3D11PixelShader * ps = nullptr;
-
-        // Compile the pixel shader
-        pPSBlob = nullptr;
-        if (!this->CompileShaderFromAsset(psAsset, sEntryPoint.c_str(), "ps_4_0", &pPSBlob))
-        {
-            LOG_WARN("GraphicsRenderer > Failed to compile pixel shader");
-            return nullptr;
-        }
-
-        // Create the pixel shader
-        hr = m_pd3dDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &ps);
-        pPSBlob->Release();
-        if (FAILED(hr))
-        {
-            LOG_WARN("GraphicsRenderer > Failed to create pixel shader.");
-            //pPSBlob->Release();
-            return nullptr;
-        }
-
-        return ps;
-    }
-
-    ID3D11InputLayout * GraphicsRenderer::CreateInputLayoutFromVSBlob(ID3DBlob ** const pVSBlob)
-    {
-        // TODO: store created vertex shader with layout data, and retrieve if used again.
-
-        HRESULT hr = S_OK;
-        ID3D11InputLayout * vsLayout = nullptr;
-
-        // Define the input layout
-        D3D11_INPUT_ELEMENT_DESC layout[] =
-        {
-            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        };
-        UINT numElements = ARRAYSIZE(layout);
-
-        // Create the input layout
-        hr = m_pd3dDevice->CreateInputLayout(layout, numElements, (*pVSBlob)->GetBufferPointer(), (*pVSBlob)->GetBufferSize(), &vsLayout);
-        //pVSBlob->Release();
-        if (FAILED(hr))
-        {
-            return nullptr;
-        }
-
-        return vsLayout;
-    }
-
     void GraphicsRenderer::CreateBuffer(unsigned int byte_width, unsigned int bind_flags, const void * object_memory, ID3D11Buffer ** buffer)
     {
         HRESULT hr = S_OK;
@@ -603,55 +456,18 @@ namespace alpha
         ZeroMemory(&bd, sizeof(bd));
         bd.Usage = D3D11_USAGE_DEFAULT;
         bd.CPUAccessFlags = 0;
-        bd.ByteWidth = byte_width; // sizeof(Vertex) * renderable->vertices.size();
-        bd.BindFlags = bind_flags; // D3D11_BIND_VERTEX_BUFFER;
+        bd.ByteWidth = byte_width;
+        bd.BindFlags = bind_flags;
 
         if (object_memory) 
         {
             ZeroMemory(&InitData, sizeof(InitData));
-            InitData.pSysMem = object_memory; // &renderable->vertices[0];
-            hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, buffer); // &renderable->m_pVertexBuffer);
+            InitData.pSysMem = object_memory;
+            hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, buffer);
         }
         else
         {
-            hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, buffer); // &renderable->m_pVertexBuffer);
-        }
-    }
-
-    void GraphicsRenderer::CreateLightBufferData(const std::vector<Light *> & lights)
-    {
-        m_pointLights.clear();
-        m_directionalLights.clear();
-
-        for (auto light : lights)
-        {
-            switch (light->GetLightType())
-            {
-            case LightType::DIRECTIONAL:
-                m_directionalLights.push_back(DirectionalLight());
-
-                m_directionalLights[m_directionalLights.size() - 1].direction = Vector4(light->GetLightDirection(), 1.f);
-                m_directionalLights[m_directionalLights.size() - 1].ambient = light->GetAmbientLight();
-                m_directionalLights[m_directionalLights.size() - 1].diffuse = light->GetDiffuseLight();
-                m_directionalLights[m_directionalLights.size() - 1].specular = light->GetSpecularLight();
-                break;
-
-            case LightType::POINT:
-                m_pointLights.push_back(PointLight());
-
-                m_pointLights[m_pointLights.size() - 1].position = Vector4(light->worldTransform.Position(), 1.f);
-                m_pointLights[m_pointLights.size() - 1].ambient = light->GetAmbientLight();
-                m_pointLights[m_pointLights.size() - 1].diffuse = light->GetDiffuseLight();
-                m_pointLights[m_pointLights.size() - 1].specular = light->GetSpecularLight();
-                m_pointLights[m_pointLights.size() - 1].attenuationConstant = light->GetAttenuationConstant();
-                m_pointLights[m_pointLights.size() - 1].attenuationLinear = light->GetAttenuationLinear();
-                m_pointLights[m_pointLights.size() - 1].attenuationQuadratic = light->GetAttenuationQuadratic();
-                break;
-
-            default:
-                LOG_WARN("Unkown light type, unable to render: ", light->GetLightType());
-                break;
-            }
+            hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, buffer);
         }
     }
 }

@@ -14,19 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Graphics/Renderable.h"
+#include "Math/Vector2.h"
 
 namespace alpha
 {
-    Renderable::Renderable(std::vector<Vertex> vertexList, std::vector<unsigned int> indexList)
-        : vertices(vertexList)
-        , indices(indexList)
-        , m_pVertexBuffer(nullptr)
-        , m_pIndexBuffer(nullptr)
+    Vector2::Vector2()
+        : x(0.f), y(0.f)
     { }
-    Renderable::~Renderable()
-    {
-        if (m_pVertexBuffer) m_pVertexBuffer->Release();
-        if (m_pIndexBuffer) m_pIndexBuffer->Release();
-    }
+    Vector2::Vector2(float _x, float _y)
+        : x(_x), y(_y)
+    { }
+    Vector2::Vector2(const Vector2 & vec)
+        : x(vec.x), y(vec.y)
+    { }
 }

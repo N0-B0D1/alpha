@@ -123,6 +123,11 @@ namespace alpha
         return m_shininess;
     }
 
+    float Material::GetSpecularCoefficient() const
+    {
+        return m_fSpecular;
+    }
+
 
 
 

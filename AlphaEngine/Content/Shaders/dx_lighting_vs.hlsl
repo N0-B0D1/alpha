@@ -17,51 +17,36 @@
 // matrix buffer
 cbuffer MatrixBuffer : register(b0)
 {
-	matrix World;
-	matrix View;
-	matrix Projection;
-}
-
-// camera buffer
-cbuffer CameraBuffer : register(b1)
-{
-	float3 cameraPosition;
-	float _spacer;
+    matrix World;
+    matrix View;
+    matrix Projection;
 }
 
 // Typedef input/output
 struct VS_INPUT
 {
-	float4 Pos : POSITION;
-	float3 Norm : NORMAL;
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
 };
 
 struct PS_INPUT
 {
-    float4 Pos : SV_POSITION;
-    float3 Norm : NORMAL;
-	float3 WorldPos : TEXCOORD0;
-	float3 ViewDir : TEXCOORD1;
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
 };
 
 // Vertex Shader
-PS_INPUT VS( VS_INPUT input )
+PS_INPUT VS(VS_INPUT input)
 {
     PS_INPUT output = (PS_INPUT)0;
-	
-	input.Pos.w = 1.0f;
-	
-	float4 posWorld = mul(input.Pos, World);
 
-    output.Pos = posWorld;
-    output.Pos = mul(output.Pos, View);
-    output.Pos = mul(output.Pos, Projection);
+    input.position.w = 1.0f;
 
-    output.Norm = mul( float4( input.Norm, 1 ), World ).xyz;
-	output.Norm = normalize(output.Norm);
+    output.position = mul(input.position, World);
+    output.position = mul(output.position, View);
+    output.position = mul(output.position, Projection);
 
-	output.WorldPos = posWorld;
-	output.ViewDir = normalize(cameraPosition - posWorld.xyz);
+    output.tex = input.tex;
 
     return output;
 }

@@ -13,42 +13,47 @@
 // limitations under the License.
 
 // Constant Buffers
+
 // matrix buffer
 cbuffer MatrixBuffer : register(b0)
 {
-	matrix World;
-	matrix View;
-	matrix Projection;
+    matrix World;
+    matrix View;
+    matrix Projection;
 }
 
-// camera buffer
-cbuffer CameraBuffer : register(b1)
+// object color data buffer
+cbuffer DeferredBuffer : register(b1)
 {
-	float3 cameraPosition;
-	float _spacer;
+    float4 diffuse;
+    float specular;
+    float _spacer1;
+    float _spacer2;
+    float _spacer3;
 }
-
-// Typedef input/output
-struct VS_INPUT
-{
-    float4 Pos : POSITION;
-    float3 Norm : NORMAL;
-};
 
 struct PS_INPUT
 {
-    float4 Pos : SV_POSITION;
-    float3 Norm : NORMAL;
+    float4 position : SV_POSITION;
+    float3 normal : NORMAL;
+    float3 world_position : TEXCOORD0;
 };
 
-// Vertex Shader
-PS_INPUT VS( VS_INPUT input )
+struct PS_OUTPUT
 {
-    PS_INPUT output = (PS_INPUT)0;
-    output.Pos = mul( input.Pos, World );
-    output.Pos = mul( output.Pos, View );
-    output.Pos = mul( output.Pos, Projection );
-    output.Norm = mul( float4( input.Norm, 1 ), World ).xyz;
-    
+    float4 position : SV_Target0;
+    float4 normal : SV_Target1;
+    float4 color : SV_Target2;
+};
+
+// Pixel Shader
+PS_OUTPUT PS(PS_INPUT input) : SV_Target
+{
+    PS_OUTPUT output = (PS_OUTPUT)0;
+
+    output.position = float4(input.world_position, 1.f);
+    output.normal = float4(input.normal, 1.f);
+    output.color = float4(diffuse.xyz, specular);
+
     return output;
 }

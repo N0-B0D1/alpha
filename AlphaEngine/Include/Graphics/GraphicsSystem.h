@@ -62,6 +62,10 @@ namespace alpha
         SceneManager * m_pSceneManager;
         /** Track the current camera that is viewing the scene */
         std::shared_ptr<Camera> m_pCamera;
+
+        // screen width and height
+        float m_fWindowWidth;
+        float m_fWindowHeight;
     };
 }
 

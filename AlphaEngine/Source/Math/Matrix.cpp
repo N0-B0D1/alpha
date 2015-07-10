@@ -106,6 +106,22 @@ namespace alpha
         return projection;
     }
 
+    Matrix Matrix::OrthoProjection(float width, float height, float near, float far)
+    {
+        //float xmax = width - 1.f;
+        //float ymax = height - 1.f;
+        float range = 1.f / (far - near);
+        Matrix ortho;
+        
+        ortho.m_11 = 2.f / width;
+        ortho.m_22 = 2.f / height;
+        ortho.m_33 = range; //2 / (far - near);
+        ortho.m_43 = range * near; //(near + far) / (near - far);
+        ortho.m_44 = 1.f;
+
+        return ortho;
+    }
+
     Matrix operator* (const Matrix& left, const Matrix& right)
     {
         float m11 = (left.m_11 * right.m_11) + (left.m_12 * right.m_21) + (left.m_13 * right.m_31) + (left.m_14 * right.m_41);

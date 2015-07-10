@@ -44,6 +44,7 @@ namespace alpha
         static Matrix Scale(const Vector3 & scale);
 
         static Matrix Projection(float fov, float aspect, float near, float far);
+        static Matrix OrthoProjection(float width, float height, float near, float far);
     };
 
     Matrix operator* (const Matrix& left, const Matrix& right);

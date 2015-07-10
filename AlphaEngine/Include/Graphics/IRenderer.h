@@ -32,7 +32,7 @@ namespace alpha
     public:
         virtual ~IRenderer() { };
 
-        virtual bool Initialize(AssetSystem * const pAssets) = 0;
+        virtual bool Initialize(AssetSystem * const pAssets, int windowWidth, int windowHeight) = 0;
         virtual bool Update(double currentTime, double elapsedTime) = 0;
         virtual bool Shutdown() = 0;
 
