@@ -15,16 +15,19 @@ limitations under the License.
 */
 
 #include "Graphics/GeometryPass.h"
+#include "Assets/AssetSystem.h"
+#include "Assets/Asset.h"
 
 namespace alpha
 {
-    GeometryPass::GeometryPass(std::shared_ptr<Asset> pVSShader, std::shared_ptr<Asset> pPSShader)
-        : ARenderPass(pVSShader, pPSShader)
-    { }
+    GeometryPass::GeometryPass() { }
     GeometryPass::~GeometryPass() { }
 
-    bool GeometryPass::VInitialize()
+    bool GeometryPass::VInitialize(AssetSystem * const pAssetSystem, int /*windowWidth*/, int /*windowHeight*/)
     {
+        m_vsDefaultShader = pAssetSystem->GetAsset("Shaders/gl_vs_normal.glsl");
+        m_psDefaultShader = pAssetSystem->GetAsset("Shaders/gl_ps_normal.glsl");
+
         return true;
     }
 

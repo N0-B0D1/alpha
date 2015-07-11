@@ -29,7 +29,8 @@ namespace alpha
 {
 	class RenderWindow;
     class RenderSet;
-    class ARenderPass;
+    class GeometryPass;
+    class LightingPass;
     class Camera;
     class Asset;
     class AssetSystem;
@@ -44,7 +45,7 @@ namespace alpha
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
-        bool Initialize(AssetSystem * const pAssets);
+        bool Initialize(AssetSystem * const pAssets, int windowWidth, int windowHeight);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
@@ -68,13 +69,10 @@ namespace alpha
 
         RenderWindow *m_pWindow;
 
-        std::shared_ptr<Asset> m_vsDefaultShader;
-        std::shared_ptr<Asset> m_psDefaultShader;
-        std::shared_ptr<Asset> m_vsLightShader;
-        std::shared_ptr<Asset> m_psLightShader;
-
-        /** A list of render passes to run during the render call. */
-        std::vector<ARenderPass *> m_vRenderPasses;
+        /** Geometry render pass for render to GBuffer */
+        GeometryPass * m_pGeometryPass;
+        /** Lighting render pass for final render to screen */
+        LightingPass * m_pLightingPass;
         
         const GLubyte *m_pRendererInfo;
         const GLubyte *m_pVersionInfo;

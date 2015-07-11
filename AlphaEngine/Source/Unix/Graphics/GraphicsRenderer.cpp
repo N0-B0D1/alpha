@@ -40,27 +40,29 @@ limitations under the License.
 
 namespace alpha
 {
-    GraphicsRenderer::GraphicsRenderer() { }
+    GraphicsRenderer::GraphicsRenderer()
+        : m_pGeometryPass(nullptr)
+        , m_pLightingPass(nullptr)
+    { }
     GraphicsRenderer::~GraphicsRenderer() { }
 
-    bool GraphicsRenderer::Initialize(AssetSystem * const pAssets)
+    bool GraphicsRenderer::Initialize(AssetSystem * const pAssets, int windowWidth, int windowHeight)
     {
-        // prep shader assets
-        m_vsDefaultShader = pAssets->GetAsset("Shaders/gl_vs_normal.glsl");
-        m_psDefaultShader = pAssets->GetAsset("Shaders/gl_ps_normal.glsl");
-        m_vsLightShader = pAssets->GetAsset("Shaders/gl_vs_light.glsl");
-        m_psLightShader = pAssets->GetAsset("Shaders/gl_ps_light.glsl");
-
-        m_vRenderPasses.push_back(new GeometryPass(m_vsDefaultShader, m_psDefaultShader));
-        m_vRenderPasses.push_back(new LightingPass(m_vsLightShader, m_psLightShader));
-        for (unsigned int i = 0; i < m_vRenderPasses.size(); ++i)
+        m_pGeometryPass = new GeometryPass();
+        if (!m_pGeometryPass->VInitialize(pAssets, windowWidth, windowHeight))
         {
-            m_vRenderPasses[i]->VInitialize();
+            return false;
+        }
+
+        m_pLightingPass = new LightingPass();
+        if (!m_pLightingPass->VInitialize(pAssets, windowWidth, windowHeight))
+        {
+            return false;
         }
 
         LOG("GraphicsRenderer > Creating render window.");
 		m_pWindow = new RenderWindow();
-		if (!m_pWindow->Initialize())
+		if (!m_pWindow->Initialize(windowWidth, windowHeight))
 		{
 			return false;
 		}
@@ -84,13 +86,15 @@ namespace alpha
 		}
 
         // destroy render passes
-        ARenderPass * pass = nullptr;
-        while (m_vRenderPasses.size() > 0)
+        if (m_pGeometryPass)
         {
-            pass = m_vRenderPasses.back();
-            m_vRenderPasses.pop_back();
-            pass->VShutdown();
-            delete pass;
+            m_pGeometryPass->VShutdown();
+            delete m_pGeometryPass;
+        }
+        if (m_pLightingPass)
+        {
+            m_pLightingPass->VShutdown();
+            delete m_pLightingPass;
         }
 
         // let glfw cleanup opengl
@@ -103,8 +107,8 @@ namespace alpha
         auto renderables = renderSet->GetRenderables();
 
         // set the shader to user for renderables in this set
-        auto vsShader = renderSet->emitsLight ? m_vsLightShader : m_vsDefaultShader;
-        auto psShader = renderSet->emitsLight ? m_psLightShader : m_psDefaultShader;
+        //auto vsShader = renderSet->emitsLight ? m_vsLightShader : m_vsDefaultShader;
+        //auto psShader = renderSet->emitsLight ? m_psLightShader : m_psDefaultShader;
 
         for (Renderable * renderable : renderables)
         {
@@ -138,6 +142,7 @@ namespace alpha
                 glBindVertexArray(0);
             }
 
+            /*
             if (renderable->m_shaderProgram == 0)
             {
                 // create vertex shader
@@ -165,6 +170,7 @@ namespace alpha
                 glDeleteShader(ps);
                 glDeleteShader(vs);
             }
+            */
         }
     }
 

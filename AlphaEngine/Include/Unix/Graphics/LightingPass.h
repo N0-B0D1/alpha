@@ -24,11 +24,15 @@ namespace alpha
     class LightingPass : public ARenderPass
     {
     public:
-        LightingPass(std::shared_ptr<Asset> pVSShader, std::shared_ptr<Asset> pPSShader);
+        LightingPass();
         virtual ~LightingPass();
 
-        virtual bool VInitialize();
+        virtual bool VInitialize(AssetSystem * const pAssetSystem, int windowWidth, int windowHeight);
         virtual bool VShutdown();
+
+    private:
+        std::shared_ptr<Asset> m_vsLightShader;
+        std::shared_ptr<Asset> m_psLightShader;
     };
 }
 

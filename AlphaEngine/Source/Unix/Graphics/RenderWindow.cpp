@@ -29,7 +29,7 @@ namespace alpha
     RenderWindow::RenderWindow() { }
     RenderWindow::~RenderWindow() { }
 
-    bool RenderWindow::Initialize()
+    bool RenderWindow::Initialize(int windowWidth, int windowHeight)
     {
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // opengl 3.3
@@ -37,7 +37,7 @@ namespace alpha
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-        g_pWindow = glfwCreateWindow(800, 600, "ALPHA Engine", nullptr, nullptr);
+        g_pWindow = glfwCreateWindow(windowWidth, windowHeight, "ALPHA Engine", nullptr, nullptr);
         glfwMakeContextCurrent(g_pWindow);
         if (g_pWindow == NULL)
         {

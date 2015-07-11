@@ -15,16 +15,20 @@ limitations under the License.
 */
 
 #include "Graphics/LightingPass.h"
+#include "Assets/AssetSystem.h"
+#include "Assets/Asset.h"
 
 namespace alpha
 {
-    LightingPass::LightingPass(std::shared_ptr<Asset> pVSShader, std::shared_ptr<Asset> pPSShader)
-        : ARenderPass(pVSShader, pPSShader)
+    LightingPass::LightingPass()
     { }
     LightingPass::~LightingPass() { }
 
-    bool LightingPass::VInitialize()
+    bool LightingPass::VInitialize(AssetSystem * const pAssetSystem, int /*windowWidth*/, int /*windowHeight*/)
     {
+        m_vsLightShader = pAssetSystem->GetAsset("Shaders/gl_vs_light.glsl");
+        m_psLightShader = pAssetSystem->GetAsset("Shaders/gl_ps_light.glsl");
+
         return true;
     }
 

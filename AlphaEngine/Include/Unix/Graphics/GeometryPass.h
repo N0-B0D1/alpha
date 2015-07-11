@@ -24,11 +24,15 @@ namespace alpha
     class GeometryPass : public ARenderPass
     {
     public:
-        GeometryPass(std::shared_ptr<Asset> pVSShader, std::shared_ptr<Asset> pPSShader);
+        GeometryPass();
         virtual ~GeometryPass();
 
-        virtual bool VInitialize();
+        virtual bool VInitialize(AssetSystem * const pAssetSystem, int windowWidth, int windowHeight);
         virtual bool VShutdown();
+
+    private:
+        std::shared_ptr<Asset> m_vsDefaultShader;
+        std::shared_ptr<Asset> m_psDefaultShader;
     };
 }
 

@@ -35,7 +35,7 @@ namespace alpha
 		RenderWindow();
 		virtual ~RenderWindow();
 
-        bool Initialize();
+        bool Initialize(int windowWidth, int windowHeight);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 

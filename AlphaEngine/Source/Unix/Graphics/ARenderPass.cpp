@@ -19,9 +19,7 @@ limitations under the License.
 
 namespace alpha
 {
-    ARenderPass::ARenderPass(std::shared_ptr<Asset> pVSShader, std::shared_ptr<Asset> pPSShader)
-        : m_vsShader(pVSShader)
-        , m_psShader(pPSShader)
+    ARenderPass::ARenderPass()
     { }
     ARenderPass::~ARenderPass() { }
 }

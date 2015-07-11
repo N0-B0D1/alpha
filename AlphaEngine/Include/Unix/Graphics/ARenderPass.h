@@ -21,20 +21,20 @@ limitations under the License.
 
 namespace alpha
 {
+    class AssetSystem;
     class Asset;
 
     class ARenderPass
     {
     public:
-        ARenderPass(std::shared_ptr<Asset> pVSShader, std::shared_ptr<Asset> pPSShader);
+        ARenderPass();
         virtual ~ARenderPass();
 
-        virtual bool VInitialize() = 0;
+        virtual bool VInitialize(AssetSystem * const pAssetSystem, int windowWidth, int windowHeight) = 0;
         virtual bool VShutdown() = 0;
 
     protected:
-        std::weak_ptr<Asset> m_vsShader;
-        std::weak_ptr<Asset> m_psShader;
+
     };
 }
 
