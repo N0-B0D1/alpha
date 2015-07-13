@@ -18,23 +18,42 @@ limitations under the License.
 */
 
 #include <memory>
+#include <vector>
+
+#include <GL/glx.h>
 
 namespace alpha
 {
     class AssetSystem;
     class Asset;
+    class Camera;
+    class RenderSet;
+    class Light;
 
     class ARenderPass
     {
     public:
+        enum GBUFFER_TYPE
+        {
+            GBUFFER_POSITION,
+            GBUFFER_NORMAL,
+            GBUFFER_ALBEDOSPEC,
+            GBUFFER_TEXTURE_COUNT,
+        };
+
         ARenderPass();
         virtual ~ARenderPass();
 
         virtual bool VInitialize(AssetSystem * const pAssetSystem, int windowWidth, int windowHeight) = 0;
         virtual bool VShutdown() = 0;
 
-    protected:
+        virtual void VRender(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets, std::vector<Light *> lights) = 0;
 
+    protected:
+        /** Create a shader program from a vertex shader and a pixel shader asset. */
+        GLuint CreateShaderProgram(std::shared_ptr<Asset> pVSAsset, std::shared_ptr<Asset> pPSAsset);
+        /** Compile a shader from an asset of the given type */
+        GLuint CreateShaderFromAsset(std::shared_ptr<Asset> pAsset, GLenum shaderType);
     };
 }
 

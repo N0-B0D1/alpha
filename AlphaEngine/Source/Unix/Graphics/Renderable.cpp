@@ -24,7 +24,6 @@ namespace alpha
         , m_vertexBuffer(0)
         , m_vertexAttribute(0)
         , m_elementBuffer(0)
-        , m_shaderProgram(0)
     { }
     Renderable::~Renderable() { }
 }

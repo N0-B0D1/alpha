@@ -30,9 +30,28 @@ namespace alpha
         virtual bool VInitialize(AssetSystem * const pAssetSystem, int windowWidth, int windowHeight);
         virtual bool VShutdown();
 
+        virtual void VRender(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets, std::vector<Light *> lights);
+
+        GLuint GetGBufferTexture(GBUFFER_TYPE texture_type);
+
     private:
-        std::shared_ptr<Asset> m_vsDefaultShader;
-        std::shared_ptr<Asset> m_psDefaultShader;
+        /** Create 2D Texture */
+        void CreateGBufferTexture(GLuint & texture, GLint texInternalFormat, GLint texFormat, GLenum position, int width, int height);
+
+        /** Vertex shader asset */
+        std::shared_ptr<Asset> m_vsShader;
+        /** Pixel/Fragment shader asset */
+        std::shared_ptr<Asset> m_psShader;
+
+        /** GL Shader Program */
+        GLuint m_shaderProgram;
+
+        /** GL Frame buffer */
+        GLuint m_gBuffer;
+        /** GBuffer texture array */
+        GLuint m_gBufferTextures[GBUFFER_TEXTURE_COUNT];
+        /** GL depth render buffer object */
+        GLuint m_rboDepth;
     };
 }
 
