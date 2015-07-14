@@ -53,9 +53,20 @@ namespace alpha
         glGenFramebuffers(1, &m_gBuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
 
-        CreateGBufferTexture(m_gBufferTextures[GBUFFER_POSITION], GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT0, windowWidth, windowHeight);
-        CreateGBufferTexture(m_gBufferTextures[GBUFFER_NORMAL], GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT1, windowWidth, windowHeight);
-        CreateGBufferTexture(m_gBufferTextures[GBUFFER_ALBEDOSPEC], GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT2, windowWidth, windowHeight);
+        glGenTextures(GBUFFER_TEXTURE_COUNT, m_gBufferTextures);
+
+        for (unsigned int i = 0; i < GBUFFER_TEXTURE_COUNT; ++i)
+        {
+            glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_gBufferTextures[i], 0);
+        }
+
+        //CreateGBufferTexture(m_gBufferTextures[GBUFFER_POSITION], GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT0, windowWidth, windowHeight);
+        //CreateGBufferTexture(m_gBufferTextures[GBUFFER_NORMAL], GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT1, windowWidth, windowHeight);
+        //CreateGBufferTexture(m_gBufferTextures[GBUFFER_ALBEDOSPEC], GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT2, windowWidth, windowHeight);
 
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3, attachments);
@@ -131,16 +142,5 @@ namespace alpha
     GLuint GeometryPass::GetGBufferTexture(GBUFFER_TYPE texture_type)
     {
         return m_gBufferTextures[texture_type];
-    }
-    
-    void GeometryPass::CreateGBufferTexture(GLuint & texture, GLint texInternalFormat, GLint texFormat, GLenum position, int width, int height)
-    {
-        LOG_WARN("setting texture buffer at attachment ", position);
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, width, height, 0, texFormat, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, position, GL_TEXTURE_2D, texture, 0);
     }
 }

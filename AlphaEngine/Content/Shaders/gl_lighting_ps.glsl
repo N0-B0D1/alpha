@@ -27,5 +27,5 @@ void main ()
     vec3 Diffuse = texture(gAlbedoSpec, TexCoords).rgb;
     float Specular = texture(gAlbedoSpec, TexCoords).a;
 
-    FragColor = vec4(Diffuse.rgb, 1.0f);
+    FragColor = vec4(Diffuse, 1.0f);
 }

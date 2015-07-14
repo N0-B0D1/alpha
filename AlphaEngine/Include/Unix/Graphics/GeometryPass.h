@@ -35,9 +35,6 @@ namespace alpha
         GLuint GetGBufferTexture(GBUFFER_TYPE texture_type);
 
     private:
-        /** Create 2D Texture */
-        void CreateGBufferTexture(GLuint & texture, GLint texInternalFormat, GLint texFormat, GLenum position, int width, int height);
-
         /** Vertex shader asset */
         std::shared_ptr<Asset> m_vsShader;
         /** Pixel/Fragment shader asset */

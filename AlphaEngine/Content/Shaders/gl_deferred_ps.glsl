@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #version 330 core
-layout (location = 0) out vec3 gPosition;
-layout (location = 1) out vec3 gNormal;
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
 
 in vec3 FragPos;
@@ -25,8 +25,8 @@ uniform float specular;
 
 void main()
 {
-    gPosition = FragPos;
-    gNormal = normalize(Normal);
+    gPosition = vec4(FragPos, 1.0f);
+    gNormal = vec4(normalize(Normal), 1.0f);
     gAlbedoSpec.rgb = diffuse;
     gAlbedoSpec.a = specular;
 }
