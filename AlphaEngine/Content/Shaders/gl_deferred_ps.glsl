@@ -25,8 +25,7 @@ uniform float specular;
 
 void main()
 {
-    gPosition = vec4(FragPos, 1.0f);
-    gNormal = vec4(normalize(Normal), 1.0f);
-    gAlbedoSpec.rgb = diffuse;
-    gAlbedoSpec.a = specular;
+    gPosition = vec4(FragPos, 0.0f);
+    gNormal = vec4(normalize(Normal), 0.0f);
+    gAlbedoSpec = vec4(diffuse, specular);
 }

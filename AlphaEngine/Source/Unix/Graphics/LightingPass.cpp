@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string>
+
 #include <GL/glew.h>
 //#include <GL/gl.h>
 //#include <GL/glx.h>
@@ -42,6 +44,12 @@ namespace alpha
 
         m_shaderProgram = CreateShaderProgram(m_vsShader, m_psShader);
 
+        // set texture samplers
+        glUseProgram(m_shaderProgram);
+        glUniform1i(glGetUniformLocation(m_shaderProgram, "gPosition"), 0);
+        glUniform1i(glGetUniformLocation(m_shaderProgram, "gNormal"), 1);
+        glUniform1i(glGetUniformLocation(m_shaderProgram, "gAlbedoSpec"), 2);
+
         // Create the quad that will be rendered to the screen, and have the gbuffer textures dawn on it
         GLfloat vertices[] = {
             -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -67,8 +75,10 @@ namespace alpha
         return true;
     }
 
-    void LightingPass::VRender(std::shared_ptr<Camera> /*pCamera*/, std::vector<RenderSet *> /*render_sets*/, std::vector<Light *> /*lights*/)
+    void LightingPass::VRender(std::shared_ptr<Camera> /*pCamera*/, std::vector<RenderSet *> /*render_sets*/, std::vector<Light *> lights)
     {
+        CreateLightBufferData(lights);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // set shader program
@@ -83,6 +93,15 @@ namespace alpha
         glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[GBUFFER_ALBEDOSPEC]);
 
         // set lights and other shader uniforms
+        for (GLuint i = 0; i < 2; ++i)
+        {
+            glUniform3f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].position").c_str()), m_pointLights[i].position.x, m_pointLights[i].position.y, m_pointLights[i].position.z);
+            glUniform3f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].diffuse").c_str()), m_pointLights[i].diffuse.x, m_pointLights[i].diffuse.y, m_pointLights[i].diffuse.z);
+
+            glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].constant").c_str()), m_pointLights[i].constant);
+            glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].linear").c_str()), m_pointLights[i].linear);
+            glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].quadratic").c_str()), m_pointLights[i].quadratic);
+        }
 
         // draw the quad for draw textures to
         glBindVertexArray(m_vaoQuad);
@@ -92,7 +111,6 @@ namespace alpha
 
     void LightingPass::AttachGBufferTexture(GBUFFER_TYPE texture_type, GLuint texture)
     {
-        LOG_ERR("gbuffer texture at ", texture_type, " is: ", texture);
         m_gBufferTextures[texture_type] = texture;
     }
 

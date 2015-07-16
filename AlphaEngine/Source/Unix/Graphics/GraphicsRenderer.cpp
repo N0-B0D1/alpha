@@ -49,7 +49,14 @@ namespace alpha
     bool GraphicsRenderer::Initialize(AssetSystem * const pAssets, int windowWidth, int windowHeight)
     {
         m_windowWidth = windowWidth;
-        m_windowHeight = windowHeight;        
+        m_windowHeight = windowHeight;
+
+        // init glfw
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // opengl 3.3
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
         
         LOG("GraphicsRenderer > Creating render window.");
 		m_pWindow = new RenderWindow();
@@ -76,7 +83,6 @@ namespace alpha
         for (int i = 0; i < ARenderPass::GBUFFER_TEXTURE_COUNT; ++i)
         {
             auto g_index = static_cast<ARenderPass::GBUFFER_TYPE>(i);
-            LOG_WARN("setting gbuffer type: ", g_index);
             m_pLightingPass->AttachGBufferTexture(g_index, m_pGeometryPass->GetGBufferTexture(g_index));
         }
 
@@ -157,7 +163,6 @@ namespace alpha
         auto window = m_pWindow->GetWindow();
 
         // prep viewport for rendering
-        glViewport(0, 0, m_windowWidth, m_windowHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // render to gbuffer textures
@@ -177,6 +182,7 @@ namespace alpha
             LOG_ERR("Failed to initialize GLEW.");
             return false;
         }
+        glViewport(0, 0, m_windowWidth, m_windowHeight);
 
         // store renderer and gl version ... for debug info?
         m_pRendererInfo = glGetString(GL_RENDERER);
@@ -189,6 +195,8 @@ namespace alpha
 
         // wireframe mode!
        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+       
+        glClearColor(0.f, 0.f, 0.f, 0.f);
 
         return true;
     }

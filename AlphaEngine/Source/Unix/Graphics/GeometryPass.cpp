@@ -51,7 +51,7 @@ namespace alpha
 
         // create gbuffer textures
         glGenFramebuffers(1, &m_gBuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_gBuffer);
 
         glGenTextures(GBUFFER_TEXTURE_COUNT, m_gBufferTextures);
 
@@ -61,12 +61,8 @@ namespace alpha
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_gBufferTextures[i], 0);
+            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_gBufferTextures[i], 0);
         }
-
-        //CreateGBufferTexture(m_gBufferTextures[GBUFFER_POSITION], GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT0, windowWidth, windowHeight);
-        //CreateGBufferTexture(m_gBufferTextures[GBUFFER_NORMAL], GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT1, windowWidth, windowHeight);
-        //CreateGBufferTexture(m_gBufferTextures[GBUFFER_ALBEDOSPEC], GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT2, windowWidth, windowHeight);
 
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3, attachments);
@@ -75,14 +71,14 @@ namespace alpha
         glGenRenderbuffers(1, &m_rboDepth);
         glBindRenderbuffer(GL_RENDERBUFFER, m_rboDepth);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rboDepth);
+        glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rboDepth);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             LOG_ERR("GeometryPass - Framebuffer not complete!");
             return false;
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
         return true;
     }
@@ -95,7 +91,7 @@ namespace alpha
     void GeometryPass::VRender(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> render_sets, std::vector<Light *> /*lights*/)
     {
         // bind gBuffer textures to be rendered to
-        glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_gBuffer);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
