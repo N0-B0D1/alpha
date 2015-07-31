@@ -112,7 +112,7 @@ namespace alpha
             auto specular = material->GetSpecularCoefficient();
 
             // attach object matrix values
-            glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram, "model"), 1, GL_FALSE, &rs->worldTransform.m_11);
+            glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram, "world"), 1, GL_FALSE, &rs->worldTransform.m_11);
 
             // set object color information
             glUniform3f(glGetUniformLocation(m_shaderProgram, "diffuse"), diffuse.x, diffuse.y, diffuse.z);

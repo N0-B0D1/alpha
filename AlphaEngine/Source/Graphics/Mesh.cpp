@@ -20,6 +20,8 @@ limitations under the License.
 #include "Graphics/Mesh.h"
 #include "Math/Constants.h"
 
+#include "Toolbox/Logger.h"
+
 namespace alpha
 {
     Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
@@ -79,6 +81,7 @@ namespace alpha
             Vertex v;
             stream.read(reinterpret_cast<char *>(&v), sizeof(Vertex));
             vertices.push_back(v);
+            //LOG_ERR("vertex normal: ", v.normal.x, ", ", v.normal.y, ", ", v.normal.z);
         }
 
         // get the number of indices to pull from stream

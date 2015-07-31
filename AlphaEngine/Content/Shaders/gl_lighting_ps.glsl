@@ -14,8 +14,11 @@
 
 #version 330 core
 out vec4 FragColor;
-
 in vec2 TexCoords;
+
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedoSpec;
 
 struct PointLight
 {
@@ -38,29 +41,27 @@ struct DirectionalLight
 uniform PointLight pointLight[2];
 uniform DirectionalLight directionalLight;
 
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
-
 void main ()
 {
-    vec3 FragPos = texture(gPosition, TexCoords).rgb;
-    vec3 Normal = texture(gNormal, TexCoords).rgb;
-    vec4 Diffuse = texture(gAlbedoSpec, TexCoords);
-    float Specular = Diffuse.a;
+    vec3 pixel_position = texture(gPosition, TexCoords).rgb;
+    vec3 pixel_normal = texture(gNormal, TexCoords).rgb;
+    vec4 pixel_color = texture(gAlbedoSpec, TexCoords);
+    float pixel_specular = pixel_color.a;
+    pixel_color.a = 1.0f;
 
-    vec3 lighting = vec3(0, 0, 0);
+    // static ambient ...
+    vec3 lighting = pixel_color.xyz * 0.2f;
 
     for (int i = 0; i < 2; ++i)
     {
         // diffuse
-        vec3 lightDir = normalize(pointLight[i].position - FragPos);
-        vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse.xyz * pointLight[i].diffuse;
+        vec3 lightDir = normalize(pointLight[i].position - pixel_position);
+        vec3 diffuse = max(dot(pixel_normal, lightDir), 0.0) * pixel_color.xyz * pointLight[i].diffuse;
 
         // specular
         
         // attenuation
-        float distance = length(pointLight[i].position - FragPos);
+        float distance = length(pointLight[i].position - pixel_position);
         float attenuation = 1.0f / (pointLight[i].constant + (pointLight[i].linear * distance) + (pointLight[i].quadratic * (distance * distance)));
 
         diffuse *= attenuation;
@@ -69,4 +70,5 @@ void main ()
     }
 
     FragColor = vec4(lighting, 1.0f);
+    //FragColor = vec4(pixel_normal, 1.0f);
 }

@@ -95,8 +95,9 @@ namespace alpha
         // set lights and other shader uniforms
         for (GLuint i = 0; i < 2; ++i)
         {
-            glUniform3f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].position").c_str()), m_pointLights[i].position.x, m_pointLights[i].position.y, m_pointLights[i].position.z);
-            glUniform3f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].diffuse").c_str()), m_pointLights[i].diffuse.x, m_pointLights[i].diffuse.y, m_pointLights[i].diffuse.z);
+            //LOG_ERR("light pos <", i, ">: ", m_pointLights[i].position.x, ", ", m_pointLights[i].position.y, ", ", m_pointLights[i].position.z);
+            glUniform3fv(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].position").c_str()), 1, &m_pointLights[i].position.x);
+            glUniform3fv(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].diffuse").c_str()), 1, &m_pointLights[i].diffuse.x);
 
             glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].constant").c_str()), m_pointLights[i].constant);
             glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].linear").c_str()), m_pointLights[i].linear);
