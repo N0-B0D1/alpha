@@ -41,6 +41,8 @@ struct DirectionalLight
 uniform PointLight pointLight[2];
 uniform DirectionalLight directionalLight;
 
+uniform vec3 viewPosition;
+
 void main ()
 {
     vec3 pixel_position = texture(gPosition, TexCoords).rgb;
@@ -50,7 +52,10 @@ void main ()
     pixel_color.a = 1.0f;
 
     // static ambient ...
-    vec3 lighting = pixel_color.xyz * 0.2f;
+    vec3 lighting = pixel_color.xyz * directionalLight.ambient;
+    lighting += max(dot(pixel_normal, directionalLight.direction), 0.0) * pixel_color.xyz * directionalLight.diffuse;
+
+    vec3 view_direction = normalize(viewPosition - pixel_position);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -59,18 +64,19 @@ void main ()
         vec3 diffuse = max(dot(pixel_normal, lightDir), 0.0) * pixel_color.xyz * pointLight[i].diffuse;
 
         // specular
+        vec3 half_direction = normalize(lightDir + view_direction);
+        float spec = pow(max(dot(pixel_normal, half_direction), 0.0), 16.0);
+        vec3 specular = pointLight[i].diffuse * spec * pixel_specular;
         
         // attenuation
         float distance = length(pointLight[i].position - pixel_position);
         float attenuation = 1.0f / (pointLight[i].constant + (pointLight[i].linear * distance) + (pointLight[i].quadratic * (distance * distance)));
 
         diffuse *= attenuation;
+        specular *= attenuation;
 
-        lighting += diffuse;
+        lighting += diffuse + specular;
     }
 
     FragColor = vec4(lighting, 1.0f);
-    //FragColor = vec4(pixel_normal, 1.0f);
-    //FragColor = vec4(pixel_position, 1.0f);
-    //FragColor = vec4(pixel_color.xyz, 1.0f);
 }

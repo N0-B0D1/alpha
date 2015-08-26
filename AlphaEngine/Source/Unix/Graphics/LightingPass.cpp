@@ -76,7 +76,7 @@ namespace alpha
         return true;
     }
 
-    void LightingPass::VRender(std::shared_ptr<Camera> /*pCamera*/, std::vector<RenderSet *> /*render_sets*/, std::vector<Light *> lights)
+    void LightingPass::VRender(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> /*render_sets*/, std::vector<Light *> lights)
     {
         CreateLightBufferData(lights);
 
@@ -92,16 +92,9 @@ namespace alpha
         glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[GBUFFER_NORMAL]);
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[GBUFFER_ALBEDOSPEC]);
-
-        // get/make view and projection matrix
-        //Matrix view = pCamera->GetView();
-        //Matrix proj = pCamera->GetProjection();
         
         // add point light data
         Vector4 pos = m_pointLights[0].position;
-        //Matrix matPos = proj * view * Matrix::Translate(Vector3(pos.x, pos.y, pos.z));
-        //pos = Vector4(matPos.Position(), 1.f);
-        LOG_ERR("light pos : ", pos.x, ", ", pos.y, ", ", pos.z);
         Vector4 color = m_pointLights[0].diffuse;
         glUniform3f(glGetUniformLocation(m_shaderProgram, "pointLight[0].position"), pos.x, pos.y, pos.z);
         glUniform3f(glGetUniformLocation(m_shaderProgram, "pointLight[0].diffuse"), color.x, color.y, color.z);
@@ -116,6 +109,20 @@ namespace alpha
         glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[1].constant"), m_pointLights[1].constant);
         glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[1].linear"), m_pointLights[1].linear);
         glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[1].quadratic"), m_pointLights[1].quadratic);
+
+        // set single directional light data
+        pos = m_directionalLights[0].direction;
+        color = m_directionalLights[0].diffuse;
+        Vector4 ambient = m_directionalLights[0].ambient;
+        Vector4 specular = m_directionalLights[0].specular;
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "directionalLight.position"), pos.x, pos.y, pos.z);
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "directionalLight.ambient"), ambient.x, ambient.y, ambient.z);
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "directionalLight.diffuse"), color.x, color.y, color.z);
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "directionalLight.specular"), specular.x, specular.y, specular.z);
+
+        // add camera view position
+        Vector3 view_pos = pCamera->GetView().Position();
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "viewPosition"), view_pos.x, view_pos.y, view_pos.z);
 
         // draw the quad for draw textures to
         glBindVertexArray(m_vaoQuad);
