@@ -26,6 +26,7 @@ limitations under the License.
 #include "Graphics/RenderSet.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Light.h"
+#include "Graphics/Camera.h"
 #include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
@@ -52,10 +53,10 @@ namespace alpha
 
         // Create the quad that will be rendered to the screen, and have the gbuffer textures dawn on it
         GLfloat vertices[] = {
-            -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
             -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         };
         glGenVertexArrays(1, &m_vaoQuad);
         glGenBuffers(1, &m_vboQuad);
@@ -92,17 +93,29 @@ namespace alpha
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[GBUFFER_ALBEDOSPEC]);
 
-        // set lights and other shader uniforms
-        for (GLuint i = 0; i < 2; ++i)
-        {
-            //LOG_ERR("light pos <", i, ">: ", m_pointLights[i].position.x, ", ", m_pointLights[i].position.y, ", ", m_pointLights[i].position.z);
-            glUniform3fv(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].position").c_str()), 1, &m_pointLights[i].position.x);
-            glUniform3fv(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].diffuse").c_str()), 1, &m_pointLights[i].diffuse.x);
-
-            glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].constant").c_str()), m_pointLights[i].constant);
-            glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].linear").c_str()), m_pointLights[i].linear);
-            glUniform1f(glGetUniformLocation(m_shaderProgram, ("pointLight[" + std::to_string(i) + "].quadratic").c_str()), m_pointLights[i].quadratic);
-        }
+        // get/make view and projection matrix
+        //Matrix view = pCamera->GetView();
+        //Matrix proj = pCamera->GetProjection();
+        
+        // add point light data
+        Vector4 pos = m_pointLights[0].position;
+        //Matrix matPos = proj * view * Matrix::Translate(Vector3(pos.x, pos.y, pos.z));
+        //pos = Vector4(matPos.Position(), 1.f);
+        LOG_ERR("light pos : ", pos.x, ", ", pos.y, ", ", pos.z);
+        Vector4 color = m_pointLights[0].diffuse;
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "pointLight[0].position"), pos.x, pos.y, pos.z);
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "pointLight[0].diffuse"), color.x, color.y, color.z);
+        glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[0].constant"), m_pointLights[0].constant);
+        glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[0].linear"), m_pointLights[0].linear);
+        glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[0].quadratic"), m_pointLights[0].quadratic);
+        
+        pos = m_pointLights[1].position;
+        color = m_pointLights[1].diffuse;
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "pointLight[1].position"), pos.x, pos.y, pos.z);
+        glUniform3f(glGetUniformLocation(m_shaderProgram, "pointLight[1].diffuse"), color.x, color.y, color.z);
+        glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[1].constant"), m_pointLights[1].constant);
+        glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[1].linear"), m_pointLights[1].linear);
+        glUniform1f(glGetUniformLocation(m_shaderProgram, "pointLight[1].quadratic"), m_pointLights[1].quadratic);
 
         // draw the quad for draw textures to
         glBindVertexArray(m_vaoQuad);
@@ -122,15 +135,19 @@ namespace alpha
 
         for (auto light : lights)
         {
+            unsigned int dindex = m_directionalLights.size();
+            unsigned int pindex = m_pointLights.size();
+
             switch(light->GetLightType())
             {
             case LightType::DIRECTIONAL:
                 m_directionalLights.push_back(DirectionalLight());
 
-                m_directionalLights[m_directionalLights.size() - 1].direction = Vector4(light->GetLightDirection(), 1.f);
-                m_directionalLights[m_directionalLights.size() - 1].ambient = light->GetAmbientLight();
-                m_directionalLights[m_directionalLights.size() - 1].diffuse = light->GetDiffuseLight();
-                m_directionalLights[m_directionalLights.size() - 1].specular = light->GetSpecularLight();
+                m_directionalLights[dindex].direction = Vector4(light->GetLightDirection(), 1.f);
+
+                m_directionalLights[dindex].ambient = light->GetAmbientLight();
+                m_directionalLights[dindex].diffuse = light->GetDiffuseLight();
+                m_directionalLights[dindex].specular = light->GetSpecularLight();
                 break;
 
             case LightType::POINT:
@@ -138,13 +155,15 @@ namespace alpha
 
                 //LOG_ERR(light->GetAttenuationConstant(), ", ", light->GetAttenuationLinear(), ", ", light->GetAttenuationQuadratic());
 
-                m_pointLights[m_pointLights.size() - 1].position = Vector4(light->worldTransform.Position(), 1.f);
-                m_pointLights[m_pointLights.size() - 1].ambient = light->GetAmbientLight();
-                m_pointLights[m_pointLights.size() - 1].diffuse = light->GetDiffuseLight();
-                m_pointLights[m_pointLights.size() - 1].specular = light->GetSpecularLight();
-                m_pointLights[m_pointLights.size() - 1].constant = light->GetAttenuationConstant();
-                m_pointLights[m_pointLights.size() - 1].linear = light->GetAttenuationLinear();
-                m_pointLights[m_pointLights.size() - 1].quadratic = light->GetAttenuationQuadratic();
+                m_pointLights[pindex].position = Vector4(light->worldTransform.Position(), 1.f);
+
+                m_pointLights[pindex].ambient = light->GetAmbientLight();
+                m_pointLights[pindex].diffuse = light->GetDiffuseLight();
+                m_pointLights[pindex].specular = light->GetSpecularLight();
+
+                m_pointLights[pindex].constant = light->GetAttenuationConstant();
+                m_pointLights[pindex].linear = light->GetAttenuationLinear();
+                m_pointLights[pindex].quadratic = light->GetAttenuationQuadratic();
                 break;
 
             default:

@@ -38,6 +38,14 @@ namespace alpha
         , m_41(_41), m_42(_42), m_43(_43), m_44(_44)
     { }
 
+    Matrix Matrix::Transpose() const
+    {
+        return Matrix(m_11, m_21, m_31, m_41,
+                      m_12, m_22, m_32, m_42,
+                      m_13, m_23, m_33, m_43,
+                      m_14, m_24, m_34, m_44);
+    }
+
     Vector3 Matrix::Position() const
     {
         return Vector3(m_41, m_42, m_43);

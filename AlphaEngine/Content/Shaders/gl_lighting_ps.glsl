@@ -44,7 +44,7 @@ uniform DirectionalLight directionalLight;
 void main ()
 {
     vec3 pixel_position = texture(gPosition, TexCoords).rgb;
-    vec3 pixel_normal = texture(gNormal, TexCoords).rgb;
+    vec3 pixel_normal = normalize(texture(gNormal, TexCoords).rgb);
     vec4 pixel_color = texture(gAlbedoSpec, TexCoords);
     float pixel_specular = pixel_color.a;
     pixel_color.a = 1.0f;
@@ -71,4 +71,6 @@ void main ()
 
     FragColor = vec4(lighting, 1.0f);
     //FragColor = vec4(pixel_normal, 1.0f);
+    //FragColor = vec4(pixel_position, 1.0f);
+    //FragColor = vec4(pixel_color.xyz, 1.0f);
 }

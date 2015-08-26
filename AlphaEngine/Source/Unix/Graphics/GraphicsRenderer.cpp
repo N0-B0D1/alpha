@@ -194,7 +194,7 @@ namespace alpha
         glDepthFunc(GL_LESS);
 
         // wireframe mode!
-       // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
        
         glClearColor(0.f, 0.f, 0.f, 0.f);
 

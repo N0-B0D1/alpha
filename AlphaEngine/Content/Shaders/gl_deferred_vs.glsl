@@ -16,20 +16,16 @@
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 
-out vec3 FragPos;
-out vec3 Normal;
-
 uniform mat4 world;
 uniform mat4 view;
 uniform mat4 projection;
 
+out vec3 FragPos;
+out vec3 Normal;
+
 void main ()
 {
-    vec4 world_position = world * vec4(position, 1.0f);
-    gl_Position = projection * view * world_position;
-    FragPos = world_position.xyz;
-
-    //Normal = transpose(inverse(mat3(world))) * normal;
-    mat3 normal_matrix = transpose(inverse(mat3(world)));
-    Normal = normal_matrix * normal;
+    gl_Position = projection * view * world * vec4(position, 1.0f);
+    FragPos = vec3(world * vec4(position, 1.0f));
+    Normal = mat3(transpose(inverse(world))) * normal;
 }
