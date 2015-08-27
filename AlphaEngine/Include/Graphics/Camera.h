@@ -46,14 +46,22 @@ namespace alpha
 
         /** Obtain the pre-calcualted view matrix for rendering */
         Matrix GetView() const;
+        /** Get base un-rotated view for 2d rendering */
+        Matrix GetBaseView() const;
         /** Obtain the pre-calculated projection matrix for rendering */
         Matrix GetProjection() const;
+        /** Obtain the orthographic project matrix for 2d rendering */
+        Matrix GetOrthoProjection() const;
 
     private:
         /** The calculated view matrix */
         Matrix m_view;
+        /** Base view for 2d rendering */
+        Matrix m_mBaseView;
         /** The calculated projection matrix */
         Matrix m_projection;
+        /** Ortho projection matrix for 2d rendering */
+        Matrix m_mOrthoProjection;
 
         /** A shared pointer to the current camera component that will drive this camera. */
         std::weak_ptr<CameraComponent> m_pCameraComponent;
@@ -61,6 +69,8 @@ namespace alpha
         float m_fov;
         float m_near;
         float m_far;
+        float m_width;
+        float m_height;
 
         Vector3 m_position;
         Quaternion m_rotation;

@@ -17,56 +17,39 @@
 // matrix buffer
 cbuffer MatrixBuffer : register(b0)
 {
-	matrix World;
-	matrix View;
-	matrix Projection;
+    matrix World;
+    matrix View;
+    matrix Projection;
 }
 
-// lighting buffer
-cbuffer ConstantBuffer : register(b1)
-{
-	float4 ambient;
-	float4 diffuse;
-	float4 specular;
-	float shininess;
-	float _spacer1;
-	float _spacer2;
-	float _spacer3;
-	float4 vOutputColor;
-
-	struct PointLight
-	{
-		float4 position;
-		
-		float4 ambient;
-		float4 diffuse;
-		float4 specular;
-	} pointLight[2];
-	
-	struct DirectionalLight
-	{
-		float4 direction;
-		
-		float4 ambient;
-		float4 diffuse;
-		float4 specular;
-	} directionalLight;
-}
-
+// Typedef input/output
 struct VS_INPUT
 {
-    float4 Pos : POSITION;
-    float3 Norm : NORMAL;
+    float4 position : POSITION;
+    float3 normal : NORMAL;
 };
 
 struct PS_INPUT
 {
-    float4 Pos : SV_POSITION;
-    float3 Norm : NORMAL;
+    float4 position : SV_POSITION;
+    float3 normal : NORMAL;
+    float3 world_position : TEXCOORD0;
 };
 
-// Pixel Shader
-float4 PS( PS_INPUT input) : SV_Target
+// Vertex Shader
+PS_INPUT VS(VS_INPUT input)
 {
-    return vOutputColor;
+    PS_INPUT output = (PS_INPUT)0;
+
+    input.position.w = 1.0f;
+
+    output.position = mul(input.position, World);
+    output.world_position = output.position.xyz;
+    output.position = mul(output.position, View);
+    output.position = mul(output.position, Projection);
+
+    output.normal = mul(float4(input.normal, 1.f), World).xyz;
+    output.normal = normalize(output.normal);
+
+    return output;
 }

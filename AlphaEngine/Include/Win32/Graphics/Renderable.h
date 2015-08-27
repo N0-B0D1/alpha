@@ -33,57 +33,6 @@ namespace alpha
         Vector3 normal;
     };
 
-    typedef struct DirectionalLight
-    {
-        Vector4 direction;
-
-        Vector4 ambient;
-        Vector4 diffuse;
-        Vector4 specular;
-    } DirectionalLight;
-
-    typedef struct PointLight
-    {
-        Vector4 position;
-
-        Vector4 ambient;
-        Vector4 diffuse;
-        Vector4 specular;
-
-        float attenuationConstant;
-        float attenuationLinear;
-        float attenuationQuadratic;
-        float _spacer;
-    } PointLight;
-
-    typedef struct MatrixBuffer
-    {
-        DirectX::XMMATRIX mWorld;
-        DirectX::XMMATRIX mView;
-        DirectX::XMMATRIX mProjection;
-    } MatrixBuffer;
-
-    typedef struct ConstantBuffer
-    {
-        Vector4 ambient;
-        Vector4 diffuse;
-        Vector4 specular;
-        float shininess;
-        float _spacer1;
-        float _spacer2;
-        float _spacer3; // buffer size has to be a multiple of 16 bytes
-        Vector4 vOutputColor;
-
-        PointLight pointLight[2];
-        DirectionalLight directionalLight;
-    } ConstantBuffer;
-
-    typedef struct CameraBuffer
-    {
-        Vector3 cameraPosition;
-        float _spacer;
-    } CameraBuffer;
-
     /**
      * The Renderable object represents the smallest subset of data
      * to be rendered by the rendering engine, and is platform specific.
@@ -104,16 +53,8 @@ namespace alpha
         std::vector<unsigned int> indices;
 
         /** D3D11 data structures */
-        ID3D11VertexShader * m_pVertexShader;
-        ID3D11InputLayout * m_pInputLayout;
-        ID3D11PixelShader * m_pPixelShader;
-
         ID3D11Buffer * m_pVertexBuffer;
         ID3D11Buffer * m_pIndexBuffer;
-
-        ID3D11Buffer * m_pMatrixBuffer;
-        ID3D11Buffer * m_pConstantBuffer;
-        ID3D11Buffer * m_pCameraBuffer;
     };
 }
 

@@ -78,7 +78,6 @@ namespace alpha
         GLuint m_vertexBuffer;
         GLuint m_vertexAttribute;
         GLuint m_elementBuffer;
-        GLuint m_shaderProgram;
     };
 }
 

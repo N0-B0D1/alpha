@@ -26,13 +26,17 @@ namespace alpha
         : m_fov(45.f)
         , m_near(0.1f)
         , m_far(100.f)
+        , m_width(800.f)
+        , m_height(600.f)
         , m_position(position)
     {
         // set view matrix to default position
         m_view = Matrix::Translate(position);
+        m_mBaseView = Matrix::Translate(Vector3(0.f, 0.f, 0.f));
 
         // set projection matrix to default
-        m_projection = Matrix::Projection(m_fov, 800.f / 600.f, m_near, m_far);
+        m_projection = Matrix::Projection(m_fov, m_width / m_height, m_near, m_far);
+        m_mOrthoProjection = Matrix::OrthoProjection(m_width, m_height, m_near, m_far);
     }
     Camera::~Camera() { }
 
@@ -45,15 +49,18 @@ namespace alpha
             float near = pCameraComponent->GetNear();
             float far = pCameraComponent->GetFar();
 
-            if (fov != m_fov || near != m_near || far != m_far)
+            if (fov != m_fov || near != m_near || far != m_far || width != m_width || height != m_height)
             {
                 m_fov = fov;
                 m_near = near;
                 m_far = far;
+                m_width = width;
+                m_height = height;
 
                 LOG("Set camera values fov: ", m_fov, ", near: ", m_near, ", far: ", m_far);
 
                 m_projection = Matrix::Projection(m_fov, width / height, m_near, m_far);
+                m_mOrthoProjection = Matrix::OrthoProjection(width, height, m_near, m_far);
             }
 
             // update the view matrix if position or rotation have changed
@@ -81,8 +88,18 @@ namespace alpha
         return m_view;
     }
 
+    Matrix Camera::GetBaseView() const
+    {
+        return m_mBaseView;
+    }
+
     Matrix Camera::GetProjection() const
     {
         return m_projection;
+    }
+
+    Matrix Camera::GetOrthoProjection() const
+    {
+        return m_mOrthoProjection;
     }
 }

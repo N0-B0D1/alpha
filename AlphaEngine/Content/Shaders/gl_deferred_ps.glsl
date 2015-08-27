@@ -13,14 +13,19 @@
 // limitations under the License.
 
 #version 330 core
-out vec4 color;
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec4 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
 
 in vec3 FragPos;
 in vec3 Normal;
 
-uniform vec3 objectColor;
+uniform vec3 diffuse;
+uniform float specular;
 
-void main ()
+void main()
 {
-    color = vec4(objectColor, 1.0f);
+    gPosition = vec4(FragPos, 1.0);
+    gNormal = vec4(normalize(Normal), 1.0);
+    gAlbedoSpec = vec4(diffuse, specular);
 }

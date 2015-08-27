@@ -1,3 +1,6 @@
+#ifndef ALPHA_VECTOR_2_H
+#define ALPHA_VECTOR_2_H
+
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -14,16 +17,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "Graphics/Renderable.h"
-
 namespace alpha
 {
-    Renderable::Renderable(std::vector<Vertex> vertexList, std::vector<unsigned int> indexList)
-        : vertices(vertexList)
-        , indices(indexList)
-        , m_vertexBuffer(0)
-        , m_vertexAttribute(0)
-        , m_elementBuffer(0)
-    { }
-    Renderable::~Renderable() { }
+    struct Vector2
+    {
+        float x, y;
+
+        Vector2();
+        Vector2(float fx, float fy);
+        Vector2(const Vector2 & vec);
+    };
 }
+
+#endif // ALPHA_VECTOR_2_H

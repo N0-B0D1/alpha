@@ -38,6 +38,14 @@ namespace alpha
         , m_41(_41), m_42(_42), m_43(_43), m_44(_44)
     { }
 
+    Matrix Matrix::Transpose() const
+    {
+        return Matrix(m_11, m_21, m_31, m_41,
+                      m_12, m_22, m_32, m_42,
+                      m_13, m_23, m_33, m_43,
+                      m_14, m_24, m_34, m_44);
+    }
+
     Vector3 Matrix::Position() const
     {
         return Vector3(m_41, m_42, m_43);
@@ -104,6 +112,22 @@ namespace alpha
         projection.m_44 = 0.f;
 
         return projection;
+    }
+
+    Matrix Matrix::OrthoProjection(float width, float height, float near, float far)
+    {
+        //float xmax = width - 1.f;
+        //float ymax = height - 1.f;
+        float range = 1.f / (far - near);
+        Matrix ortho;
+        
+        ortho.m_11 = 2.f / width;
+        ortho.m_22 = 2.f / height;
+        ortho.m_33 = range; //2 / (far - near);
+        ortho.m_43 = range * near; //(near + far) / (near - far);
+        ortho.m_44 = 1.f;
+
+        return ortho;
     }
 
     Matrix operator* (const Matrix& left, const Matrix& right)

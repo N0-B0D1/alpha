@@ -29,13 +29,11 @@ namespace alpha
 {
 	class RenderWindow;
     class RenderSet;
+    class GeometryPass;
+    class LightingPass;
     class Camera;
-    class Asset;
     class AssetSystem;
     class Light;
-
-    struct PointLight;
-    struct DirectionalLight;
 
     class GraphicsRenderer : public IRenderer
     {
@@ -43,7 +41,7 @@ namespace alpha
         GraphicsRenderer();
         virtual ~GraphicsRenderer();
 
-        bool Initialize(AssetSystem * const pAssets);
+        bool Initialize(AssetSystem * const pAssets, int windowWidth, int windowHeight);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
@@ -55,28 +53,20 @@ namespace alpha
         /** Initializes the OpenGL device with GLFW */
         bool InitializeDevice();
 
-        /** Render a set of renderables */
-        void SetRender(std::shared_ptr<Camera> pCamera, RenderSet * renderSet);
-
-        /** Creates and returns a Vertex Shader from the given asset, also outputs blob data which can be passed into Input Layout creation */
-        GLuint CreateVertexShaderFromAsset(std::shared_ptr<Asset> vsAsset);
-        /** Creates and returns a Pixel/Fragment Shader from the given asset */
-        GLuint CreatePixelShaderFromAsset(std::shared_ptr<Asset> psAsset);
-        /** Convert light objects into type data structs for rendering. */
-        void CreateLightBufferData(const std::vector<Light *> & lights);
-
+        /** Game window width */
+        int m_windowWidth;
+        /** Game window height */
+        int m_windowHeight;
+        /** XWindow manager */
         RenderWindow *m_pWindow;
 
-        std::shared_ptr<Asset> m_vsDefaultShader;
-        std::shared_ptr<Asset> m_psDefaultShader;
-        std::shared_ptr<Asset> m_vsLightShader;
-        std::shared_ptr<Asset> m_psLightShader;
+        /** Geometry render pass for render to GBuffer */
+        GeometryPass * m_pGeometryPass;
+        /** Lighting render pass for final render to screen */
+        LightingPass * m_pLightingPass;
         
         const GLubyte *m_pRendererInfo;
         const GLubyte *m_pVersionInfo;
-
-        std::vector<PointLight> m_pointLights;
-        std::vector<DirectionalLight> m_directionalLights;
     };
 }
 

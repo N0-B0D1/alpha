@@ -27,7 +27,7 @@ namespace alpha
         GraphicsWindow();
         virtual ~GraphicsWindow();
 
-        bool Initialize();
+        bool Initialize(int windowWidth, int windowHeight);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
@@ -37,12 +37,11 @@ namespace alpha
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
         HINSTANCE m_hInstance;
-        //HWND m_hWnd;
     };
 
     /**
      * Global handle for the game window handle.
-     * XXX If possible find a way to make this now global easily...
+     * XXX If possible find a way to make this not global easily...
      */
     extern HWND g_hWnd;
 }

@@ -37,6 +37,9 @@ namespace alpha
                float _31, float _32, float _33, float _34,
                float _41, float _42, float _43, float _44);
 
+        /** Calculate and return the transpose of this matrix. */
+        Matrix Transpose() const;
+
         Vector3 Position() const;
 
         static Matrix Rotate(const Quaternion & rotation);
@@ -44,6 +47,7 @@ namespace alpha
         static Matrix Scale(const Vector3 & scale);
 
         static Matrix Projection(float fov, float aspect, float near, float far);
+        static Matrix OrthoProjection(float width, float height, float near, float far);
     };
 
     Matrix operator* (const Matrix& left, const Matrix& right);

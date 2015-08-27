@@ -33,6 +33,8 @@ namespace alpha
         , m_pRenderer(nullptr)
         , m_pSceneManager(nullptr)
         , m_pCamera(nullptr)
+        , m_fWindowWidth(1024.f)
+        , m_fWindowHeight(768.f)
     { }
     GraphicsSystem::~GraphicsSystem() { }
 
@@ -40,7 +42,7 @@ namespace alpha
     {
         // OS specific renderer
         m_pRenderer = new GraphicsRenderer();
-        if (!m_pRenderer->Initialize(m_pAssets))
+        if (!m_pRenderer->Initialize(m_pAssets, static_cast<int>(m_fWindowWidth), static_cast<int>(m_fWindowHeight)))
         {
             return false;
         }
@@ -77,7 +79,7 @@ namespace alpha
         m_pSceneManager->PreRender();
 
         // udpate the camera pre-render, so it can adjust to any game logic changes
-        m_pCamera->Update(800, 600);
+        m_pCamera->Update(m_fWindowWidth, m_fWindowHeight);
 
         // XXX TODO - pass camera into scene manager so the renderables can be frustum culled ... maybe ?
         const std::vector<RenderSet *> renderables = m_pSceneManager->GetRenderData();

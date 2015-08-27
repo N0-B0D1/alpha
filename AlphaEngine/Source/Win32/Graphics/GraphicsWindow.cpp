@@ -25,7 +25,7 @@ namespace alpha
     { }
     GraphicsWindow::~GraphicsWindow() { }
 
-    bool GraphicsWindow::Initialize()
+    bool GraphicsWindow::Initialize(int windowWidth, int windowHeight)
     {
         m_hInstance = GetModuleHandle(NULL);
 
@@ -52,7 +52,7 @@ namespace alpha
         }
 
         // Create window
-        RECT rc = { 0, 0, 800, 600 };
+        RECT rc = { 0, 0, windowWidth, windowHeight };
         AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
         g_hWnd = CreateWindow("ALPHAClass", "ALPHA Engine", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, m_hInstance, nullptr);
         if (!g_hWnd)
