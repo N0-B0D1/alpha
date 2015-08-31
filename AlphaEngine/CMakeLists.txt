@@ -99,3 +99,7 @@ endif (MSVC)
 # copy shader content files
 file(GLOB CONTENT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders/*.${SHADER_EXT}")
 file(COPY ${CONTENT_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Shaders/")
+
+# copy engine model content files
+file(GLOB CONTENT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Content/Models/*.am")
+file(COPY ${CONTENT_FILES} DESTINATION "${CMAKE_BINARY_DIR}${WORKING_DIR}/Models/")

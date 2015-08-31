@@ -89,7 +89,15 @@ namespace alpha
         // bind gBuffer textures to be rendered to
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_gBuffer);
 
+        // write to depth buffer
+        glDepthMask(GL_TRUE);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // enable depth test, and disable blend before drawing deometry to
+        // gbuffer
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
         
         // set shader program
         glUseProgram(m_shaderProgram);
@@ -129,6 +137,10 @@ namespace alpha
 
         // un-bind gbuffer textures.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glDepthMask(GL_FALSE);
+
+        glDisable(GL_DEPTH_TEST);
     }
     
     GLuint GeometryPass::GetGBufferTexture(GBUFFER_TYPE texture_type)

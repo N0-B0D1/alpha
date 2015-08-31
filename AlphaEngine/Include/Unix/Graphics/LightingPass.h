@@ -46,16 +46,21 @@ namespace alpha
         /** Convert light objects into type data structs for rendering. */
         void CreateLightBufferData(const std::vector<Light *> & lights);
 
+        void RenderPointLights(std::shared_ptr<Camera> pCamera);
+        void RenderDirectionalLights();
+
         /** light data for rendering */
         std::vector<PointLight> m_pointLights;
         std::vector<DirectionalLight> m_directionalLights;
 
         /** Lighting shader assets */
         std::shared_ptr<Asset> m_vsShader;
-        std::shared_ptr<Asset> m_psShader;
+        std::shared_ptr<Asset> m_psPLShader;
+        std::shared_ptr<Asset> m_psDLShader;
 
         /** Lighting shader program */
-        GLuint m_shaderProgram;
+        GLuint m_PLShaderProgram;
+        GLuint m_DLShaderProgram;
 
         /** GBuffer texture array, shared from the geometry pass */
         GLuint m_gBufferTextures[GBUFFER_TEXTURE_COUNT];
@@ -63,6 +68,9 @@ namespace alpha
         /** Quad vertex objects */
         GLuint m_vboQuad;
         GLuint m_vaoQuad;
+
+        /** Lighting volume sphere objects */
+        std::shared_ptr<Asset> m_pSphere;
     };
 }
 
