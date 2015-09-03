@@ -24,6 +24,7 @@ limitations under the License.
 namespace alpha
 {
     class Light;
+    class Model;
 
     struct PointLight;
     struct DirectionalLight;
@@ -31,7 +32,7 @@ namespace alpha
     class LightingPass : public ARenderPass
     {
     public:
-        LightingPass();
+        explicit LightingPass(Model * pSphere);
         virtual ~LightingPass();
 
         virtual bool VInitialize(AssetSystem * const pAssetSystem, int windowWidth, int windowHeight);
@@ -70,7 +71,7 @@ namespace alpha
         GLuint m_vaoQuad;
 
         /** Lighting volume sphere objects */
-        std::shared_ptr<Asset> m_pSphere;
+        Model * m_pSphere;
     };
 }
 

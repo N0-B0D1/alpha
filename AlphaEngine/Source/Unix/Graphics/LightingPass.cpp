@@ -23,23 +23,23 @@ limitations under the License.
 #include "Graphics/Renderable.h"
 #include "Graphics/Light.h"
 #include "Graphics/Camera.h"
+#include "Graphics/Model.h"
+#include "Graphics/ModelFile.h"
 #include "Assets/AssetSystem.h"
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    LightingPass::LightingPass()
+    LightingPass::LightingPass(Model * pSphere)
         : m_PLShaderProgram(0)
         , m_DLShaderProgram(0)
+        , m_pSphere(pSphere)
     { }
     LightingPass::~LightingPass() { }
 
     bool LightingPass::VInitialize(AssetSystem * const pAssetSystem, int /*windowWidth*/, int /*windowHeight*/)
     {
-        // load sphere model for point light volumes
-        m_pSphere = pAssetSystem->GetAsset("Models/unitsphere.am");
-
         // load shader asset files
         m_vsShader = pAssetSystem->GetAsset("Shaders/gl_lighting_vs.glsl");
         m_psPLShader = pAssetSystem->GetAsset("Shaders/gl_pointlight_ps.glsl");
@@ -199,6 +199,8 @@ namespace alpha
         
         for (unsigned int i = 0; i < m_pointLights.size(); ++i)
         {
+            if (m_pSphere)
+            {
             // add point light data
             pos = m_pointLights[i].position;
             color = m_pointLights[i].diffuse;
@@ -208,6 +210,7 @@ namespace alpha
             glUniform1f(glGetUniformLocation(m_PLShaderProgram, "pointLight.constant"), m_pointLights[i].constant);
             glUniform1f(glGetUniformLocation(m_PLShaderProgram, "pointLight.linear"), m_pointLights[i].linear);
             glUniform1f(glGetUniformLocation(m_PLShaderProgram, "pointLight.quadratic"), m_pointLights[i].quadratic);
+            }
         }
     }
 

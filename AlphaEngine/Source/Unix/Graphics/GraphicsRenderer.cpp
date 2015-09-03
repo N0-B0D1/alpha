@@ -34,6 +34,8 @@ limitations under the License.
 #include "Graphics/LightingPass.h"
 #include "Graphics/Camera.h"
 #include "Graphics/Light.h"
+#include "Graphics/Model.h"
+#include "Graphics/ModelFile.h"
 #include "Math/Vector4.h"
 
 #include "Assets/AssetSystem.h"
@@ -71,7 +73,12 @@ namespace alpha
             return false;
         }
 
-        m_pLightingPass = new LightingPass();
+        // create sphere primitive for light volumes
+        auto pSphere = pAssets->GetAsset("Models/unitsphere.am");
+        Model * pSphereModel = LoadModelFromAsset(pSphere);
+        this->PreRender(pSphereModel);
+
+        m_pLightingPass = new LightingPass(pSphereModel);
         if (!m_pLightingPass->VInitialize(pAssets, windowWidth, windowHeight))
         {
             return false;
