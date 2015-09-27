@@ -199,8 +199,6 @@ namespace alpha
         
         for (unsigned int i = 0; i < m_pointLights.size(); ++i)
         {
-            if (m_pSphere)
-            {
             // add point light data
             pos = m_pointLights[i].position;
             color = m_pointLights[i].diffuse;
@@ -210,6 +208,12 @@ namespace alpha
             glUniform1f(glGetUniformLocation(m_PLShaderProgram, "pointLight.constant"), m_pointLights[i].constant);
             glUniform1f(glGetUniformLocation(m_PLShaderProgram, "pointLight.linear"), m_pointLights[i].linear);
             glUniform1f(glGetUniformLocation(m_PLShaderProgram, "pointLight.quadratic"), m_pointLights[i].quadratic);
+
+            for (Renderable * renderable : m_pSphere->GetRenderables())
+            {
+                glBindVertexArray(renderable->m_vertexAttribute);
+                glDrawElements(GL_TRIANGLES, renderable->indices.size(), GL_UNSIGNED_INT, (void*)0);
+                glBindVertexArray(0);
             }
         }
     }
