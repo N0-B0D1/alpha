@@ -80,6 +80,8 @@ namespace alpha
 
     bool LightingPass::VShutdown()
     {
+        if (m_pSphere) { delete m_pSphere; }
+
         return true;
     }
 
