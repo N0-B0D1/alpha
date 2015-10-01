@@ -17,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -55,23 +56,26 @@ namespace alpha
             m_writeMutex.lock();
             m_outStream.open(m_path.c_str(), std::ios_base::app | std::ios_base::out);
 
-            //if (m_outStream.open)
             {
-                m_outStream << this->GetTimestamp();
+                std::string time = this->GetTimestamp();
+                print_val(time);
 
+                std::string level;
                 switch (severity)
                 {
+
                     case Severity::SDEBUG:
-                        m_outStream << " [  DEBUG  ] : ";
+                        level = " [  DEBUG  ] : ";
                         break;
                     case Severity::SWARNING:
-                        m_outStream << " [*WARNING*] : ";
+                        level = " [*WARNING*] : ";
                         break;
                     case Severity::SERROR:
-                        m_outStream << " [!!ERROR!!] : ";
+                        level = " [!!ERROR!!] : ";
                         break;
                 }
 
+                print_val(level);
                 print_impl(args...);
             }
             m_outStream.close();
@@ -80,16 +84,27 @@ namespace alpha
         }
 
     private:
+        /**
+         * Print the given string to the log file and stdout.
+         */
+        template<typename value>
+        void print_val(value output)
+        {
+            m_outStream << output;
+            std::cout << output;
+        }
+
         void print_impl()
         {
             // finish with a newline, so it logs cleanly
             m_outStream << std::endl;
+            std::cout << std::endl;
         }
          
         template<typename First, typename...Rest>
         void print_impl(First param1, Rest...rest)
         {
-            m_outStream << param1;
+            print_val<First>(param1);
             print_impl(rest...);    
         }
 
