@@ -54,7 +54,6 @@ namespace alpha
         m_vAmbient = m_vDiffuse * m_fAmbientIntensity;
         m_vSpecular = Vector4(1.f, 1.f, 1.f, 1.f);
 
-        // XXX insert the magic here ...
         /**
          *                   I
          * Atten. = ---------------------
@@ -122,5 +121,10 @@ namespace alpha
     float Light::GetAttenuationQuadratic() const
     {
         return m_fQuadratic;
+    }
+
+    float Light::GetMaxDistance() const
+    {
+        return m_fMaxDistance;
     }
 }

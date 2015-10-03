@@ -20,6 +20,7 @@ limitations under the License.
 #include <vector>
 
 #include "Graphics/ARenderPass.h"
+#include "Math/Vector2.h"
 
 namespace alpha
 {
@@ -48,7 +49,7 @@ namespace alpha
         void CreateLightBufferData(const std::vector<Light *> & lights);
 
         void RenderPointLights(std::shared_ptr<Camera> pCamera);
-        void RenderDirectionalLights();
+        void RenderDirectionalLights(std::shared_ptr<Camera> pCamera);
 
         /** light data for rendering */
         std::vector<PointLight> m_pointLights;
@@ -72,6 +73,9 @@ namespace alpha
 
         /** Lighting volume sphere objects */
         Model * m_pSphere;
+
+        /** Store the screen size so it can be passed to the shader */
+        Vector2 m_vScreenSize;
     };
 }
 

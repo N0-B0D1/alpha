@@ -14,8 +14,8 @@
 
 #version 330 core
 out vec4 FragColor;
-in vec2 TexCoords;
 
+uniform vec2      gScreenSize;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
@@ -35,6 +35,8 @@ uniform vec3 viewPosition;
 
 void main ()
 {
+    vec2 TexCoords = gl_FragCoord.xy / gScreenSize;
+
     vec3 pixel_position = texture(gPosition, TexCoords).rgb;
     vec3 pixel_normal = normalize(texture(gNormal, TexCoords).rgb);
     vec4 pixel_color = texture(gAlbedoSpec, TexCoords);

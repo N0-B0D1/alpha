@@ -38,8 +38,11 @@ namespace alpha
     { }
     LightingPass::~LightingPass() { }
 
-    bool LightingPass::VInitialize(AssetSystem * const pAssetSystem, int /*windowWidth*/, int /*windowHeight*/)
+    bool LightingPass::VInitialize(AssetSystem * const pAssetSystem, int windowWidth, int windowHeight)
     {
+        m_vScreenSize.x = windowWidth;
+        m_vScreenSize.y = windowHeight;
+
         // load shader asset files
         m_vsShader = pAssetSystem->GetAsset("Shaders/gl_lighting_vs.glsl");
         m_psPLShader = pAssetSystem->GetAsset("Shaders/gl_pointlight_ps.glsl");
@@ -60,10 +63,10 @@ namespace alpha
 
         // Create the quad that will be rendered to the screen, and have the gbuffer textures dawn on it
         GLfloat vertices[] = {
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,
+             1.0f,  1.0f, 0.0f,
+             1.0f, -1.0f, 0.0f,
         };
         glGenVertexArrays(1, &m_vaoQuad);
         glGenBuffers(1, &m_vboQuad);
@@ -71,9 +74,7 @@ namespace alpha
         glBindBuffer(GL_ARRAY_BUFFER, m_vboQuad);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
         return true;
     }
@@ -96,7 +97,7 @@ namespace alpha
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         this->RenderPointLights(pCamera);
-        this->RenderDirectionalLights();
+        this->RenderDirectionalLights(pCamera);
     }
 
     void LightingPass::AttachGBufferTexture(GBUFFER_TYPE texture_type, GLuint texture)
@@ -147,36 +148,6 @@ namespace alpha
                 break;
             }
         }
-
-        // XXX hack
-        // make sure at least 2 point lights exist, and 1 directional light
-        /*
-        switch (m_directionalLights.size())
-        {
-        case 0:
-            m_directionalLights.push_back(DirectionalLight());
-            break;
-        }
-
-        switch (m_pointLights.size())
-        {
-        case 1:
-            m_pointLights.push_back(PointLight());
-            
-            m_pointLights[m_pointLights.size() - 1].constant = 1.f;
-            m_pointLights[m_pointLights.size() - 1].linear = 0.045f;
-            m_pointLights[m_pointLights.size() - 1].quadratic = 0.0075f;
-
-            break;
-
-        case 0:
-            for (int i = 0; i < 2; i++)
-            {
-                m_pointLights.push_back(PointLight());
-            }
-            break;
-        }
-        */
     }
 
     void LightingPass::RenderPointLights(std::shared_ptr<Camera> pCamera)
@@ -192,6 +163,15 @@ namespace alpha
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[GBUFFER_ALBEDOSPEC]);
 
+        // add screen size to shader
+        glUniform2f(glGetUniformLocation(m_PLShaderProgram, "gScreenSize"), m_vScreenSize.x, m_vScreenSize.y);
+
+        Matrix world;
+        Matrix view = pCamera->GetView();
+        Matrix proj = pCamera->GetProjection();
+        glUniformMatrix4fv(glGetUniformLocation(m_PLShaderProgram, "view"), 1, GL_FALSE, &view.m_11);
+        glUniformMatrix4fv(glGetUniformLocation(m_PLShaderProgram, "projection"), 1, GL_FALSE, &proj.m_11);
+
         // add camera view position
         Vector3 view_pos = pCamera->GetView().Position();
         glUniform3f(glGetUniformLocation(m_PLShaderProgram, "viewPosition"), view_pos.x, view_pos.y, view_pos.z);
@@ -204,6 +184,12 @@ namespace alpha
             // add point light data
             pos = m_pointLights[i].position;
             color = m_pointLights[i].diffuse;
+
+            Matrix scale = Matrix::Scale(Vector3(10.f, 10.f, 10.f));
+
+            // attach world position
+            world = scale * Matrix::Translate(Vector3(pos.x, pos.y, pos.z));
+            glUniformMatrix4fv(glGetUniformLocation(m_PLShaderProgram, "world"), 1, GL_FALSE, &world.m_11);
 
             glUniform3f(glGetUniformLocation(m_PLShaderProgram, "pointLight.position"), pos.x, pos.y, pos.z);
             glUniform3f(glGetUniformLocation(m_PLShaderProgram, "pointLight.diffuse"), color.x, color.y, color.z);
@@ -220,7 +206,7 @@ namespace alpha
         }
     }
 
-    void LightingPass::RenderDirectionalLights()
+    void LightingPass::RenderDirectionalLights(std::shared_ptr<Camera> /*pCamera*/)
     {
         // set shader program
         glUseProgram(m_DLShaderProgram);
@@ -232,6 +218,16 @@ namespace alpha
         glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[GBUFFER_NORMAL]);
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, m_gBufferTextures[GBUFFER_ALBEDOSPEC]);
+
+        // add screen size to shader
+        glUniform2f(glGetUniformLocation(m_DLShaderProgram, "gScreenSize"), m_vScreenSize.x, m_vScreenSize.y);
+
+        Matrix world;
+        Matrix view;
+        Matrix proj;
+        glUniformMatrix4fv(glGetUniformLocation(m_DLShaderProgram, "world"), 1, GL_FALSE, &world.m_11);
+        glUniformMatrix4fv(glGetUniformLocation(m_DLShaderProgram, "view"), 1, GL_FALSE, &view.m_11);
+        glUniformMatrix4fv(glGetUniformLocation(m_DLShaderProgram, "projection"), 1, GL_FALSE, &proj.m_11);
 
         for (unsigned int i = 0; i < m_directionalLights.size(); ++i)
         {

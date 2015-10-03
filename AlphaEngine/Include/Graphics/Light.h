@@ -52,6 +52,9 @@ namespace alpha
         float GetAttenuationLinear() const;
         float GetAttenuationQuadratic() const;
 
+        /** Get the max light distance */
+        float GetMaxDistance() const;
+
         Matrix worldTransform;
 
     private:
