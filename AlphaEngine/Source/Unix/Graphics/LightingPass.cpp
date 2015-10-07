@@ -141,6 +141,8 @@ namespace alpha
                 m_pointLights[pindex].constant = light->GetAttenuationConstant();
                 m_pointLights[pindex].linear = light->GetAttenuationLinear();
                 m_pointLights[pindex].quadratic = light->GetAttenuationQuadratic();
+
+                m_pointLights[pindex].distance = light->GetMaxDistance();
                 break;
 
             default:
@@ -178,14 +180,16 @@ namespace alpha
 
         Vector4 pos;
         Vector4 color;
+        float distance;
         
         for (unsigned int i = 0; i < m_pointLights.size(); ++i)
         {
             // add point light data
             pos = m_pointLights[i].position;
             color = m_pointLights[i].diffuse;
+            distance = m_pointLights[i].distance;
 
-            Matrix scale = Matrix::Scale(Vector3(10.f, 10.f, 10.f));
+            Matrix scale = Matrix::Scale(Vector3(distance, distance, distance));
 
             // attach world position
             world = scale * Matrix::Translate(Vector3(pos.x, pos.y, pos.z));

@@ -43,6 +43,8 @@ namespace alpha
         float constant;
         float linear;
         float quadratic;
+
+        float distance;
     } PointLight;
 
     typedef struct DirectionalLight
