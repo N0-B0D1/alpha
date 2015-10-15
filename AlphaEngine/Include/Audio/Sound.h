@@ -19,11 +19,17 @@ limitations under the License.
 
 #include <memory>
 
-#include <fmod.hpp>
+#include <SDL2/SDL_audio.h>
 
 namespace alpha
 {
     class Asset;
+
+    struct SoundData
+    {
+        unsigned char * position;
+        unsigned int length;
+    };
 
     /**
      * Sound is a helper class for managing an FMOD sound and its playback state.
@@ -32,7 +38,7 @@ namespace alpha
     class Sound
     {
     public:
-        explicit Sound(FMOD::System * pSystem, std::weak_ptr<Asset> pAsset);
+        explicit Sound(std::weak_ptr<Asset> pAsset);
         ~Sound();
 
         void Play();
@@ -42,9 +48,14 @@ namespace alpha
 
     private:
         std::weak_ptr<Asset> m_pAsset;
-        FMOD::System * m_pSystem;
-        FMOD::Sound * m_pSound;
-        FMOD::Channel * m_pChannel;
+
+        // userdata struct
+        SoundData m_pUserData;
+
+        // SDL Audio format
+        unsigned int m_wavLength;
+        unsigned char * m_pWavBuffer;
+        SDL_AudioSpec m_wavSpec;
 
         float m_volume;
     };

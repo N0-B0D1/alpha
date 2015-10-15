@@ -29,6 +29,7 @@ namespace alpha
         Asset(const char * path, struct stat fileStats);
         virtual ~Asset();
 
+        std::string GetPath() const;
         std::vector<unsigned char> GetData();
 
     private:

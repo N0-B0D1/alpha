@@ -20,7 +20,8 @@ limitations under the License.
 #include <memory>
 #include <vector>
 
-#include <fmod.hpp>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_audio.h>
 
 #include "AlphaSystem.h"
 
@@ -47,8 +48,9 @@ namespace alpha
         /** Manage a list of sounds, so they can be properly updated and disposed of. */
         std::vector<std::shared_ptr<Sound>> m_sounds;
 
-        /** FMOD system instance, shared with all sound and sound group objects */
-        FMOD::System * m_pSystem;
+        /** Audio device spec */
+        SDL_AudioSpec m_audioSpec;
+        SDL_AudioDeviceID m_audioDevID;
     };
 }
 

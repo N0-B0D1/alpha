@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 cmake_minimum_required(VERSION 2.6)
 
 # Use relative paths in windows
@@ -58,9 +59,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STRE
     FIND_LIBRARY(GLEW_LIB GLEW)
     FIND_LIBRARY(GLFW_LIB glfw)
     FIND_LIBRARY(UUID_LIB uuid)
-    FIND_LIBRARY(FMOD_LIB fmod)
+    FIND_LIBRARY(SDL2_LIB SDL2)
     FIND_PACKAGE(Threads)
-    set(PLATFORM_LIBS ${X11_LIB} ${GL_LIB} ${GLUT_LIB} ${GLEW_LIB} ${GLFW_LIB} ${UUID_LIB} ${FMOD_LIB} ${CMAKE_THREAD_LIBS_INIT})
+    set(PLATFORM_LIBS ${X11_LIB} ${GL_LIB} ${GLUT_LIB} ${GLEW_LIB} ${GLFW_LIB} ${UUID_LIB} ${SDL2_LIB} ${CMAKE_THREAD_LIBS_INIT})
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         set(ALPHA_CXX_FLAGS "-g -std=c++11")
     else()

@@ -22,70 +22,62 @@ limitations under the License.
 
 namespace alpha
 {
-    Sound::Sound(FMOD::System * pSystem, std::weak_ptr<Asset> pAsset)
+    void mix_callback(void *userdata, unsigned char *stream, int length)
+    {
+        SoundData *data = (struct SoundData*)userdata;
+
+        length = (length > (int)data->length ? data->length : length);
+        SDL_MixAudio(stream, data->position, length, SDL_MIX_MAXVOLUME);
+
+        data->position += length;
+        data->length -= length;
+    }
+
+    Sound::Sound(std::weak_ptr<Asset> pAsset)
         : m_pAsset(pAsset)
-        , m_pSystem(pSystem)
-        , m_pSound(nullptr)
-        , m_pChannel(nullptr)
-        , m_volume(0.5f)
+        , m_pWavBuffer(nullptr)
     {
         // create the sound so it is preped for use
         if (auto asset = pAsset.lock())
         {
-            std::vector<unsigned char> data = asset->GetData();
-            if (data.size() > 0)
+            std::string path = asset->GetPath();
+
+            if (SDL_LoadWAV(path.c_str(), &m_wavSpec, &m_pWavBuffer, &m_wavLength) == nullptr)
             {
-                char * buffer = reinterpret_cast<char *>(&data[0]);
+                LOG_ERR("Failed to load sound WAV from path.");
+            }
+            else
+            {
+                m_pUserData.position = m_pWavBuffer;
+                m_pUserData.length = m_wavLength;
 
-                FMOD_CREATESOUNDEXINFO exinfo;
-                memset(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
-                exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-                exinfo.length = data.size();
+                m_wavSpec.callback = mix_callback;
+                m_wavSpec.userdata = &m_pUserData;
 
-                FMOD_RESULT result = m_pSystem->createSound(buffer, FMOD_OPENMEMORY, &exinfo, &m_pSound);
-                if (result != FMOD_OK)
-                {
-                    LOG_ERR("AudioSystem > FMOD failed to create sound from asset data.");
-                }
+                LOG("WAV loaded and set to wav spec...");
             }
         }
     }
 
     Sound::~Sound()
     {
-        // release the sound
-        // do not need to do anything with the channel
-        // fmod will handle the rest
-        if (m_pSound)
+        if (m_pWavBuffer)
         {
-            m_pSound->release();
+            LOG("Freeing wav buffer for sound.");
+            SDL_FreeWAV(m_pWavBuffer);
         }
     }
 
     void Sound::Play()
     {
-        FMOD_RESULT result = m_pSystem->playSound(m_pSound, 0, false, &m_pChannel);
-        if (result != FMOD_OK)
-        {
-            LOG_ERR("Sound > Failed to play sound.");
-        }
-        result = m_pChannel->setVolume(m_volume);
     }
 
     void Sound::Stop()
     {
-        if (m_pChannel != nullptr)
-        {
-            m_pChannel->stop();
-        }
     }
 
     void Sound::SetVolume(float volume)
     {
         m_volume = volume;
-        if (m_pChannel != nullptr)
-        {
-            m_pChannel->setVolume(m_volume);
-        }
     }
 }
