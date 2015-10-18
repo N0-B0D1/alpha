@@ -60,7 +60,7 @@ bool DemoGameState::VInitialize()
     }
 
     // create a test sound to play
-    m_pTestSound = this->CreateSound("Media/hit.mp3");
+    m_pTestSound = this->CreateSound("Media/hit.wav");
     if (auto pSound = m_pTestSound.lock())
     {
         // hit sound is fairly loud, so set the channel low on play

@@ -111,6 +111,7 @@ namespace alpha
     void ThreadPool::QueueTask(ATask * pTask)
     {
         // always add tasks to the next task queue with a round robin approach.
-        m_vTaskRunnerQueues[(m_currentQueue + 1) % m_maxThreads]->Push(pTask);
+        m_currentQueue = (m_currentQueue + 1) % m_maxThreads;
+        m_vTaskRunnerQueues[m_currentQueue]->Push(pTask);
     }
 }

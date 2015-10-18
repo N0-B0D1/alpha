@@ -84,7 +84,11 @@ namespace alpha
         m_sounds.clear();
 
         // close the audio device
-        if (m_audioDevID != 0) { SDL_CloseAudioDevice(m_audioDevID); }
+        if (m_audioDevID != 0)
+        {
+            SDL_PauseAudioDevice(m_audioDevID, 1);
+            SDL_CloseAudioDevice(m_audioDevID);
+        }
 
         SDL_Quit();
 
@@ -100,6 +104,12 @@ namespace alpha
 
     bool AudioSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
+        // update all sounds, allowing them to handle state transitions
+        // properly.
+        for (auto sound : m_sounds)
+        {
+            sound->Update();
+        }
         return true;
     }
 }

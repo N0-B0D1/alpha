@@ -25,10 +25,30 @@ namespace alpha
 {
     class Asset;
 
+    enum SoundState
+    {
+        STOP,
+        STOPPED,
+        PLAY,
+        PLAYING,
+        PAUSE,
+        PAUSED,
+    };
+
     struct SoundData
     {
+        // audio format and data
+        unsigned int wav_length;
+        unsigned char * wav_buffer;
+        SDL_AudioSpec wav_spec;
+
+        // sound playing data
         unsigned char * position;
         unsigned int length;
+
+        SoundState state;
+
+        SoundData();
     };
 
     /**
@@ -41,8 +61,11 @@ namespace alpha
         explicit Sound(std::weak_ptr<Asset> pAsset);
         ~Sound();
 
+        void Update();
+
         void Play();
         void Stop();
+        void Pause();
 
         void SetVolume(float volume);
 
@@ -50,12 +73,7 @@ namespace alpha
         std::weak_ptr<Asset> m_pAsset;
 
         // userdata struct
-        SoundData m_pUserData;
-
-        // SDL Audio format
-        unsigned int m_wavLength;
-        unsigned char * m_pWavBuffer;
-        SDL_AudioSpec m_wavSpec;
+        SoundData * m_pUserData;
 
         float m_volume;
     };
