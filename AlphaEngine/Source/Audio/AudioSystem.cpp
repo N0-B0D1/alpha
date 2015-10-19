@@ -112,7 +112,6 @@ namespace alpha
 
     bool AudioSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        m_pMainChannel->Update();
         return true;
     }
 }

@@ -27,16 +27,6 @@ namespace alpha
         m_sounds.clear();
     }
 
-    void AudioMixer::Update()
-    {
-        // update all sounds, allowing them to handle state transitions
-        // properly.
-        for (auto sound : m_sounds)
-        {
-            sound->Update();
-        }
-    }
-
     void AudioMixer::Add(std::shared_ptr<Sound> pSound)
     {
         m_sounds.push_back(pSound);

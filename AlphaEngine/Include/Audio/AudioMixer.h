@@ -29,8 +29,6 @@ namespace alpha
     public:
         ~AudioMixer();
 
-        /** Update all sound states */
-        void Update();
         /** Mix all sounds in this mixer channel */
         void Mix(unsigned char * stream, int length);
 

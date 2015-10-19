@@ -22,207 +22,69 @@ limitations under the License.
 
 namespace alpha
 {
-    /*
-    static void mix_callback(void *userdata, unsigned char *stream, int length)
-    {
-        SoundData *data = (struct SoundData*)userdata;
-
-        switch (data->state)
-        {
-            case SoundState::PLAYING:
-                // in the mix callback, we only care if the sound bit is
-                // actually in a playing state, all other states are handled in
-                // the Sound class.
-                //
-                // make sure we still have audio to play, if none left, then we
-                // can stop playing.
-                if (data->length == 0)
-                {
-                    data->state = SoundState::STOP;
-                    break;
-                }
-
-                // mix the audio if all conditions pass
-                length = (length > (int)data->length ? data->length : length);
-                LOG_WARN("MIXING AUDIO: ", data->length);
-                SDL_MixAudio(stream, data->position, length, SDL_MIX_MAXVOLUME);
-
-                data->position += length;
-                data->length -= length;
-
-                break;
-
-            default:
-                break;
-        }
-    }
-    */
-
-    SoundData::SoundData()
-        : wav_buffer(nullptr)
-        , position(nullptr)
-        , state(SoundState::STOP)
-    { }
-
     Sound::Sound(std::weak_ptr<Asset> pAsset, SDL_AudioSpec audio_spec)
         : m_pAsset(pAsset)
+        , m_pWavBuffer(nullptr)
+        , m_position(nullptr)
+        , m_state(SoundState::STOP)
     {
         // create the sound so it is preped for use
         if (auto asset = pAsset.lock())
         {
             std::string path = asset->GetPath();
 
-            m_pUserData = new SoundData();
-
-            if (SDL_LoadWAV(path.c_str(), &m_pUserData->wav_spec, &m_pUserData->wav_buffer, &m_pUserData->wav_length) == nullptr)
+            if (SDL_LoadWAV(path.c_str(), &m_wavSpec, &m_pWavBuffer, &m_wavLength) == nullptr)
             {
                 LOG_ERR("Failed to load sound WAV from path.");
             }
             else
             {
                 // convert audio if needed
-                if (m_pUserData->wav_spec.freq != audio_spec.freq ||
-                    m_pUserData->wav_spec.format != audio_spec.format ||
-                    m_pUserData->wav_spec.channels != audio_spec.channels)
+                if (m_wavSpec.freq != audio_spec.freq ||
+                    m_wavSpec.format != audio_spec.format ||
+                    m_wavSpec.channels != audio_spec.channels)
                 {
                     SDL_AudioCVT cvt;
                     SDL_BuildAudioCVT(&cvt,
-                                      m_pUserData->wav_spec.format, m_pUserData->wav_spec.channels, m_pUserData->wav_spec.freq,
+                                      m_wavSpec.format, m_wavSpec.channels, m_wavSpec.freq,
                                       audio_spec.format, audio_spec.channels, audio_spec.freq);
                     
-                    cvt.len = m_pUserData->wav_length;
+                    cvt.len = m_wavLength;
                     cvt.buf = (unsigned char *)SDL_malloc(cvt.len * cvt.len_mult);
-                    memcpy(cvt.buf, m_pUserData->wav_buffer, m_pUserData->wav_length);
+                    memcpy(cvt.buf, m_pWavBuffer, m_wavLength);
 
                     SDL_ConvertAudio(&cvt);
 
-                    m_pUserData->wav_length = cvt.len_cvt;
-                    SDL_FreeWAV(m_pUserData->wav_buffer);
-                    m_pUserData->wav_buffer = (unsigned char *)SDL_malloc(cvt.len_cvt);
-                    memcpy(m_pUserData->wav_buffer, cvt.buf, cvt.len_cvt);
+                    m_wavLength = cvt.len_cvt;
+                    SDL_FreeWAV(m_pWavBuffer);
+                    m_pWavBuffer = (unsigned char *)SDL_malloc(cvt.len_cvt);
+                    memcpy(m_pWavBuffer, cvt.buf, cvt.len_cvt);
                 }
-
-                m_pUserData->wav_spec.userdata = m_pUserData;
             }
         }
     }
 
     Sound::~Sound()
     {
-        if (m_pUserData)
+        if (m_pWavBuffer)
         {
-            if (m_pUserData->wav_buffer)
-            {
-                SDL_FreeWAV(m_pUserData->wav_buffer);
-            }
-            delete m_pUserData;
-        }
-    }
-
-    void Sound::Update()
-    {
-        switch (m_pUserData->state)
-        {
-            case SoundState::STOP:
-                // a stop request occured, reset the data length and set to
-                // stopped
-                m_pUserData->length = m_pUserData->wav_length;
-                m_pUserData->position = m_pUserData->wav_buffer;
-                m_pUserData->state = SoundState::STOPPED;
-                break;
-
-            case SoundState::PLAY:
-                // switch to playing state
-                m_pUserData->state = SoundState::PLAYING;
-                break;
-
-            case SoundState::PAUSE:
-                // switch to paused state, leaving the data length at its
-                // current position, so that it can be resumed.
-                m_pUserData->state = SoundState::PAUSED;
-                break;
-
-            case SoundState::PLAYING:
-                // special case, if the sound is playing but no data is left,
-                // the mix callback with not do anything, and the sound needs
-                // to have its state changed to STOPPED
-                if (m_pUserData->length == 0)
-                {
-                    m_pUserData->state = SoundState::STOP;
-                }
-
-            case SoundState::STOPPED:
-            case SoundState::PAUSED:
-            default:
-                break;
+            SDL_FreeWAV(m_pWavBuffer);
         }
     }
 
     void Sound::Play()
     {
-        if (m_pUserData)
-        {
-            // if already playing or transition from play to playing, then do
-            // nothing, otherwise set the play.
-            switch (m_pUserData->state)
-            {
-                case SoundState::STOP:
-                case SoundState::STOPPED:
-                case SoundState::PAUSE:
-                case SoundState::PAUSED:
-                    m_pUserData->state = SoundState::PLAY;
-                    break;
-
-                case SoundState::PLAY:
-                case SoundState::PLAYING:
-                default:
-                    break;
-            }
-        }
+        m_qStateChange.Push(SoundState::PLAY);
     }
 
     void Sound::Stop()
     {
-        if (m_pUserData)
-        {
-            // only stop if not already stopping or stopped
-            switch (m_pUserData->state)
-            {
-                case SoundState::PLAY:
-                case SoundState::PLAYING:
-                case SoundState::PAUSE:
-                case SoundState::PAUSED:
-                    m_pUserData->state = SoundState::STOP;
-                    break;
-
-                case SoundState::STOP:
-                case SoundState::STOPPED:
-                default:
-                    break;
-            }
-        }
+        m_qStateChange.Push(SoundState::STOP);
     }
 
     void Sound::Pause()
     {
-        if (m_pUserData)
-        {
-            // only pause if the sound is actually playing
-            switch (m_pUserData->state)
-            {
-                case SoundState::PLAY:
-                case SoundState::PLAYING:
-                    m_pUserData->state = SoundState::PAUSE;
-                    break;
-
-                case SoundState::PAUSE:
-                case SoundState::PAUSED:
-                case SoundState::STOP:
-                case SoundState::STOPPED:
-                default:
-                    break;
-            }
-        }
+        m_qStateChange.Push(SoundState::PAUSE);
     }
 
     void Sound::SetVolume(float volume)
@@ -232,23 +94,44 @@ namespace alpha
 
     void Sound::Mix(unsigned char * stream, int length)
     {
-        if (m_pUserData->state == SoundState::PLAYING)
+        int len = (length > (int)m_length ? m_length : length);
+        // change state if requested
+        m_qStateChange.TryPop(m_state);
+
+        switch (m_state)
         {
-            // make sure we still have audio to play, if none left, then we
-            // can stop playing.
-            if (m_pUserData->length == 0)
-            {
-                return;
-            }
+            case SoundState::STOP:
+                m_length = m_wavLength;
+                m_position = m_pWavBuffer;
+                m_state = SoundState::STOPPED;
 
-            // mix the audio if all conditions pass
-            int len = (length > (int)m_pUserData->length ? m_pUserData->length : length);
-            //LOG_WARN("MIXING AUDIO: ", len, m_pUserData->wav_spec.format);
-            SDL_MixAudioFormat(stream, m_pUserData->position, AUDIO_F32, len, SDL_MIX_MAXVOLUME / 2);
+            case SoundState::STOPPED:
+                break;
 
-            m_pUserData->position += len;
-            m_pUserData->length -= len;
+            case SoundState::PLAY:
+                m_state = SoundState::PLAYING;
 
+            case SoundState::PLAYING:
+                // make sure we still have audio to play, if none left, then we
+                // can stop playing.
+                if (m_length == 0)
+                {
+                    m_state = SoundState::STOP;
+                    break;
+                }
+
+                SDL_MixAudioFormat(stream, m_position, AUDIO_F32, len, SDL_MIX_MAXVOLUME / 2);
+
+                m_position += len;
+                m_length -= len;
+                break;
+
+            case SoundState::PAUSE:
+                m_state = SoundState::PAUSED;
+
+            case SoundState::PAUSED:
+            default:
+                break;
         }
     }
 }
