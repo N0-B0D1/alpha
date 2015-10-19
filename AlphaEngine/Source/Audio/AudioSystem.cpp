@@ -19,6 +19,7 @@ limitations under the License.
 #include <SDL2/SDL_audio.h>
 
 #include "Audio/AudioSystem.h"
+#include "Audio/AudioMixer.h"
 #include "Audio/Sound.h"
 #include "Assets/Asset.h"
 #include "Toolbox/FileSystem.h"
@@ -26,21 +27,27 @@ limitations under the License.
 
 namespace alpha
 {
-    void EmptyAudioCallback(void * /*userdata*/, unsigned char * /*stream*/, int /*length*/)
+    static void EmptyAudioCallback(void * userdata, unsigned char * stream, int length)
     {
-        // for now mix silence ...
-        //extern const unsigned char * mix_data;
-        //SDL_memset(stream, 0, length);
-        //SDL_MixAudio(stream, mix_data, length, SDL_MIX_MAXVOLUME / 2);
+        SDL_memset(stream, 0, length);
+
+        AudioMixer * mixer = (class AudioMixer *)userdata;
+        if (mixer)
+        {
+            mixer->Mix(stream, length);
+        }
     }
 
     AudioSystem::AudioSystem()
         : AlphaSystem(60)
+        , m_pMainChannel(nullptr)
     { }
     AudioSystem::~AudioSystem() { }
 
     bool AudioSystem::VInitialize()
     {
+        m_pMainChannel = new AudioMixer();
+
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
             LOG_ERR("AudioSystem > Failed to initialize SDL Audio system.");
@@ -61,6 +68,7 @@ namespace alpha
         wanted.channels = 2;
         wanted.samples = 4096;
         wanted.callback = EmptyAudioCallback;
+        wanted.userdata = m_pMainChannel;
 
         m_audioDevID = SDL_OpenAudioDevice(nullptr, 0, &wanted, &m_audioSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
         if (m_audioDevID == 0)
@@ -78,11 +86,6 @@ namespace alpha
 
     bool AudioSystem::VShutdown()
     {
-        // release handles to all sound objects
-        // forces destructor to be called for each
-        // and all sounds get properly released.
-        m_sounds.clear();
-
         // close the audio device
         if (m_audioDevID != 0)
         {
@@ -92,24 +95,24 @@ namespace alpha
 
         SDL_Quit();
 
+        if (m_pMainChannel)
+        {
+            delete m_pMainChannel;
+        }
+
         return true;
     }
 
     std::weak_ptr<Sound> AudioSystem::CreateSound(std::shared_ptr<Asset> pAsset)
     {
-        auto sound = std::make_shared<Sound>(pAsset);
-        m_sounds.push_back(sound);
+        auto sound = std::make_shared<Sound>(pAsset, m_audioSpec);
+        m_pMainChannel->Add(sound);
         return sound;
     }
 
     bool AudioSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        // update all sounds, allowing them to handle state transitions
-        // properly.
-        for (auto sound : m_sounds)
-        {
-            sound->Update();
-        }
+        m_pMainChannel->Update();
         return true;
     }
 }

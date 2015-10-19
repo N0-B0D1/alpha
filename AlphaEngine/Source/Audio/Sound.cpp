@@ -22,7 +22,8 @@ limitations under the License.
 
 namespace alpha
 {
-   static void mix_callback(void *userdata, unsigned char *stream, int length)
+    /*
+    static void mix_callback(void *userdata, unsigned char *stream, int length)
     {
         SoundData *data = (struct SoundData*)userdata;
 
@@ -55,6 +56,7 @@ namespace alpha
                 break;
         }
     }
+    */
 
     SoundData::SoundData()
         : wav_buffer(nullptr)
@@ -62,7 +64,7 @@ namespace alpha
         , state(SoundState::STOP)
     { }
 
-    Sound::Sound(std::weak_ptr<Asset> pAsset)
+    Sound::Sound(std::weak_ptr<Asset> pAsset, SDL_AudioSpec audio_spec)
         : m_pAsset(pAsset)
     {
         // create the sound so it is preped for use
@@ -78,10 +80,29 @@ namespace alpha
             }
             else
             {
-                m_pUserData->wav_spec.callback = mix_callback;
-                m_pUserData->wav_spec.userdata = m_pUserData;
+                // convert audio if needed
+                if (m_pUserData->wav_spec.freq != audio_spec.freq ||
+                    m_pUserData->wav_spec.format != audio_spec.format ||
+                    m_pUserData->wav_spec.channels != audio_spec.channels)
+                {
+                    SDL_AudioCVT cvt;
+                    SDL_BuildAudioCVT(&cvt,
+                                      m_pUserData->wav_spec.format, m_pUserData->wav_spec.channels, m_pUserData->wav_spec.freq,
+                                      audio_spec.format, audio_spec.channels, audio_spec.freq);
+                    
+                    cvt.len = m_pUserData->wav_length;
+                    cvt.buf = (unsigned char *)SDL_malloc(cvt.len * cvt.len_mult);
+                    memcpy(cvt.buf, m_pUserData->wav_buffer, m_pUserData->wav_length);
 
-                LOG("WAV loaded and set to wav spec...");
+                    SDL_ConvertAudio(&cvt);
+
+                    m_pUserData->wav_length = cvt.len_cvt;
+                    SDL_FreeWAV(m_pUserData->wav_buffer);
+                    m_pUserData->wav_buffer = (unsigned char *)SDL_malloc(cvt.len_cvt);
+                    memcpy(m_pUserData->wav_buffer, cvt.buf, cvt.len_cvt);
+                }
+
+                m_pUserData->wav_spec.userdata = m_pUserData;
             }
         }
     }
@@ -92,7 +113,6 @@ namespace alpha
         {
             if (m_pUserData->wav_buffer)
             {
-                LOG("Freeing wav buffer for sound.");
                 SDL_FreeWAV(m_pUserData->wav_buffer);
             }
             delete m_pUserData;
@@ -107,6 +127,7 @@ namespace alpha
                 // a stop request occured, reset the data length and set to
                 // stopped
                 m_pUserData->length = m_pUserData->wav_length;
+                m_pUserData->position = m_pUserData->wav_buffer;
                 m_pUserData->state = SoundState::STOPPED;
                 break;
 
@@ -207,5 +228,27 @@ namespace alpha
     void Sound::SetVolume(float volume)
     {
         m_volume = volume;
+    }
+
+    void Sound::Mix(unsigned char * stream, int length)
+    {
+        if (m_pUserData->state == SoundState::PLAYING)
+        {
+            // make sure we still have audio to play, if none left, then we
+            // can stop playing.
+            if (m_pUserData->length == 0)
+            {
+                return;
+            }
+
+            // mix the audio if all conditions pass
+            int len = (length > (int)m_pUserData->length ? m_pUserData->length : length);
+            //LOG_WARN("MIXING AUDIO: ", len, m_pUserData->wav_spec.format);
+            SDL_MixAudioFormat(stream, m_pUserData->position, AUDIO_F32, len, SDL_MIX_MAXVOLUME / 2);
+
+            m_pUserData->position += len;
+            m_pUserData->length -= len;
+
+        }
     }
 }

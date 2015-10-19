@@ -18,7 +18,6 @@ limitations under the License.
 */
 
 #include <memory>
-#include <vector>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
@@ -28,6 +27,7 @@ limitations under the License.
 namespace alpha
 {
     class Asset;
+    class AudioMixer;
     class Sound;
 
     class AudioSystem : public AlphaSystem
@@ -45,8 +45,8 @@ namespace alpha
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
-        /** Manage a list of sounds, so they can be properly updated and disposed of. */
-        std::vector<std::shared_ptr<Sound>> m_sounds;
+        /** Main audio channel mixer */
+        AudioMixer * m_pMainChannel;
 
         /** Audio device spec */
         SDL_AudioSpec m_audioSpec;

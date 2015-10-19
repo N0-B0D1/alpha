@@ -57,8 +57,10 @@ namespace alpha
      */
     class Sound
     {
+        friend class AudioMixer;
+
     public:
-        explicit Sound(std::weak_ptr<Asset> pAsset);
+        Sound(std::weak_ptr<Asset> pAsset, SDL_AudioSpec audio_spec);
         ~Sound();
 
         void Update();
@@ -70,6 +72,8 @@ namespace alpha
         void SetVolume(float volume);
 
     private:
+        void Mix(unsigned char * stream, int length);
+
         std::weak_ptr<Asset> m_pAsset;
 
         // userdata struct
