@@ -15,6 +15,8 @@ limitations under the License.
 */
 
 #include <cstring>
+#include <string>
+
 #include "Assets/Asset.h"
 #include "Toolbox/Logger.h"
 
@@ -25,6 +27,11 @@ namespace alpha
         , m_fileStats(fileStats)
     { }
     Asset::~Asset() { }
+
+    std::string Asset::GetPath() const
+    {
+        return std::string(m_pPath);
+    }
 
     std::vector<unsigned char> Asset::GetData()
     {

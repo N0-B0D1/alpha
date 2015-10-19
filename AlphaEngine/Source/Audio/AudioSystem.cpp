@@ -14,7 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_audio.h>
+
 #include "Audio/AudioSystem.h"
+#include "Audio/AudioMixer.h"
 #include "Audio/Sound.h"
 #include "Assets/Asset.h"
 #include "Toolbox/FileSystem.h"
@@ -22,44 +27,58 @@ limitations under the License.
 
 namespace alpha
 {
+    static void EmptyAudioCallback(void * userdata, unsigned char * stream, int length)
+    {
+        SDL_memset(stream, 0, length);
+
+        AudioMixer * mixer = (class AudioMixer *)userdata;
+        if (mixer)
+        {
+            mixer->Mix(stream, length);
+        }
+    }
+
     AudioSystem::AudioSystem()
         : AlphaSystem(60)
-        , m_pSystem(nullptr)
+        , m_pMainChannel(nullptr)
     { }
     AudioSystem::~AudioSystem() { }
 
     bool AudioSystem::VInitialize()
     {
-        FMOD_RESULT result;
-        unsigned int version;
-        void *pExtraDriverVersion = 0;
+        m_pMainChannel = new AudioMixer();
 
-        // create fmod system
-        result = FMOD::System_Create(&m_pSystem);
-        if (result != FMOD_OK)
+        if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
-            LOG_ERR("AudioSystem > Failed to initialize FMOD system.");
+            LOG_ERR("AudioSystem > Failed to initialize SDL Audio system.");
             return false;
         }
 
-        // get the fmod version, and make sure lib and headers match
-        result = m_pSystem->getVersion(&version);
-        if (result != FMOD_OK)
+        // list audio devices
+        for (int i = 0; i < SDL_GetNumAudioDevices(0); ++i)
         {
-            LOG_ERR("AudioSystem > An error occured while attempting to get the FMOD system version.");
-            return false;
-        }
-        if (version < FMOD_VERSION)
-        {
-            LOG_ERR("AudioSystem > FMOD lib version ", version, " does not match the header version ", FMOD_VERSION);
-            return false;
+            LOG("Audio Device ", i, ": ", SDL_GetAudioDeviceName(i, 0));
         }
 
-        result = m_pSystem->init(32, FMOD_INIT_NORMAL, pExtraDriverVersion);
-        if (result != FMOD_OK)
+        // acquire the audio device and spec
+        SDL_AudioSpec wanted;
+        SDL_zero(wanted);
+        wanted.freq = 48000;
+        wanted.format = AUDIO_F32;
+        wanted.channels = 2;
+        wanted.samples = 4096;
+        wanted.callback = EmptyAudioCallback;
+        wanted.userdata = m_pMainChannel;
+
+        m_audioDevID = SDL_OpenAudioDevice(nullptr, 0, &wanted, &m_audioSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
+        if (m_audioDevID == 0)
         {
-            LOG_ERR("AudioSystem > FMOD system init failed.");
-            return false;
+            LOG_ERR("AudioSystem failed to obtain audio device spec! ", SDL_GetError());
+        }
+        else
+        {
+            // start playing audio
+            SDL_PauseAudioDevice(m_audioDevID, 0);
         }
 
         return true;
@@ -67,25 +86,18 @@ namespace alpha
 
     bool AudioSystem::VShutdown()
     {
-        unsigned int result;
-
-        // release handles to all sound objects
-        // forces destructor to be called for each
-        // and all sounds get properly released.
-        m_sounds.clear();
-
-        if (m_pSystem)
+        // close the audio device
+        if (m_audioDevID != 0)
         {
-            result = m_pSystem->close();
-            if (result != FMOD_OK)
-            {
-                LOG_ERR("AudioSystem > An error occured while closing the FMOD system.");
-            }
-            result = m_pSystem->release();
-            if (result != FMOD_OK)
-            {
-                LOG_ERR("AudioSystem > And error occured while releasing the FMOD system.");
-            }
+            SDL_PauseAudioDevice(m_audioDevID, 1);
+            SDL_CloseAudioDevice(m_audioDevID);
+        }
+
+        SDL_Quit();
+
+        if (m_pMainChannel)
+        {
+            delete m_pMainChannel;
         }
 
         return true;
@@ -93,19 +105,13 @@ namespace alpha
 
     std::weak_ptr<Sound> AudioSystem::CreateSound(std::shared_ptr<Asset> pAsset)
     {
-        auto sound = std::make_shared<Sound>(m_pSystem, pAsset);
-        m_sounds.push_back(sound);
+        auto sound = std::make_shared<Sound>(pAsset, m_audioSpec);
+        m_pMainChannel->Add(sound);
         return sound;
     }
 
     bool AudioSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        FMOD_RESULT result = m_pSystem->update();
-        if (result != FMOD_OK)
-        {
-            // XXX for now log the error, however we may need to do something more drastic ...
-            LOG_ERR("AudioSystem > FMOD system failed to update.");
-        }
         return true;
     }
 }

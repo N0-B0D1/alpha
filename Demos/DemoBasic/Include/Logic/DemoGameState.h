@@ -17,6 +17,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "Entities/Entity.h"
+
 #include "FSA/GameState.h"
 
 namespace alpha
@@ -47,6 +49,8 @@ private:
     std::shared_ptr<alpha::Entity> m_test;
     std::shared_ptr<alpha::Entity> m_test2;
     std::shared_ptr<alpha::Entity> m_cube;
+    std::shared_ptr<alpha::Entity> m_pLight;
+    std::shared_ptr<alpha::Entity> m_pLight2;
 
     std::shared_ptr<alpha::Entity> m_pCamera;
 

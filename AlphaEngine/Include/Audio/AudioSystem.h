@@ -18,15 +18,16 @@ limitations under the License.
 */
 
 #include <memory>
-#include <vector>
 
-#include <fmod.hpp>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_audio.h>
 
 #include "AlphaSystem.h"
 
 namespace alpha
 {
     class Asset;
+    class AudioMixer;
     class Sound;
 
     class AudioSystem : public AlphaSystem
@@ -44,11 +45,12 @@ namespace alpha
     private:
         virtual bool VUpdate(double currentTime, double elapsedTime);
 
-        /** Manage a list of sounds, so they can be properly updated and disposed of. */
-        std::vector<std::shared_ptr<Sound>> m_sounds;
+        /** Main audio channel mixer */
+        AudioMixer * m_pMainChannel;
 
-        /** FMOD system instance, shared with all sound and sound group objects */
-        FMOD::System * m_pSystem;
+        /** Audio device spec */
+        SDL_AudioSpec m_audioSpec;
+        SDL_AudioDeviceID m_audioDevID;
     };
 }
 

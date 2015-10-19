@@ -1,6 +1,3 @@
-#ifndef ASSET_H
-#define ASSET_H
-
 /**
 Copyright 2014-2015 Jason R. Wendlandt
 
@@ -17,26 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <sys/stat.h>
-#include <string>
-#include <vector>
+#include "Audio/AudioMixer.h"
+#include "Audio/Sound.h"
 
 namespace alpha
 {
-    class Asset
+    AudioMixer::~AudioMixer()
     {
-    public:
-        Asset(const char * path, struct stat fileStats);
-        virtual ~Asset();
+        // release handles to all sound objects
+        // forces destructor to be called for each
+        // and all sounds get properly released.
+        m_sounds.clear();
+    }
 
-        std::string GetPath() const;
-        std::vector<unsigned char> GetData();
+    void AudioMixer::Add(std::shared_ptr<Sound> pSound)
+    {
+        m_sounds.push_back(pSound);
+    }
 
-    private:
-        const char * m_pPath;
-        struct stat m_fileStats;
-        std::vector<unsigned char> m_data;
-    };
+    void AudioMixer::Mix(unsigned char * stream, int length)
+    {
+        for (auto sound : m_sounds)
+        {
+            sound->Mix(stream, length);
+        }
+    }
 }
-
-#endif // ASSET_H

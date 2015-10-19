@@ -30,6 +30,8 @@ bool DemoGameState::VInitialize()
     m_test2 = CreateEntity("Entities/test.lua");
     m_cube = CreateEntity("Entities/cube.lua");
     m_pCamera = CreateEntity("Entities/camera.lua");
+    m_pLight = CreateEntity("Entities/directional_light.lua");
+    m_pLight2 = CreateEntity("Entities/light.lua");
 
     // set our camera as the active camera for the scene
     auto pCameraComponent = std::dynamic_pointer_cast<alpha::CameraComponent>(m_pCamera->Get("root"));
@@ -37,6 +39,7 @@ bool DemoGameState::VInitialize()
     {
         // set start position for the camera
         pCameraComponent->SetPosition(alpha::Vector3(0, 0, 20));
+
         SetActiveCamera(pCameraComponent);
     }
 
@@ -60,7 +63,7 @@ bool DemoGameState::VInitialize()
     }
 
     // create a test sound to play
-    m_pTestSound = this->CreateSound("Media/hit.mp3");
+    m_pTestSound = this->CreateSound("Media/hit.wav");
     if (auto pSound = m_pTestSound.lock())
     {
         // hit sound is fairly loud, so set the channel low on play

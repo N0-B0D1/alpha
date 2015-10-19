@@ -19,33 +19,60 @@ limitations under the License.
 
 #include <memory>
 
-#include <fmod.hpp>
+#include <SDL2/SDL_audio.h>
+
+#include "Toolbox/ConcurrentQueue.h"
 
 namespace alpha
 {
     class Asset;
 
+    enum SoundState
+    {
+        STOP,
+        STOPPED,
+        PLAY,
+        PLAYING,
+        PAUSE,
+        PAUSED,
+    };
+    
     /**
      * Sound is a helper class for managing an FMOD sound and its playback state.
      * Provides an interface for other engine systems to manipulate sounds.
      */
     class Sound
     {
+        friend class AudioMixer;
+
     public:
-        explicit Sound(FMOD::System * pSystem, std::weak_ptr<Asset> pAsset);
+        Sound(std::weak_ptr<Asset> pAsset, SDL_AudioSpec audio_spec);
         ~Sound();
 
         void Play();
         void Stop();
+        void Pause();
 
         void SetVolume(float volume);
 
     private:
-        std::weak_ptr<Asset> m_pAsset;
-        FMOD::System * m_pSystem;
-        FMOD::Sound * m_pSound;
-        FMOD::Channel * m_pChannel;
+        void Mix(unsigned char * stream, int length);
 
+        std::weak_ptr<Asset> m_pAsset;
+
+        // sound data should only be modified on initial creation and inside
+        // the mix callback thread.
+        unsigned int m_wavLength;
+        unsigned char * m_pWavBuffer;
+        SDL_AudioSpec m_wavSpec;
+
+        unsigned char * m_position;
+        unsigned int m_length;
+
+        SoundState m_state;
+        ConcurrentQueue<SoundState> m_qStateChange;
+
+        /** volume of this sound */
         float m_volume;
     };
 }

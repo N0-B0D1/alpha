@@ -22,30 +22,43 @@ limitations under the License.
 
 namespace alpha
 {
-    Sound::Sound(FMOD::System * pSystem, std::weak_ptr<Asset> pAsset)
+    Sound::Sound(std::weak_ptr<Asset> pAsset, SDL_AudioSpec audio_spec)
         : m_pAsset(pAsset)
-        , m_pSystem(pSystem)
-        , m_pSound(nullptr)
-        , m_pChannel(nullptr)
-        , m_volume(0.5f)
+        , m_pWavBuffer(nullptr)
+        , m_position(nullptr)
+        , m_state(SoundState::STOP)
     {
         // create the sound so it is preped for use
         if (auto asset = pAsset.lock())
         {
-            std::vector<unsigned char> data = asset->GetData();
-            if (data.size() > 0)
+            std::string path = asset->GetPath();
+
+            if (SDL_LoadWAV(path.c_str(), &m_wavSpec, &m_pWavBuffer, &m_wavLength) == nullptr)
             {
-                char * buffer = reinterpret_cast<char *>(&data[0]);
-
-                FMOD_CREATESOUNDEXINFO exinfo;
-                memset(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
-                exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-                exinfo.length = data.size();
-
-                FMOD_RESULT result = m_pSystem->createSound(buffer, FMOD_OPENMEMORY, &exinfo, &m_pSound);
-                if (result != FMOD_OK)
+                LOG_ERR("Failed to load sound WAV from path.");
+            }
+            else
+            {
+                // convert audio if needed
+                if (m_wavSpec.freq != audio_spec.freq ||
+                    m_wavSpec.format != audio_spec.format ||
+                    m_wavSpec.channels != audio_spec.channels)
                 {
-                    LOG_ERR("AudioSystem > FMOD failed to create sound from asset data.");
+                    SDL_AudioCVT cvt;
+                    SDL_BuildAudioCVT(&cvt,
+                                      m_wavSpec.format, m_wavSpec.channels, m_wavSpec.freq,
+                                      audio_spec.format, audio_spec.channels, audio_spec.freq);
+                    
+                    cvt.len = m_wavLength;
+                    cvt.buf = (unsigned char *)SDL_malloc(cvt.len * cvt.len_mult);
+                    memcpy(cvt.buf, m_pWavBuffer, m_wavLength);
+
+                    SDL_ConvertAudio(&cvt);
+
+                    m_wavLength = cvt.len_cvt;
+                    SDL_FreeWAV(m_pWavBuffer);
+                    m_pWavBuffer = (unsigned char *)SDL_malloc(cvt.len_cvt);
+                    memcpy(m_pWavBuffer, cvt.buf, cvt.len_cvt);
                 }
             }
         }
@@ -53,39 +66,72 @@ namespace alpha
 
     Sound::~Sound()
     {
-        // release the sound
-        // do not need to do anything with the channel
-        // fmod will handle the rest
-        if (m_pSound)
+        if (m_pWavBuffer)
         {
-            m_pSound->release();
+            SDL_FreeWAV(m_pWavBuffer);
         }
     }
 
     void Sound::Play()
     {
-        FMOD_RESULT result = m_pSystem->playSound(m_pSound, 0, false, &m_pChannel);
-        if (result != FMOD_OK)
-        {
-            LOG_ERR("Sound > Failed to play sound.");
-        }
-        result = m_pChannel->setVolume(m_volume);
+        m_qStateChange.Push(SoundState::PLAY);
     }
 
     void Sound::Stop()
     {
-        if (m_pChannel != nullptr)
-        {
-            m_pChannel->stop();
-        }
+        m_qStateChange.Push(SoundState::STOP);
+    }
+
+    void Sound::Pause()
+    {
+        m_qStateChange.Push(SoundState::PAUSE);
     }
 
     void Sound::SetVolume(float volume)
     {
         m_volume = volume;
-        if (m_pChannel != nullptr)
+    }
+
+    void Sound::Mix(unsigned char * stream, int length)
+    {
+        int len = (length > (int)m_length ? m_length : length);
+        // change state if requested
+        m_qStateChange.TryPop(m_state);
+
+        switch (m_state)
         {
-            m_pChannel->setVolume(m_volume);
+            case SoundState::STOP:
+                m_length = m_wavLength;
+                m_position = m_pWavBuffer;
+                m_state = SoundState::STOPPED;
+
+            case SoundState::STOPPED:
+                break;
+
+            case SoundState::PLAY:
+                m_state = SoundState::PLAYING;
+
+            case SoundState::PLAYING:
+                // make sure we still have audio to play, if none left, then we
+                // can stop playing.
+                if (m_length == 0)
+                {
+                    m_state = SoundState::STOP;
+                    break;
+                }
+
+                SDL_MixAudioFormat(stream, m_position, AUDIO_F32, len, SDL_MIX_MAXVOLUME / 2);
+
+                m_position += len;
+                m_length -= len;
+                break;
+
+            case SoundState::PAUSE:
+                m_state = SoundState::PAUSED;
+
+            case SoundState::PAUSED:
+            default:
+                break;
         }
     }
 }

@@ -1,5 +1,5 @@
-#ifndef ASSET_H
-#define ASSET_H
+#ifndef ALPHA_AUDIO_MIXER_H
+#define ALPHA_AUDIO_MIXER_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,26 +17,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <sys/stat.h>
-#include <string>
+#include <memory>
 #include <vector>
 
 namespace alpha
 {
-    class Asset
+    class Sound;
+
+    class AudioMixer
     {
     public:
-        Asset(const char * path, struct stat fileStats);
-        virtual ~Asset();
+        ~AudioMixer();
 
-        std::string GetPath() const;
-        std::vector<unsigned char> GetData();
+        /** Mix all sounds in this mixer channel */
+        void Mix(unsigned char * stream, int length);
+
+        /** Add a sound to this mixer */
+        void Add(std::shared_ptr<Sound> pSound);
 
     private:
-        const char * m_pPath;
-        struct stat m_fileStats;
-        std::vector<unsigned char> m_data;
+        /** Manage a list of sounds, so they can be properly updated and disposed of. */
+        std::vector<std::shared_ptr<Sound>> m_sounds;
     };
 }
 
-#endif // ASSET_H
+#endif // ALPHA_AUDIO_MIXER_H
