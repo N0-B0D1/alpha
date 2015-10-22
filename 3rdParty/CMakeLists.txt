@@ -30,6 +30,8 @@ MARK_AS_ADVANCED(ASSIMP_NO_EXPORT)
 MARK_AS_ADVANCED(ASSIMP_OPT_BUILD_PACKAGES)
 MARK_AS_ADVANCED(ASSIMP_PACKAGE_VERSION)
 MARK_AS_ADVANCED(BUILD_SHARED_LIBS)
+MARK_AS_ADVANCED(AMD64)
+MARK_AS_ADVANCED(ASM686)
 
 add_subdirectory(Assimp)
 
@@ -54,3 +56,8 @@ if (TARGET zlibstatic)
     set_target_properties(zlibstatic PROPERTIES FOLDER 3rdParty)
 endif (TARGET zlibstatic)
 set_target_properties(uninstall PROPERTIES FOLDER 3rdParty)
+
+# SDL2
+add_subdirectory(SDL2)
+set_target_properties(SDL2 PROPERTIES FOLDER 3rdParty)
+set_target_properties(SDL2main PROPERTIES FOLDER 3rdParty)
