@@ -29,6 +29,10 @@ include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include)
 include_directories(${CMAKE_SOURCE_DIR}/AlphaEngine/Include/${ALPHA_BUILD_TARGET_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
+# include 3rdParty headers
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/Lua/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/SDL2/include)
+
 # create demo as an executable
 add_executable(Demo-0002-Lights WIN32 ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(Demo-0002-Lights ${ALPHA_LIBRARIES})

@@ -47,11 +47,6 @@ set_target_properties(Demo-0002-Lights PROPERTIES FOLDER Demos)
 
 # make content files available for debugging
 if (MSVC)
-	# XXX Not sure if this is correct to do ...
-	# copy fmod.dll to bin directory, so it can be loaded, only do this for windows
-    file(GLOB FMOD_DLL "${FMOD_LOWLEVELAPI_DIRECTORY}/lib/fmodL.dll")
-    file(COPY ${FMOD_DLL} DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug/")
-
     set(WORKING_DIR /bin/Debug/Content)
     set(SHADER_EXT hlsl)
 else ()

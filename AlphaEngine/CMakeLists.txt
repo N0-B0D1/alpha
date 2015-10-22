@@ -77,6 +77,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include/${ALPHA_BUILD_TARGET_DIR
 
 #include 3rdParty dependencies
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/Lua/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/SDL2/include)
 
 # create engine as static lib
 add_library(AlphaEngine ${HEADER_FILES} ${SOURCE_FILES})

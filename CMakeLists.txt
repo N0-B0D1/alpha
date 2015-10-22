@@ -45,11 +45,6 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/sdk" CACHE PATH "ALPHA ins
 # do these before we set the compiler flags, so that they build cleanly.
 # LUA for instance, complains about a lot of type conversions.
 add_subdirectory(3rdParty)
-	
-# add sdl2 include directory
-# This is an optional parameter for locationg the SDL2 header files, if they are not placed in the 3rdParty folder
-set(SDL2_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/SDL2/include")
-include_directories(${SDL2_LOCATION})
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DALPHA_DEBUG")
 

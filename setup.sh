@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# initialize and update submodules
+echo "Init and Update GIT submodules ..."
+git submodule init
+git submodule update
+
 SDL_DIRECTORY=./3rdParty/SDL2
 
 # Clone sdl2 repository into 3rdParty directory
