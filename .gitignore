@@ -4,3 +4,11 @@ Docs/
 .vimrc
 *.swp
 .ycm_extra_conf.py*
+3rdParty/SDL2/repo/
+3rdParty/SDL2/include/
+3rdParty/SDL2/src/
+3rdParty/SDL2/cmake/
+3rdParty/SDL2/sdl2-config.in
+3rdParty/SDL2/sdl2.m4
+3rdParty/SDL2/sdl2.pc.in
+3rdParty/SDL2/SDL2.spec.in

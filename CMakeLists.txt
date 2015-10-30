@@ -53,15 +53,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DALPHA_DEBUG")
 # 3rdParty libs don't care about, we do this after the 3rdParty folder is setup.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(warnings "-Wall -Wextra -Werror")
-    FIND_LIBRARY(X11_LIB X11)
-    FIND_LIBRARY(GL_LIB GL)
-    FIND_LIBRARY(GLUT_LIB GLU)
-    FIND_LIBRARY(GLEW_LIB GLEW)
-    FIND_LIBRARY(GLFW_LIB glfw)
-    FIND_LIBRARY(UUID_LIB uuid)
-    FIND_LIBRARY(SDL2_LIB SDL2)
+	
+    FIND_LIBRARY(ALPHA_LIB_X11 X11)
+    FIND_LIBRARY(ALPHA_LIB_GL GL)
+    FIND_LIBRARY(ALPHA_LIB_GLUT GLU)
+    FIND_LIBRARY(ALPHA_LIB_GLEW GLEW)
+    FIND_LIBRARY(ALPHA_LIB_GLFW glfw)
+    FIND_LIBRARY(ALPHA_LIB_UUID uuid)
     FIND_PACKAGE(Threads)
-    set(PLATFORM_LIBS ${X11_LIB} ${GL_LIB} ${GLUT_LIB} ${GLEW_LIB} ${GLFW_LIB} ${UUID_LIB} ${SDL2_LIB} ${CMAKE_THREAD_LIBS_INIT})
+	
+    set(PLATFORM_LIBS ${ALPHA_LIB_X11} ${ALPHA_LIB_GL} ${ALPHA_LIB_GLUT} ${ALPHA_LIB_GLEW} ${ALPHA_LIB_GLFW} ${ALPHA_LIB_UUID} ${CMAKE_THREAD_LIBS_INIT})
+	
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
         set(ALPHA_CXX_FLAGS "-g -std=c++11")
     else()
@@ -69,15 +71,11 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STRE
     endif()
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	set(PLATFORM_LIBS d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib rpcrt4.lib)
 	# 4996 - disables warning for unsafe functions such as fopen.
     set(warnings "/W4 /WX /EHsc /wd4996")
-    set(ALPHA_CXX_FLAGS "")
 	
-	# add fmod install include directory
-	set(FMOD_LOWLEVELAPI_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/fmod" CACHE PATH "FMOD Lowlevel API Directory")
-	include_directories(${FMOD_LOWLEVELAPI_DIRECTORY}/inc)
-	set(PLATFORM_LIBS ${PLATFORM_LIBS} ${FMOD_LOWLEVELAPI_DIRECTORY}/lib/fmodL_vc.lib)
+	set(PLATFORM_LIBS d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib rpcrt4.lib)
+    set(ALPHA_CXX_FLAGS "")
 
 endif()
 
@@ -86,7 +84,7 @@ set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${ALPHA_CXX_FLAGS} ${CMAKE_CXX_FLAGS} ${warnings}")
 
 #set(ALPHA_LIBRARIES AlphaEngine lua)
-set(ALPHA_LIBRARIES AlphaEngine Lua ${PLATFORM_LIBS})
+set(ALPHA_LIBRARIES AlphaEngine Lua SDL2 ${PLATFORM_LIBS})
 
 # build Engine
 add_subdirectory(AlphaEngine)
