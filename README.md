@@ -12,11 +12,11 @@ Alpha Requirements
  * Mercurial
 
 - Windows
- * DirectX 11 (June 2010 SDK)
- * Visual Studio 11+
+ * DirectX 11.1
+ * DXSDK June 2010 (Required for SDL2 Audio)
 
 - Linux
- * OpenGL 3/4
+ * OpenGL 3.3+
  * X11
  * GLEW
  * GLFW

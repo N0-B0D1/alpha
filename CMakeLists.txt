@@ -74,6 +74,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	# 4996 - disables warning for unsafe functions such as fopen.
     set(warnings "/W4 /WX /EHsc /wd4996")
 	
+    link_directories($ENV{DXSDK_DIR}\\lib\\x86)
+	
 	set(PLATFORM_LIBS d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib rpcrt4.lib)
     set(ALPHA_CXX_FLAGS "")
 
