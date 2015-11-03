@@ -47,8 +47,7 @@ namespace alpha
 
     bool HIDSystem::VUpdate(double /*currentTime*/, double /*elapsedTime*/)
     {
-        m_pWindowListener->Update();
-        return true;
+        return m_pWindowListener->Update();
     }
 
     void HIDSystem::DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed)

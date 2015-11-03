@@ -16,27 +16,50 @@ limitations under the License.
 
 #define GLEW_STATIC
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
+
+#include <SDL.h>
+#include <SDL_video.h>
 
 #include "Graphics/RenderWindow.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
-    /** Initialize global window to nullptr */
-    GLFWwindow * g_pWindow = nullptr;
-
-    RenderWindow::RenderWindow() { }
+    RenderWindow::RenderWindow()
+        : m_pWindow(nullptr)
+    { }
     RenderWindow::~RenderWindow() { }
 
     bool RenderWindow::Initialize(int windowWidth, int windowHeight)
     {
-        g_pWindow = glfwCreateWindow(windowWidth, windowHeight, "ALPHA Engine", nullptr, nullptr);
-        glfwMakeContextCurrent(g_pWindow);
-        if (g_pWindow == NULL)
+        if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
         {
-            LOG_ERR("Failed to create GLFW window.");
-            glfwTerminate();
+            LOG_ERR("Failed to initialize SDL video system!");
+            return false;
+        }
+
+        // Video sub-system must be initialize before we set attributes, but
+        // attributes must be set before the window is created, thus we have to
+        // define these here, rather than in the renderer class.
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+        m_pWindow = SDL_CreateWindow(
+            "ALPHA Engine",
+            SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED,
+            windowWidth,
+            windowHeight,
+            SDL_WINDOW_OPENGL
+        );
+
+        if (m_pWindow == nullptr)
+        {
+            LOG_ERR("Failed to create SDL window!");
             return false;
         }
 
@@ -45,18 +68,13 @@ namespace alpha
 
     bool RenderWindow::Update(double /*currentTime*/, double /*elapsedTime*/)
     {
-        // play nicely with the existing window system (X11)
-        if (glfwWindowShouldClose(g_pWindow))
-        {
-            return false;
-        }
-        
-        glfwPollEvents();
         return true;
     }
 
     bool RenderWindow::Shutdown()
     {
+        SDL_DestroyWindow(m_pWindow);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
         return true;
     }
 
@@ -65,8 +83,8 @@ namespace alpha
         // XXX remove this? probably not needed
     }
 
-    GLFWwindow * RenderWindow::GetWindow() const
+    SDL_Window * RenderWindow::GetWindow() const
     {
-        return g_pWindow;
+        return m_pWindow;
     }
 }

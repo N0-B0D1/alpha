@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace alpha
 {
-    HIDAction::HIDAction(unsigned short actionRaw, std::string actionName)
+    HIDAction::HIDAction(unsigned int actionRaw, std::string actionName)
         : raw(actionRaw)
         , name(actionName)
     { }

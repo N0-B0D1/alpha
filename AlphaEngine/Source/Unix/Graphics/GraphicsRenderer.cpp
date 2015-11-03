@@ -22,7 +22,9 @@ limitations under the License.
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
-#include <GLFW/glfw3.h>
+
+#include <SDL.h>
+#include <SDL_video.h>
 
 #include "Graphics/GraphicsRenderer.h"
 #include "Graphics/RenderWindow.h"
@@ -51,13 +53,6 @@ namespace alpha
         m_windowWidth = windowWidth;
         m_windowHeight = windowHeight;
 
-        // init glfw
-        glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // opengl 3.3
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-        
         LOG("GraphicsRenderer > Creating render window.");
 		m_pWindow = new RenderWindow();
 		if (!m_pWindow->Initialize(windowWidth, windowHeight))
@@ -65,7 +60,10 @@ namespace alpha
 			return false;
 		}
 
-        this->InitializeDevice();
+        if (!this->InitializeDevice())
+        {
+            return false;
+        }
 
         m_pGeometryPass = new GeometryPass();
         if (!m_pGeometryPass->VInitialize(pAssets, windowWidth, windowHeight))
@@ -108,6 +106,9 @@ namespace alpha
             delete m_pLightingPass;
         }
 
+        // destroy context before closing the window
+        SDL_GL_DeleteContext(m_GLContext);
+
         // close window
         if (m_pWindow) 
 		{
@@ -115,8 +116,6 @@ namespace alpha
 			delete m_pWindow;
 		}
 
-        // let glfw cleanup opengl
-        glfwTerminate();
 		return true;
 	}
 
@@ -171,11 +170,16 @@ namespace alpha
         m_pLightingPass->VRender(pCamera, render_sets, lights);
 
         // swap buffer to display cool new render objects.
-        glfwSwapBuffers(window);
+        SDL_GL_SwapWindow(window);
     }
 
     bool GraphicsRenderer::InitializeDevice()
     {
+        LOG_WARN(SDL_GetError());
+        auto window = m_pWindow->GetWindow();
+        m_GLContext = SDL_GL_CreateContext(window);
+        LOG_WARN(SDL_GetError());
+
         glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK)
         {

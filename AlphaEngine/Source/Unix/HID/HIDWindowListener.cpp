@@ -16,6 +16,8 @@ limitations under the License.
 
 #include <functional>
 
+#include <SDL.h>
+
 #include "HID/HIDWindowListener.h"
 #include "HID/HIDPlatformTranslator.h"
 #include "Graphics/RenderWindow.h"
@@ -24,6 +26,7 @@ limitations under the License.
 namespace alpha
 {
     static HIDWindowListener * g_pWindowListener = nullptr;
+    /*
     static void StaticGLFWKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mode)
     {
         if (g_pWindowListener != nullptr)
@@ -52,6 +55,7 @@ namespace alpha
             g_pWindowListener->GLFWMousePositionCallback(window, xpos, ypos);
         }
     }
+    */
 
     HIDWindowListener::HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis)
         : m_fDispatchHIDActionKey(dispatchHIDActionKey)
@@ -61,10 +65,10 @@ namespace alpha
         g_pWindowListener = this;
 
         // hook up GLFW listeners callbacks
-        glfwSetKeyCallback(g_pWindow, StaticGLFWKeyCallback);
-        glfwSetMouseButtonCallback(g_pWindow, StaticGLFWMouseKeyCallback);
-        glfwSetScrollCallback(g_pWindow, StaticGLFWMouseScrollCallback);
-        glfwSetCursorPosCallback(g_pWindow, StaticGLFWMousePositionCallback);
+        //glfwSetKeyCallback(g_pWindow, StaticGLFWKeyCallback);
+        //glfwSetMouseButtonCallback(g_pWindow, StaticGLFWMouseKeyCallback);
+        //glfwSetScrollCallback(g_pWindow, StaticGLFWMouseScrollCallback);
+        //glfwSetCursorPosCallback(g_pWindow, StaticGLFWMousePositionCallback);
 
         // set platform context, to translate to engine input codes
         m_pPlatformTranslator = new HIDPlatformTranslator();
@@ -76,8 +80,62 @@ namespace alpha
         g_pWindowListener = nullptr;
     }
 
-    void HIDWindowListener::Update()
+    bool HIDWindowListener::Update()
     {
+        bool not_closing = true;
+        HIDAction * pAction = nullptr;
+        SDL_Event e;
+
+        while (SDL_PollEvent(&e) != 0)
+        {
+            if (e.type == SDL_QUIT)
+            {
+                // quit game
+                LOG_WARN("Close requested on game window, shutting down game.");
+                not_closing = false;
+            }
+
+            switch (e.type)
+            {
+                case SDL_KEYDOWN:
+                    // keyboard press, translate key
+                    pAction = m_pPlatformTranslator->TranslateKeyboardCode(e.key.keysym.scancode);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, true);
+                    }
+                    break;
+
+                case SDL_KEYUP:
+                    // keyboard release, translate key
+                    pAction = m_pPlatformTranslator->TranslateKeyboardCode(e.key.keysym.scancode);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, false);
+                    }
+                    break;
+
+                case SDL_MOUSEBUTTONDOWN:
+                    pAction = m_pPlatformTranslator->TranslateMouseCode(e.button.button);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
+                    }
+                    break;
+
+                case SDL_MOUSEBUTTONUP:
+                    pAction = m_pPlatformTranslator->TranslateMouseCode(e.button.button);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_MOUSE, *pAction, false);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         // publish mouse movement
         if (m_lastMousePosition.xAbsolutePos != m_mousePosition.xAbsolutePos)
         {
@@ -94,27 +152,10 @@ namespace alpha
 
         // store last position
         m_lastMousePosition = m_mousePosition;
+
+        return not_closing;
     }
 
-    void HIDWindowListener::GLFWKeyCallback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/)
-    {
-        if (action != GLFW_REPEAT)
-        {
-            // do cool stuff with key presses!
-            auto pAction = m_pPlatformTranslator->TranslateKeyboardCode(key);
-            if (pAction)
-            {
-                m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, action == GLFW_PRESS);
-            }
-
-            // When a user presses the escape key, we set the WindowShouldClose property to true, 
-            if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-            {
-                glfwSetWindowShouldClose(window, GL_TRUE);
-            }
-        }
-    }
-    
     void HIDWindowListener::GLFWMouseKeyCallback(GLFWwindow * /*window*/, int button, int action, int mods)
     {
         auto pAction = m_pPlatformTranslator->TranslateMouseCode(button);

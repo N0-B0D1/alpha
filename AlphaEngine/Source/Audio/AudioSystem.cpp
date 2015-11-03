@@ -48,7 +48,7 @@ namespace alpha
     {
         m_pMainChannel = new AudioMixer();
 
-        if (SDL_Init(SDL_INIT_AUDIO) < 0)
+        if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
         {
             LOG_ERR("AudioSystem > Failed to initialize SDL Audio system.");
             return false;
@@ -93,7 +93,7 @@ namespace alpha
             SDL_CloseAudioDevice(m_audioDevID);
         }
 
-        SDL_Quit();
+        SDL_QuitSubSystem(SDL_INIT_AUDIO);
 
         if (m_pMainChannel)
         {

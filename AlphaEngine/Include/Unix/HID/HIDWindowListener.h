@@ -35,9 +35,8 @@ namespace alpha
         HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis);
         virtual ~HIDWindowListener();
 
-        void Update();
+        bool Update();
 
-        void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
         void GLFWMouseKeyCallback(GLFWwindow * window, int button, int action, int mods);
         void GLFWMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset);
         void GLFWMousePositionCallback(GLFWwindow * window, double xpos, double ypos);
