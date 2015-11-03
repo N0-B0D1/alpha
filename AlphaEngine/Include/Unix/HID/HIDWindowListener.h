@@ -17,8 +17,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <GLFW/glfw3.h>
-
 #include "HID/HIDTypes.h"
 
 namespace alpha
@@ -36,10 +34,6 @@ namespace alpha
         virtual ~HIDWindowListener();
 
         bool Update();
-
-        void GLFWMouseKeyCallback(GLFWwindow * window, int button, int action, int mods);
-        void GLFWMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset);
-        void GLFWMousePositionCallback(GLFWwindow * window, double xpos, double ypos);
 
     private:
         // non-copyable

@@ -26,36 +26,6 @@ limitations under the License.
 namespace alpha
 {
     static HIDWindowListener * g_pWindowListener = nullptr;
-    /*
-    static void StaticGLFWKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mode)
-    {
-        if (g_pWindowListener != nullptr)
-        {
-            g_pWindowListener->GLFWKeyCallback(window, key, scancode, action, mode);
-        }
-    }
-    static void StaticGLFWMouseKeyCallback(GLFWwindow * window, int button, int action, int mods)
-    {
-        if (g_pWindowListener != nullptr)
-        {
-            g_pWindowListener->GLFWMouseKeyCallback(window, button, action, mods);
-        }
-    }
-    static void StaticGLFWMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
-    {
-        if (g_pWindowListener != nullptr)
-        {
-            g_pWindowListener->GLFWMouseScrollCallback(window, xoffset, yoffset);
-        }
-    }
-    static void StaticGLFWMousePositionCallback(GLFWwindow * window, double xpos, double ypos)
-    {
-        if (g_pWindowListener != nullptr)
-        {
-            g_pWindowListener->GLFWMousePositionCallback(window, xpos, ypos);
-        }
-    }
-    */
 
     HIDWindowListener::HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis)
         : m_fDispatchHIDActionKey(dispatchHIDActionKey)
@@ -63,12 +33,6 @@ namespace alpha
         , m_pPlatformTranslator(nullptr)
     {
         g_pWindowListener = this;
-
-        // hook up GLFW listeners callbacks
-        //glfwSetKeyCallback(g_pWindow, StaticGLFWKeyCallback);
-        //glfwSetMouseButtonCallback(g_pWindow, StaticGLFWMouseKeyCallback);
-        //glfwSetScrollCallback(g_pWindow, StaticGLFWMouseScrollCallback);
-        //glfwSetCursorPosCallback(g_pWindow, StaticGLFWMousePositionCallback);
 
         // set platform context, to translate to engine input codes
         m_pPlatformTranslator = new HIDPlatformTranslator();
@@ -156,20 +120,8 @@ namespace alpha
         return not_closing;
     }
 
-    void HIDWindowListener::GLFWMouseKeyCallback(GLFWwindow * /*window*/, int button, int action, int mods)
-    {
-        auto pAction = m_pPlatformTranslator->TranslateMouseCode(button);
-        if (pAction)
-        {
-            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, action == GLFW_PRESS);
-        }
-        else
-        {
-            LOG_WARN("Unknown mouse key click: ", button, ", ", action, ", ", mods);
-        }
-    }
-
-    void HIDWindowListener::GLFWMouseScrollCallback(GLFWwindow * /*window*/, double xoffset, double yoffset)
+    /*
+    void HIDWindowListener::GLFWMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
     {
         if (yoffset > 0)
         {
@@ -198,9 +150,10 @@ namespace alpha
         }
     }
 
-    void HIDWindowListener::GLFWMousePositionCallback(GLFWwindow * /*window*/, double xpos, double ypos)
+    void HIDWindowListener::GLFWMousePositionCallback(GLFWwindow * window, double xpos, double ypos)
     {
         m_mousePosition.xAbsolutePos = xpos;
         m_mousePosition.yAbsolutePos = ypos;
     }
+    */
 }
