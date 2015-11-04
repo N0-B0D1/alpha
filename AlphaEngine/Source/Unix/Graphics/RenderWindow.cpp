@@ -34,7 +34,7 @@ namespace alpha
     {
         if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
         {
-            LOG_ERR("Failed to initialize SDL video system!");
+            LOG_ERR("Failed to initialize SDL video system! ", SDL_GetError());
             return false;
         }
 
@@ -59,7 +59,7 @@ namespace alpha
 
         if (m_pWindow == nullptr)
         {
-            LOG_ERR("Failed to create SDL window!");
+            LOG_ERR("Failed to create SDL window! ", SDL_GetError());
             return false;
         }
 
