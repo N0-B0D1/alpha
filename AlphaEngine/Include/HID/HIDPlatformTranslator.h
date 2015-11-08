@@ -40,7 +40,7 @@ namespace alpha
         void CreateHIDAction(HID device, unsigned int code, const std::string & name);
 
         /** Maps platform specific codes to generic engine inputs. */
-        std::map<unsigned short, HIDAction *> m_actions[2];
+        std::map<unsigned int, HIDAction *> m_actions[2];
     };
 }
 

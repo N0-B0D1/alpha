@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_WINDOW_H
-#define GRAPHICS_WINDOW_H
+#ifndef RENDER_WINDOW_H
+#define RENDER_WINDOW_H
 
 /**
 Copyright 2014-2015 Jason R. Wendlandt
@@ -17,33 +17,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <Windows.h>
+#include<stdio.h>
+#include<stdlib.h>
+
+#include <SDL.h>
+#include <SDL_video.h>
+#include <SDL_syswm.h>
 
 namespace alpha
 {
-    class GraphicsWindow
-    {
-    public:
-        GraphicsWindow();
-        virtual ~GraphicsWindow();
+	class RenderWindow
+	{
+	public:
+		RenderWindow();
+		virtual ~RenderWindow();
 
         bool Initialize(int windowWidth, int windowHeight);
         bool Update(double currentTime, double elapsedTime);
         bool Shutdown();
 
-        HWND GetHWND() const;
+        void Render();
+
+        SDL_Window * GetWindow() const;
+        SDL_SysWMinfo GetWindowInfo() const;
 
     private:
-        static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-        HINSTANCE m_hInstance;
-    };
-
-    /**
-     * Global handle for the game window handle.
-     * XXX If possible find a way to make this not global easily...
-     */
-    extern HWND g_hWnd;
+        SDL_Window * m_pWindow;
+	};
 }
 
-#endif // GRAPHICS_WINDOW_H
+#endif // RENDER_WINDOW_H

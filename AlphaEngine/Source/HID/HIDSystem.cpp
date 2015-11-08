@@ -31,7 +31,7 @@ namespace alpha
     {
         //m_pWindowListener = new HIDWindowListener(m_pubHIDKeyAction);
         m_pWindowListener = new HIDWindowListener([this](HID device, const HIDAction & action, bool pressed) { this->DispatchHIDActionKeyEvent(device, action, pressed); },
-                                                  [this](HID device, const HIDAction & action, long relative, float absolute) { this->DispatchHIDActionAxisEvent(device, action, relative, absolute); });
+                                                  [this](HID device, const HIDAction & action, float relative, float absolute) { this->DispatchHIDActionAxisEvent(device, action, relative, absolute); });
 
         return true;
     }
@@ -55,7 +55,7 @@ namespace alpha
         this->PublishEvent(new Event_HIDKeyAction(device, action, pressed));
     }
 
-    void HIDSystem::DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute)
+    void HIDSystem::DispatchHIDActionAxisEvent(HID device, const HIDAction & action, float relative, float absolute)
     {
         this->PublishEvent(new Event_HIDKeyAction(device, action, false, relative, absolute));
     }

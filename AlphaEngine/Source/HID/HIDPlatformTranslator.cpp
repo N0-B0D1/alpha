@@ -123,7 +123,7 @@ namespace alpha
         CreateHIDAction(HID_KEYBOARD, KA_APOSTROPHE, "KA_APOSTROPHE");
 
         // numpad
-        CreateHIDAction(HID_KEYBOARD, KA_NUM_0, "KB_NUM0");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_0, "KB_NUM_0");
         CreateHIDAction(HID_KEYBOARD, KA_NUM_1, "KA_NUM_1");
         CreateHIDAction(HID_KEYBOARD, KA_NUM_2, "KA_NUM_2");
         CreateHIDAction(HID_KEYBOARD, KA_NUM_3, "KA_NUM_3");
@@ -184,7 +184,7 @@ namespace alpha
         auto it = m_actions[device].find(code);
         if (it != m_actions[device].end())
         {
-            LOG_WARN("action -> ", it->second->name);
+            //LOG_WARN("action -> ", it->second->name);
             return it->second;
         }
         return nullptr;

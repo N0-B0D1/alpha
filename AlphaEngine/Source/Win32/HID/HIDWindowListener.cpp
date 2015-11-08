@@ -14,367 +14,180 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <Windows.h>
 #include <functional>
+
+#include <SDL.h>
 
 #include "HID/HIDWindowListener.h"
 #include "HID/HIDPlatformTranslator.h"
-#include "HID/HIDConstants.h"
-#include "Graphics/GraphicsWindow.h"
+#include "Graphics/RenderWindow.h"
 #include "Toolbox/Logger.h"
 
 namespace alpha
 {
     static HIDWindowListener * g_pWindowListener = nullptr;
-    static LRESULT CALLBACK StaticInputWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        if (g_pWindowListener != nullptr)
-        {
-            return g_pWindowListener->InputWndProc(hWnd, message, wParam, lParam);
-        }
-        return S_OK;
-    }
 
-    HIDWindowListener::HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey,
-                                         std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis)
-        : m_origWndProc(nullptr)
-        , m_mouseTracking(false)
-        , m_pPlatformTranslator(nullptr)
-        , m_fDispatchHIDActionKey(dispatchHIDActionKey)
+    HIDWindowListener::HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, float, float)> dispatchHIDActionAxis)
+        : m_fDispatchHIDActionKey(dispatchHIDActionKey)
         , m_fDispatchHIDActionAxis(dispatchHIDActionAxis)
+        , m_pPlatformTranslator(nullptr)
     {
-        // set global pointer, so static wndproc can call this class instance, which should be a singlton, but we don't enforce that ...
         g_pWindowListener = this;
-        RegisterRawHIDs();
-
-        // hi-jack the current window message function, store old one so we can still call it.
-        m_origWndProc = (WNDPROC)SetWindowLongPtr(g_hWnd, GWL_WNDPROC, (LONG)StaticInputWndProc);
 
         // set platform context, to translate to engine input codes
         m_pPlatformTranslator = new HIDPlatformTranslator();
 
         m_lastMousePosition = m_mousePosition;
     }
-
     HIDWindowListener::~HIDWindowListener()
     {
-        // un-hi-jack WndProc
-        SetWindowLongPtr(g_hWnd, GWL_WNDPROC, (LONG)m_origWndProc);
         g_pWindowListener = nullptr;
     }
 
-    void HIDWindowListener::Update()
+    bool HIDWindowListener::Update()
     {
-        // compare current and last mouse positions
-        // if changed, then send an action range event
-        if (m_lastMousePosition.xRelativePos != m_mousePosition.xRelativePos || m_lastMousePosition.xAbsolutePos != m_mousePosition.xAbsolutePos)
+        bool not_closing = true;
+        HIDAction * pAction = nullptr;
+        int x, y;
+        float xoffset, yoffset;
+        SDL_Event e;
+
+        while (SDL_PollEvent(&e) != 0)
         {
-            // send x-axis action event
+            if (e.type == SDL_QUIT)
+            {
+                // quit game
+                LOG_WARN("Close requested on game window, shutting down game.");
+                not_closing = false;
+            }
+
+            switch (e.type)
+            {
+                case SDL_KEYDOWN:
+                    // keyboard press, translate key
+                    pAction = m_pPlatformTranslator->TranslateKeyboardCode(e.key.keysym.scancode);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, true);
+                    }
+                    break;
+
+                case SDL_KEYUP:
+                    // keyboard release, translate key
+                    pAction = m_pPlatformTranslator->TranslateKeyboardCode(e.key.keysym.scancode);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, false);
+                    }
+                    break;
+
+                case SDL_MOUSEBUTTONDOWN:
+                    pAction = m_pPlatformTranslator->TranslateMouseCode(e.button.button);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
+                    }
+                    break;
+
+                case SDL_MOUSEBUTTONUP:
+                    pAction = m_pPlatformTranslator->TranslateMouseCode(e.button.button);
+                    if (pAction)
+                    {
+                        m_fDispatchHIDActionKey(HID_MOUSE, *pAction, false);
+                    }
+                    break;
+
+                case SDL_MOUSEMOTION:
+                    SDL_GetMouseState(&x, &y);
+                    m_mousePosition.xAbsolutePos = static_cast<float>(x);
+                    m_mousePosition.yAbsolutePos = static_cast<float>(y);
+                    break;
+
+                case SDL_MOUSEWHEEL:
+                    xoffset = static_cast<float>(e.wheel.x);
+                    yoffset = static_cast<float>(e.wheel.y);
+
+                    if (yoffset > 0)
+                    {
+                        // forward
+                        pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_FORWARD);
+                        m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, yoffset, 120);
+                    }
+                    else if (yoffset < 0)
+                    {
+                        // back scroll
+                        pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_BACK);
+                        m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, yoffset, -120);
+                    }
+
+                    if (xoffset > 0)
+                    {
+                        // left
+                        pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_RIGHT);
+                        m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
+                    }
+                    else if (xoffset < 0)
+                    {
+                        // right
+                        pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_LEFT);
+                        m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        // publish mouse movement
+        if (m_lastMousePosition.xAbsolutePos != m_mousePosition.xAbsolutePos)
+        {
+            m_mousePosition.xRelativePos = m_lastMousePosition.xAbsolutePos - m_mousePosition.xAbsolutePos;
             HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_X_AXIS);
             m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, m_mousePosition.xRelativePos, m_mousePosition.xAbsolutePos);
         }
-        if (m_lastMousePosition.yRelativePos != m_mousePosition.yRelativePos || m_lastMousePosition.yAbsolutePos != m_mousePosition.yAbsolutePos)
+        if (m_lastMousePosition.yAbsolutePos != m_mousePosition.yAbsolutePos)
         {
-            // send y-axis action event
+            m_mousePosition.yRelativePos = m_lastMousePosition.yAbsolutePos - m_mousePosition.yAbsolutePos;
             HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(MA_Y_AXIS);
             m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, m_mousePosition.yRelativePos, m_mousePosition.yAbsolutePos);
         }
 
-        // update last mouse postition
+        // store last position
         m_lastMousePosition = m_mousePosition;
+
+        return not_closing;
     }
 
-    LRESULT CALLBACK HIDWindowListener::InputWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+    /*
+    void HIDWindowListener::GLFWMouseScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
     {
-        //int count;
-
-        switch (message)
+        if (yoffset > 0)
         {
-        case WM_INPUT:
-            this->WMInputHandler(hWnd, message, wParam, lParam);
-            break;
-
-        case WM_MOUSEMOVE:
-            /*
-            // Track mouse, and make it dissappear when over window
-            if (!m_mouseTracking)
-            {
-                m_mouseTracking = true;
-                while (ShowCursor(false) >= 0);
-            }
-            */
-
-            // set the mouse positions absolute values
-            m_mousePosition.xAbsolutePos = LOWORD(lParam);
-            m_mousePosition.yAbsolutePos = HIWORD(lParam);
-
-            break;
-
-        case WM_NCMOUSELEAVE:
-            //m_mouseTracking = false;
-            while (ShowCursor(true) < 0);
-            break;
+            // forward
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_FORWARD);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, yoffset, 120);
+        }
+        else
+        {
+            // back scroll
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_BACK);
+            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, yoffset, -120);
         }
 
-        // Call the original wndproc setup by our graphics window manager class instance.
-        return CallWindowProc(m_origWndProc, hWnd, message, wParam, lParam);
-    }
-
-    void HIDWindowListener::WMInputHandler(HWND /*hWnd*/, UINT /*message*/, WPARAM /*wParam*/, LPARAM lParam)
-    {
-        UINT size;
-        GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &size, sizeof(RAWINPUTHEADER));
-
-        LPBYTE lpByte = new BYTE[size];
-        if (lpByte == NULL)
+        if (xoffset > 0)
         {
-            return;
+            // left
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_LEFT);
+            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
         }
-
-        if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpByte, &size, sizeof(RAWINPUTHEADER)) != size)
+        else
         {
-            LOG_WARN("WindowListener > Raw input did not return the correct size.");
-        }
-
-        RAWINPUT * raw = (RAWINPUT *)lpByte;
-
-        if (raw->header.dwType == RIM_TYPEKEYBOARD)
-        {
-            // read keyboard input
-            bool keyUp = raw->data.keyboard.Flags & RI_KEY_BREAK;
-            unsigned short keyCode = this->ConvertKeyCode(raw->data.keyboard);
-            HIDAction * pAction = m_pPlatformTranslator->TranslateKeyboardCode(keyCode);
-
-            if (pAction != nullptr)
-            {
-                m_fDispatchHIDActionKey(HID_KEYBOARD, *pAction, !keyUp);
-            }
-            else
-            {
-                LOG_WARN("Non-mapped input: ", keyCode);
-            }
-        }
-        else if (raw->header.dwType == RIM_TYPEMOUSE)
-        {
-            // read mouse button input
-            // for now only read left, middle, and right buttons
-            unsigned short btnIndex = MA_1; // skip x-axis and y-axis codes
-            unsigned int rawIndex = RI_MOUSE_BUTTON_1_DOWN;
-            while (rawIndex <= RI_MOUSE_WHEEL) // 0x0400 will also hit 0x0800
-            {
-                // check for button pushed
-                unsigned long btnCode = (raw->data.mouse.ulButtons & rawIndex);
-                bool btnState = (btnCode == 0 ? false : true);
-                if (btnState)
-                {
-                    // button was pushed
-                    //m_pContextManager->MouseButtonDown(static_cast<MouseButtonCode>(btnIndex));
-                    if (rawIndex == RI_MOUSE_WHEEL)
-                    {
-                        // dispatch axis for mouse wheel
-                        short delta = raw->data.mouse.usButtonData;
-                        unsigned short code = static_cast<unsigned short>(delta > 0 ? MA_WHEEL_FORWARD : MA_WHEEL_BACK);
-                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(code);
-                        if (pAction)
-                        {
-                            m_fDispatchHIDActionAxis(HID_MOUSE, *pAction, delta / 120, delta);
-                        }
-                    }
-                    else
-                    {
-                        // dispatch mouse button click
-                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(btnIndex);
-                        if (pAction)
-                        {
-                            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
-                        }
-                    }
-                }
-
-                // increment to next raw button id
-                rawIndex = rawIndex << 1;
-
-                // check for button released
-                btnCode = (raw->data.mouse.ulButtons & rawIndex);
-                btnState = (btnCode == 0 ? false : true);
-                if (btnState)
-                {
-                    // this button was released
-                    if (rawIndex == 0x0800) // mouse wheel left/right
-                    {
-                        // dispatch mouse wheel left or right
-                        // left is usButtonData = -120, right is usButtonData = 120
-                        short delta = raw->data.mouse.usButtonData;
-                        LOG(raw->data.mouse.usButtonData, " ", raw->data.mouse.usButtonFlags, " ", raw->data.mouse.usFlags);
-                        unsigned short code = static_cast<unsigned short>(delta > 0 ? MA_WHEEL_RIGHT : MA_WHEEL_LEFT);
-                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(code);
-                        if (pAction)
-                        {
-                            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, delta > 0);
-                        }
-                    }
-                    else
-                    {
-                        HIDAction * pAction = m_pPlatformTranslator->TranslateMouseCode(btnIndex);
-                        if (pAction)
-                        {
-                            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, false);
-                        }
-                    }
-                }
-
-                // increment to next raw button id
-                rawIndex = rawIndex << 1;
-                ++btnIndex;
-            }
-        }
-
-        // always store the mouse's most recent relative position
-        m_mousePosition.xRelativePos = raw->data.mouse.lLastX;
-        m_mousePosition.yRelativePos = raw->data.mouse.lLastY;
-    }
-
-    unsigned short HIDWindowListener::ConvertKeyCode(RAWKEYBOARD kbRaw)
-    {
-        UINT vKey = kbRaw.VKey;
-        UINT sCode = kbRaw.MakeCode;
-        UINT flags = kbRaw.Flags;
-
-        if (vKey != 255) // ignore 'fake' keys
-        {
-            if (vKey == VK_SHIFT)
-            {
-                vKey = MapVirtualKey(sCode, MAPVK_VSC_TO_VK_EX);
-            }
-            else if (vKey == VK_NUMLOCK)
-            {
-                sCode = (MapVirtualKey(vKey, MAPVK_VK_TO_VSC) | 0x100);
-            }
-
-            const bool isE0 = ((flags & RI_KEY_E0) != 0);
-            const bool isE1 = ((flags & RI_KEY_E1) != 0);
-
-            if (isE1)
-            {
-                if (vKey == VK_PAUSE)
-                {
-                    sCode = 0x45;
-                }
-                else
-                {
-                    sCode = MapVirtualKey(vKey, MAPVK_VK_TO_VSC);
-                }
-            }
-
-            switch (vKey)
-            {
-                // right-hand CONTROL and ALT have their e0 bit set
-            case VK_CONTROL:
-                if (isE0)
-                    vKey = KA_RIGHT_CTRL; // Keys::RIGHT_CONTROL;
-                else
-                    vKey = KA_LEFT_CTRL; // Keys::LEFT_CONTROL;
-                break;
-
-            case VK_MENU:
-                if (isE0)
-                    vKey = KA_RIGHT_ALT; // Keys::RIGHT_ALT;
-                else
-                    vKey = KA_LEFT_ALT; // Keys::LEFT_ALT;
-                break;
-
-                // NUMPAD ENTER has its e0 bit set
-            case VK_RETURN:
-                if (isE0)
-                    vKey = KA_NUM_ENTER; // Keys::NUMPAD_ENTER;
-                break;
-
-                // the standard INSERT, DELETE, HOME, END, PRIOR and NEXT keys will always have their e0 bit set, but the
-                // corresponding keys on the NUMPAD will not.
-            case VK_INSERT:
-                if (!isE0)
-                    vKey = KA_NUM_0; // Keys::NUMPAD_0;
-                break;
-
-            case VK_DELETE:
-                if (!isE0)
-                    vKey = KA_NUM_DECIMAL; // Keys::NUMPAD_DECIMAL;
-                break;
-
-            case VK_HOME:
-                if (!isE0)
-                    vKey = KA_NUM_7; // Keys::NUMPAD_7;
-                break;
-
-            case VK_END:
-                if (!isE0)
-                    vKey = KA_NUM_1; // Keys::NUMPAD_1;
-                break;
-
-            case VK_PRIOR:
-                if (!isE0)
-                    vKey = KA_NUM_9; // Keys::NUMPAD_9;
-                break;
-
-            case VK_NEXT:
-                if (!isE0)
-                    vKey = KA_NUM_3; // Keys::NUMPAD_3;
-                break;
-
-                // the standard arrow keys will always have their e0 bit set, but the
-                // corresponding keys on the NUMPAD will not.
-            case VK_LEFT:
-                if (!isE0)
-                    vKey = KA_NUM_4; // Keys::NUMPAD_4;
-                break;
-
-            case VK_RIGHT:
-                if (!isE0)
-                    vKey = KA_NUM_6; // Keys::NUMPAD_6;
-                break;
-
-            case VK_UP:
-                if (!isE0)
-                    vKey = KA_NUM_8; // Keys::NUMPAD_8;
-                break;
-
-            case VK_DOWN:
-                if (!isE0)
-                    vKey = KA_NUM_2; // Keys::NUMPAD_2;
-                break;
-
-                // NUMPAD 5 doesn't have its e0 bit set
-            case VK_CLEAR:
-                if (!isE0)
-                    vKey = KA_NUM_5; // Keys::NUMPAD_5;
-                break;
-            }
-
-            return (unsigned short)vKey;
-        }
-
-        return 0;
-    }
-
-    void HIDWindowListener::RegisterRawHIDs()
-    {
-        RAWINPUTDEVICE rid[2];
-
-        // mouse support
-        rid[0].usUsagePage = 0x01;
-        rid[0].usUsage = 0x02;
-        rid[0].dwFlags = 0; // RIDEV_NOLEGACY;
-        rid[0].hwndTarget = 0;
-
-        // keyboard support
-        rid[1].usUsagePage = 0x01;
-        rid[1].usUsage = 0x06;
-        rid[1].dwFlags = 0; // RIDEV_NOLEGACY;
-        rid[1].hwndTarget = 0;
-
-        if (RegisterRawInputDevices(rid, 2, sizeof(rid[0])) == FALSE)
-        {
-            LOG_ERR("HIDWindowListener > Failed to register raw HIDs.");
+            // right
+            auto pAction = m_pPlatformTranslator->TranslateMouseCode(MA_WHEEL_RIGHT);
+            m_fDispatchHIDActionKey(HID_MOUSE, *pAction, true);
         }
     }
+    */
 }

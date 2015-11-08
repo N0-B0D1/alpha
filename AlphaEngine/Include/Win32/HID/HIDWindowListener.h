@@ -17,8 +17,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <Windows.h>
-
 #include "HID/HIDTypes.h"
 
 namespace alpha
@@ -32,36 +30,21 @@ namespace alpha
     class HIDWindowListener
     {
     public:
-        explicit HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, long, float)> dispatchHIDActionAxis);
+        HIDWindowListener(std::function<void(HID, const HIDAction &, bool)> dispatchHIDActionKey, std::function<void(HID, const HIDAction &, float, float)> dispatchHIDActionAxis);
         virtual ~HIDWindowListener();
 
-        void Update();
-
-        /** Windows message loop handler for human input. */
-        LRESULT CALLBACK InputWndProc(HWND, UINT, WPARAM, LPARAM);
+        bool Update();
 
     private:
         // non-copyable
         HIDWindowListener(const HIDWindowListener&);
         HIDWindowListener & operator=(const HIDWindowListener&);
 
-        /** Helper function to handle WM_INPUT message. */
-        void WMInputHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-        /** Convert raw keyboard key codes as needed. */
-        unsigned short ConvertKeyCode(RAWKEYBOARD kbRaw);
-
-        /** Register raw input devices, so we can query their state in our WndProc */
-        void RegisterRawHIDs();
-
         /** Helper for dispatching HID Action key up/down events */
         std::function<void(HID, const HIDAction &, bool)> m_fDispatchHIDActionKey;
         /** Helper for dispatching HID Action axis range events */
-        std::function<void(HID, const HIDAction &, long, float)> m_fDispatchHIDActionAxis;
+        std::function<void(HID, const HIDAction &, float, float)> m_fDispatchHIDActionAxis;
 
-        /** Handle to original WndProc, allowing it to run, and be restored when this instance destructs */
-        WNDPROC m_origWndProc;
-        /** Track mouse inside/outside of window */
-        bool m_mouseTracking;
         /** Track the current mouse absolute and relative position */
         MousePosition m_mousePosition;
         /** Track the position of the mouse, since the last update, campare against current to determine if event should be published */

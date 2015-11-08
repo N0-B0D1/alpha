@@ -45,8 +45,8 @@ namespace alpha
     {
         MousePosition();
 
-        long xRelativePos;
-        long yRelativePos;
+        float xRelativePos;
+        float yRelativePos;
 
         float xAbsolutePos;
         float yAbsolutePos;
