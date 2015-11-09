@@ -16,6 +16,8 @@ limitations under the License.
 
 #include <memory>
 
+#include <SDL.h>
+
 #include "AlphaController.h"
 #include "Audio/AudioSystem.h"
 #include "Logic/LogicSystem.h"
@@ -80,6 +82,13 @@ namespace alpha
 
     bool AlphaController::Initialize(std::shared_ptr<AGameState> state)
     {
+        // Initialize the default SDL sub systems
+        if (SDL_Init(SDL_INIT_NOPARACHUTE) < 0)
+        {
+            LOG_ERR("--SDL-- Initialize failed!");
+            return false;
+        }
+
         // Create the event manager first
         // the event manager is responsible for all communication between
         // sub-systems, thus it must exist for any systems.
@@ -146,8 +155,6 @@ namespace alpha
 
     bool AlphaController::Update()
     {
-        bool success = true;
-
         // update event manager first each frame
         m_pEventManager->Update();
 
@@ -173,21 +180,16 @@ namespace alpha
             m_pAssets->Update(currentTime, sk_maxUpdateTime);
 
             // update human input, so the latest input state can be passed to the logic system
-            m_pInput->Update(currentTime, sk_maxUpdateTime);
+            if (!m_pInput->Update(currentTime, sk_maxUpdateTime)) { return false; };
 
             // update logic which will udpate entities
             m_pLogic->Update(currentTime, sk_maxUpdateTime);
 
             // update current game state
-            success = m_pGameStateMachine->Update(currentTime, sk_maxUpdateTime);
+            if (!m_pGameStateMachine->Update(currentTime, sk_maxUpdateTime)) { return false; };
 
             // update graphics, which will create any new elements for the scene, or remove them as needed.
-            success = m_pGraphics->Update(currentTime, sk_maxUpdateTime);
-
-            if (!success)
-            {
-                return false;
-            }
+            if (!m_pGraphics->Update(currentTime, sk_maxUpdateTime)) { return false; };
 
             // wait for all threading tasks to complete for this update iteration
             m_pThreads->JoinTasks();
@@ -205,7 +207,7 @@ namespace alpha
         // render after updates complete
         m_pGraphics->Render();
 
-        return success;
+        return true;
     }
 
     bool AlphaController::Shutdown()
@@ -223,6 +225,9 @@ namespace alpha
         if (ShutdownSystem(m_pInput)) { LOG("<HIDSystem> Disposed."); }
         if (ShutdownSystem(m_pGraphics)) { LOG("<GraphicsSystem> Disposed."); }
         if (ShutdownSystem(m_pAssets)) { LOG("<AssetSystem> Disposed."); }
+
+        // finally close all sdl and all sub-systems
+        SDL_Quit();
 
         LOG("<AlphaController> Shutdown complete.");
         return true;

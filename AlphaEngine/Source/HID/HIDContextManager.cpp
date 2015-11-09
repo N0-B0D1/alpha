@@ -104,7 +104,7 @@ namespace alpha
         //LOG("KEY STATE RELEASED: ", action->name);
     }
 
-    void HIDContextManager::MouseMoved(const HIDAction * const /*action*/, long /*relative*/, float /*absolute*/)
+    void HIDContextManager::MouseMoved(const HIDAction * const /*action*/, float /*relative*/, float /*absolute*/)
     {
         //LOG("Mouse: ", action->name, " ", relative, " - ", absolute);
     }

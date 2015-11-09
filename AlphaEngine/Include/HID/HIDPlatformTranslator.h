@@ -25,25 +25,22 @@ limitations under the License.
 
 namespace alpha
 {
-    /**
-     * HIDDefaultContext provides the default Win32 input context that is always available.
-     */
     class HIDPlatformTranslator
     {
     public:
         HIDPlatformTranslator();
         virtual ~HIDPlatformTranslator();
 
-        HIDAction * TranslateKeyboardCode(const unsigned short & code);
-        HIDAction * TranslateMouseCode(const unsigned short & code);
+        HIDAction * TranslateKeyboardCode(const unsigned int & code);
+        HIDAction * TranslateMouseCode(const unsigned int & code);
 
     private:
-        HIDAction * TranslateCode(const HID & device, const unsigned short & code);
+        HIDAction * TranslateCode(const HID & device, const unsigned int & code);
         /** Creates a maping of a raw input to a engine code name. */
-        void CreateHIDAction(HID device, unsigned short code, const std::string & name);
+        void CreateHIDAction(HID device, unsigned int code, const std::string & name);
 
         /** Maps platform specific codes to generic engine inputs. */
-        std::map<unsigned short, HIDAction *> m_actions[2];
+        std::map<unsigned int, HIDAction *> m_actions[2];
     };
 }
 

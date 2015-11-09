@@ -27,9 +27,9 @@ namespace alpha
     */
     struct HIDAction
     {
-        HIDAction(unsigned short actionRaw, std::string actionName);
+        HIDAction(unsigned int actionRaw, std::string actionName);
 
-        unsigned short raw;
+        unsigned int raw;
         std::string name;
     };
 
@@ -45,8 +45,8 @@ namespace alpha
     {
         MousePosition();
 
-        long xRelativePos;
-        long yRelativePos;
+        float xRelativePos;
+        float yRelativePos;
 
         float xAbsolutePos;
         float yAbsolutePos;

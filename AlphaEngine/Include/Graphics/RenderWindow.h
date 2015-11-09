@@ -20,12 +20,9 @@ limitations under the License.
 #include<stdio.h>
 #include<stdlib.h>
 
-//#include<X11/X.h>
-//#include<X11/Xlib.h>
-
-#include<GL/gl.h>
-#include<GL/glx.h>
-#include <GLFW/glfw3.h>
+#include <SDL.h>
+#include <SDL_video.h>
+#include <SDL_syswm.h>
 
 namespace alpha
 {
@@ -41,13 +38,12 @@ namespace alpha
 
         void Render();
 
-        GLFWwindow * GetWindow() const;
-	};
+        SDL_Window * GetWindow() const;
+        SDL_SysWMinfo GetWindowInfo() const;
 
-    /**
-     * Global window handle allows input system to hook into window events as needed.
-     */
-    extern GLFWwindow * g_pWindow;
+    private:
+        SDL_Window * m_pWindow;
+	};
 }
 
 #endif // RENDER_WINDOW_H

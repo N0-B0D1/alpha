@@ -23,6 +23,9 @@ limitations under the License.
 
 #include <GL/glx.h>
 
+#include <SDL.h>
+#include <SDL_video.h>
+
 #include "Graphics/IRenderer.h"
 
 namespace alpha
@@ -50,15 +53,19 @@ namespace alpha
         void Render(std::shared_ptr<Camera> pCamera, std::vector<RenderSet *> renderables, std::vector<Light *> lights);
 
     private:
-        /** Initializes the OpenGL device with GLFW */
+        /** Initializes the OpenGL device with SDL/GLEW */
         bool InitializeDevice();
 
         /** Game window width */
         int m_windowWidth;
         /** Game window height */
         int m_windowHeight;
-        /** XWindow manager */
+
+        /** Window manager */
         RenderWindow *m_pWindow;
+
+        /** SDL OpengGL Context */
+        SDL_GLContext m_GLContext;
 
         /** Geometry render pass for render to GBuffer */
         GeometryPass * m_pGeometryPass;

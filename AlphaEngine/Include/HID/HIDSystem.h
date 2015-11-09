@@ -40,7 +40,7 @@ namespace alpha
         /** Helper for dispatching HID Action key up/down events */
         void DispatchHIDActionKeyEvent(HID device, const HIDAction & action, bool pressed);
         /** Helper for dispatching HID Action axis range events */
-        void DispatchHIDActionAxisEvent(HID device, const HIDAction & action, long relative, float absolute);
+        void DispatchHIDActionAxisEvent(HID device, const HIDAction & action, float relative, float absolute);
 
         /** Pointer to the platform specific window listener, that will forward user input on the game window to this class */
         HIDWindowListener * m_pWindowListener;

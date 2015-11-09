@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "HID/HIDPlatformTranslator.h"
 #include "HID/HIDTypes.h"
+#include "Toolbox/Logger.h"
 
 namespace alpha
 {
@@ -122,7 +123,7 @@ namespace alpha
         CreateHIDAction(HID_KEYBOARD, KA_APOSTROPHE, "KA_APOSTROPHE");
 
         // numpad
-        CreateHIDAction(HID_KEYBOARD, KA_NUM_0, "KB_NUM0");
+        CreateHIDAction(HID_KEYBOARD, KA_NUM_0, "KB_NUM_0");
         CreateHIDAction(HID_KEYBOARD, KA_NUM_1, "KA_NUM_1");
         CreateHIDAction(HID_KEYBOARD, KA_NUM_2, "KA_NUM_2");
         CreateHIDAction(HID_KEYBOARD, KA_NUM_3, "KA_NUM_3");
@@ -147,9 +148,9 @@ namespace alpha
         CreateHIDAction(HID_MOUSE, MA_3, "MA_3"); // MA_RIGHT
         CreateHIDAction(HID_MOUSE, MA_4, "MA_4");
         CreateHIDAction(HID_MOUSE, MA_5, "MA_5");
-        CreateHIDAction(HID_MOUSE, MA_6, "MA_6");
-        CreateHIDAction(HID_MOUSE, MA_7, "MA_7");
-        CreateHIDAction(HID_MOUSE, MA_8, "MA_8");
+        //CreateHIDAction(HID_MOUSE, MA_6, "MA_6");
+        //CreateHIDAction(HID_MOUSE, MA_7, "MA_7");
+        //CreateHIDAction(HID_MOUSE, MA_8, "MA_8");
         CreateHIDAction(HID_MOUSE, MA_WHEEL_FORWARD, "MA_WHEEL_FORWARD");
         CreateHIDAction(HID_MOUSE, MA_WHEEL_BACK, "MA_WHEEL_BACK");
         CreateHIDAction(HID_MOUSE, MA_WHEEL_LEFT, "MA_WHEEL_LEFT");
@@ -168,27 +169,28 @@ namespace alpha
         }
     }
 
-    HIDAction * HIDPlatformTranslator::TranslateKeyboardCode(const unsigned short & code)
+    HIDAction * HIDPlatformTranslator::TranslateKeyboardCode(const unsigned int & code)
     {
         return TranslateCode(HID_KEYBOARD, code);
     }
 
-    HIDAction * HIDPlatformTranslator::TranslateMouseCode(const unsigned short & code)
+    HIDAction * HIDPlatformTranslator::TranslateMouseCode(const unsigned int & code)
     {
         return TranslateCode(HID_MOUSE, code);
     }
 
-    HIDAction * HIDPlatformTranslator::TranslateCode(const HID & device, const unsigned short & code)
+    HIDAction * HIDPlatformTranslator::TranslateCode(const HID & device, const unsigned int & code)
     {
         auto it = m_actions[device].find(code);
         if (it != m_actions[device].end())
         {
+            //LOG_WARN("action -> ", it->second->name);
             return it->second;
         }
         return nullptr;
     }
 
-    void HIDPlatformTranslator::CreateHIDAction(HID device, unsigned short code, const std::string & name)
+    void HIDPlatformTranslator::CreateHIDAction(HID device, unsigned int code, const std::string & name)
     {
         m_actions[device][code] = new HIDAction(code, name);
     }

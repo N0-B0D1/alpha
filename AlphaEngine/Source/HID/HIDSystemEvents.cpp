@@ -20,7 +20,7 @@ namespace alpha
 {
     const std::string Event_HIDKeyAction::sk_name = "EventData_HIDKeyDown";
 
-    Event_HIDKeyAction::Event_HIDKeyAction(HID device, const HIDAction & action, bool pressed, long relative /*= 0*/, float absolute /*= 0.f*/)
+    Event_HIDKeyAction::Event_HIDKeyAction(HID device, const HIDAction & action, bool pressed, float relative /*= 0*/, float absolute /*= 0.f*/)
         : m_device(device)
         , m_action(action)
         , m_pressed(pressed)
@@ -53,7 +53,7 @@ namespace alpha
         return m_pressed;
     }
 
-    long Event_HIDKeyAction::GetRelative() const
+    float Event_HIDKeyAction::GetRelative() const
     {
         return m_relative;
     }

@@ -42,7 +42,7 @@ namespace alpha
 
         void MouseButtonDown(const HIDAction * const action);
         void MouseButtonUp(const HIDAction * const action);
-        void MouseMoved(const HIDAction * const action, long relative, float absolute);
+        void MouseMoved(const HIDAction * const action, float relative, float absolute);
 
         /** Bind delegate to action */
         void BindAction(std::string action, std::function<void ()> delegate);

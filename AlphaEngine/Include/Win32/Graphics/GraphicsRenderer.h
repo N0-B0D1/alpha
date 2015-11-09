@@ -27,7 +27,7 @@ limitations under the License.
 
 namespace alpha
 {
-    class GraphicsWindow;
+    class RenderWindow;
     class RenderSet;
     class Light;
     class Asset;
@@ -55,7 +55,7 @@ namespace alpha
         void CleanupDevice();
 
         /** Windows hwnd manager */
-        GraphicsWindow *m_pWindow;
+        RenderWindow *m_pWindow;
 
         /** Create a d3d buffer object */
         void CreateBuffer(unsigned int byte_width, unsigned int bind_flags, const void * object_memory, ID3D11Buffer ** buffer);

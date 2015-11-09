@@ -33,7 +33,7 @@ namespace alpha
     public:
         static const std::string sk_name;
 
-        explicit Event_HIDKeyAction(HID device, const HIDAction & action, bool pressed, long relative = 0, float absolute = 0.f);
+        explicit Event_HIDKeyAction(HID device, const HIDAction & action, bool pressed, float relative = 0, float absolute = 0.f);
 
         virtual std::string VGetTypeName() const;
         virtual AEvent * VCopy();
@@ -42,7 +42,7 @@ namespace alpha
         const HIDAction & GetAction() const;
         bool GetPressed() const;
 
-        long GetRelative() const;
+        float GetRelative() const;
         float GetAbsolute() const;
 
     private:
@@ -56,7 +56,7 @@ namespace alpha
         bool m_pressed;
 
         // axis range values
-        long m_relative;
+        float m_relative;
         float m_absolute;
     };
 }

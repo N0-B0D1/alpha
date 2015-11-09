@@ -24,7 +24,7 @@ limitations under the License.
 #include <vector>
 
 #include "Graphics/GraphicsRenderer.h"
-#include "Graphics/GraphicsWindow.h"
+#include "Graphics/RenderWindow.h"
 #include "Graphics/RenderSet.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Light.h"
@@ -63,7 +63,7 @@ namespace alpha
 
     bool GraphicsRenderer::Initialize(AssetSystem * const pAssets, int windowWidth, int windowHeight)
     {
-        m_pWindow = new GraphicsWindow();
+        m_pWindow = new RenderWindow();
         if (!m_pWindow->Initialize(windowWidth, windowHeight))
         {
             LOG_ERR("Failed to create and open game window.");
@@ -187,7 +187,9 @@ namespace alpha
     HRESULT GraphicsRenderer::InitializeDevice()
     {
         HRESULT hr = S_OK;
-        HWND hwnd = m_pWindow->GetHWND();
+
+        auto info = m_pWindow->GetWindowInfo();
+        HWND hwnd = info.info.win.window;
 
         RECT rc;
         GetClientRect(hwnd, &rc);
